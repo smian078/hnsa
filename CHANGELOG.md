@@ -68,3 +68,17 @@
 - **In Simple Words & Disk Slice Proof Badges (`src/components/GranuleInspector.tsx`)**: Highlighted `In Simple Words (What This .h5 File Shows)` boxes displaying `rec.plainEnglishSummary` plus HH/HV/Soil Wetness/Ground Shift plain-English translations and 3 binary disk slice proof badges (`Offset MB`, `Active Radar Fill %`, `Chunk Hash`).
 - **AI Guide `.h5` Summary Bridge (`src/components/GranuleInspector.tsx`, `src/components/PageAwareAssistant.tsx`, `src/utils/globeMath.ts`, `server/routes.ts`)**: Updated `✨ Ask AI Guide to Explain This .h5 File` buttons to dispatch `h5Summary` inside `nisar-ask-ai`, auto-opening the assistant panel and forwarding the `.h5` summary to `/api/gemini/assist`.
 
+## [0.3.4] - 2026-11-14 — History, Past Issues & Laptop Server AI Q&A
+### Added
+- **Dedicated `history_issues` Aspect & Types (`src/types/sar.ts`, `src/utils/globeMath.ts`, `src/services/nisarApi.ts`, `src/data/samples/asfVertexSamples.ts`)**: Added `'history_issues'` to `DatasetAspectId`, `HistoricalIssueEntry` interface, `recurringProblemsSummary`, and region-specific historical event timelines across Maharashtra, Northeast India, and Japan.
+- **History & Past Issues Panel (`src/components/HistoryIssuesPanel.tsx`, `src/components/RegionExplorerView.tsx`)**: Created a dedicated section displaying the `DATA SOURCE: SMIAN_P5 LAPTOP SERVER (.H5 + HISTORICAL BASELINE)` badge, live `.h5` file metadata, **Past Issues vs. Current Nov 2026 `.h5` Scan Timeline**, and an inline **Ask AI About History & Past Issues** chat with 3 quick-question chips grounded in `/api/local-h5` + historical baselines.
+- **Historical AI Grounding (`server/routes.ts`, `src/utils/globeMath.ts`)**: Enhanced `/api/gemini/assist` and `buildPageAwareAssistantFallback` to compare past flood, crop-loss, and earthquake events directly against current Nov 2026 `.h5` telemetry.
+
+## [0.4.0] - 2026-11-14 — Dark Editorial Portal, Throwable Sleeve Deck & Google-Earth 3D Globe
+### Added
+- **Six-Section Editorial Portal (`src/components/HomeLandingView.tsx`, `src/components/Footer.tsx`)**: Implemented a `240vh` scroll-bound split-shutter portal hero (`SKIP PORTAL / INTERACT WITH GLOBE` bypass included), Statement Fold (`035` outline numeral + scroll-rotating interferogram seal), 4-card physical Throwable Sleeve Deck (pointer-capture fling + `←`/`→` keyboard navigation), 6-zone Hairline Roster, Cycle 035 `.h5` Passes Table, and cropped full-width `'Syne'` wordmark footer.
+- **High-Detail 3D Satellite Earth & Dive-Zoom (`src/components/EarthGlobeCanvas.tsx`, `src/App.tsx`)**: Upgraded procedural/Blue-Marble Earth textures (`4096×2048` + `bumpMap` + water `roughnessMap` + `RoomEnvironment`), dual-layer Rayleigh atmospheric glow, composite gold-foil NISAR spacecraft, flush concentric radar target rings, zero-GC screen-projected HTML HUD badges synced with `SMIAN_P5`, and a `950ms` cubic-bezier dive-into-Earth transition with radial atmospheric cross-fade into the 2D Explorer.
+
+### Changed
+- **Palette & Typography (`index.html`, `src/index.css`, `src/components/Navbar.tsx`)**: Loaded `'Syne'`, `'Sora'`, and `'JetBrains Mono'`, applied the Dark Editorial color tokens (`#0A0C0E`, `#EDE7DC`, `#E8913C`, `#2E6B72`), and introduced the fixed `58px` translucent navigation bar (`01 PORTAL`, `02 CATALOGUE`, `03 ROSTER & PASSES`, `04 2D RADAR MAP`) while keeping all 2D Leaflet, `GranuleInspector`, `HistoryIssuesPanel`, `PageAwareAssistant`, and `/api/local-h5` flows intact.
+

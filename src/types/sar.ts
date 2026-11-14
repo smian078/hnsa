@@ -201,7 +201,16 @@ export type DatasetAspectId =
   | 'coherence_mask'
   | 'climate_power'
   | 'physics_ai'
-  | 'sources_hdf5';
+  | 'sources_hdf5'
+  | 'history_issues';
+
+export interface HistoricalIssueEntry {
+  year: string;
+  eventTitle: string;
+  whatHappened: string;
+  radarSignatureComparison: string;
+  communityImpact: string;
+}
 
 export interface DatasetAspectOption {
   id: DatasetAspectId;

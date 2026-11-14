@@ -714,7 +714,7 @@ Provide 3 concise, specific items in actionableAdvisory citing the exact dB, cm,
 
     const smianSnapshot = SMIAN_P5_VERIFIED_RECORDS.map(
       (r) =>
-        `${r.regionId}: ${r.fileName} (${(r.fileSizeMB / 1000).toFixed(2)} GB / ${r.fileSizeMB} MB, digest ${r.headerDigest}, HH mean ${r.hhGamma0MeanDb} dB, HH flood min ${r.hhFloodMinDb} dB, HV mean ${r.hvGamma0MeanDb} dB${typeof r.soilMoistureIndex === 'number' ? `, soil moisture ${Math.round(r.soilMoistureIndex * 100)}%` : ''}${typeof r.losDisplacementCm === 'number' ? `, ground shift ${r.losDisplacementCm} cm` : ''}${typeof r.coherenceMean === 'number' ? `, confidence ${Math.round(r.coherenceMean * 100)}%` : ''}${r.plainEnglishSummary ? `, summary: "${r.plainEnglishSummary}"` : ''}${r.liveDiskSlices?.length ? `, disk slices: ${r.liveDiskSlices.map((s) => `${s.offsetMB}MB/${(s.nonZeroByteRatio * 100).toFixed(1)}%/${s.chunkSha256}`).join(';')}` : ''})`
+        `${r.regionId}: ${r.fileName} (${(r.fileSizeMB / 1000).toFixed(2)} GB / ${r.fileSizeMB} MB, digest ${r.headerDigest}, HH mean ${r.hhGamma0MeanDb} dB, HH flood min ${r.hhFloodMinDb} dB, HV mean ${r.hvGamma0MeanDb} dB${typeof r.soilMoistureIndex === 'number' ? `, soil moisture ${Math.round(r.soilMoistureIndex * 100)}%` : ''}${typeof r.losDisplacementCm === 'number' ? `, ground shift ${r.losDisplacementCm} cm` : ''}${typeof r.coherenceMean === 'number' ? `, confidence ${Math.round(r.coherenceMean * 100)}%` : ''}${r.plainEnglishSummary ? `, summary: "${r.plainEnglishSummary}"` : ''}${r.liveDiskSlices?.length ? `, disk slices: ${r.liveDiskSlices.map((s) => `${s.offsetMB}MB/${(s.nonZeroByteRatio * 100).toFixed(1)}%/${s.chunkSha256}`).join(';')}` : ''}${r.recurringProblemsSummary ? `, recurring problems: "${r.recurringProblemsSummary}"` : ''}${r.historicalIssues?.length ? `, history: ${r.historicalIssues.map((h) => `[${h.year}] ${h.eventTitle}: ${h.whatHappened} (${h.radarSignatureComparison})`).join(' | ')}` : ''})`
     ).join(' | ');
 
     const cacheKey = `assist:${payload.currentView}:${payload.regionId ?? 'none'}:${payload.activeAspect ?? 'none'}:${payload.zoneName ?? 'none'}:${payload.metricsSummary ?? 'none'}:${payload.language}:${payload.question.toLowerCase()}`;
@@ -745,13 +745,15 @@ When explaining .h5 files, HDF5 paths, or radar numbers, ALWAYS use simple every
 - Mirror analogy for HH water: calm standing floodwater acts like a flat mirror and bounces radar away, making flood zones dark (-18 dB or lower) even through 100% clouds.
 - Leaf-bounce analogy for HV crops/forests: radar bounces inside leaves and stems to measure plant thickness.
 - Centimeter ruler analogy for GUNW earthquakes: measures how many centimeters the land rose or sank from space.
+When activeAspect is history_issues or the user asks about past events/history, explicitly compare the region's historical disasters (floods, cotton waterlogging, or 2024 Noto earthquake) against the current Nov 2026 SMIAN_P5 laptop .h5 metrics below.
 Always cite the exact file size (e.g., 5.1 GB, 6.4 GB, or 6.5 GB) and exact numbers from SMIAN_P5 or Visible Telemetry below. Never invent measurements.
 Active Page: ${payload.currentView}
 Context Label: ${contextLabel}
+${payload.activeAspect ? `Active Aspect: ${payload.activeAspect}` : ''}
 ${payload.passDate ? `Orbital Pass Date: ${payload.passDate}` : ''}
 ${payload.layerMode ? `Active 2D Layer: ${payload.layerMode}` : ''}
 ${payload.metricsSummary ? `Visible Telemetry: ${payload.metricsSummary}` : ''}
-SMIAN_P5 Verified .h5 Database: ${smianSnapshot}
+SMIAN_P5 Verified .h5 & Historical Database: ${smianSnapshot}
 User Question: ${payload.question}`;
 
     const runAssistModel = async (modelName: string) => {

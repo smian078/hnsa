@@ -10,6 +10,7 @@ import type {
   AsfGranulesApiResponse,
   EonetEvent,
   HealthStatusResponse,
+  HistoricalIssueEntry,
   NasaPowerApiResponse,
   PageAwareAssistRequest,
   PageAwareAssistResponse,
@@ -20,6 +21,8 @@ import type {
   SavedSnapshot,
   SynthesizeRequestPayload,
 } from '../types/sar.ts';
+
+export type { HistoricalIssueEntry };
 import { buildDeterministicSynthesis } from '../utils/sarPhysics.ts';
 import { buildPageAwareAssistantFallback } from '../utils/globeMath.ts';
 
@@ -63,6 +66,8 @@ export interface LiveLaptopGranuleRecord {
   coherenceMean?: number;
   plainEnglishSummary?: string;
   liveDiskSlices?: LiveDiskSlice[];
+  recurringProblemsSummary?: string;
+  historicalIssues?: HistoricalIssueEntry[];
 }
 
 export interface LiveLaptopH5DbResponse {
@@ -245,6 +250,30 @@ function parseLiveLaptopPayload(
                   chunkSha256: String(slice.chunkSha256),
                 }))
             : verifiedMatch?.liveDiskSlices,
+        recurringProblemsSummary:
+          typeof g.recurringProblemsSummary === 'string' &&
+          g.recurringProblemsSummary.trim().length > 0
+            ? g.recurringProblemsSummary.trim()
+            : verifiedMatch?.recurringProblemsSummary,
+        historicalIssues:
+          Array.isArray(g.historicalIssues) && g.historicalIssues.length > 0
+            ? g.historicalIssues
+                .filter(
+                  (issue): issue is HistoricalIssueEntry =>
+                    Boolean(issue) &&
+                    typeof issue === 'object' &&
+                    typeof issue.eventTitle === 'string'
+                )
+                .map((issue) => ({
+                  year: String(issue.year ?? ''),
+                  eventTitle: String(issue.eventTitle ?? ''),
+                  whatHappened: String(issue.whatHappened ?? ''),
+                  radarSignatureComparison: String(
+                    issue.radarSignatureComparison ?? ''
+                  ),
+                  communityImpact: String(issue.communityImpact ?? ''),
+                }))
+            : verifiedMatch?.historicalIssues,
       };
     });
 

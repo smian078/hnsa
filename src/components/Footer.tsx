@@ -2,66 +2,67 @@ import { ArrowUpRight } from 'lucide-react';
 
 interface FooterProps {
   onOpenAbout: () => void;
+  onOpenExplorer?: () => void;
 }
 
-export function Footer({ onOpenAbout }: FooterProps) {
+export function Footer({ onOpenAbout, onOpenExplorer }: FooterProps) {
   return (
-    <footer className="relative overflow-hidden bg-[var(--rr-surface)] text-[var(--rr-text)] border-t border-[var(--rr-border)]">
-      {/* Top Interactive Trigger */}
-      <div className="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-8 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[var(--rr-border)]">
-          <div className="space-y-2.5">
-            <div className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--rr-muted)]">
-              NASA Space Apps Challenge 2026 · Dancing With The SARs
+    <footer className="relative overflow-hidden bg-[#0A0C0E] text-[#EDE7DC] border-t border-[rgba(237,231,220,0.13)]">
+      {/* Top Close Section */}
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-8 pt-14 pb-8 relative z-10">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-10 border-b border-[rgba(237,231,220,0.13)]">
+          <div className="space-y-3 max-w-2xl">
+            <div className="font-micro text-[#E8913C]">
+              06 / NASA SPACE APPS CHALLENGE 2026 · DANCING WITH THE SARS
             </div>
+            <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-[-0.025em] text-[#EDE7DC]">
+              Cloud-piercing radar intelligence for floods, farms, and active faults.
+            </h2>
+            <p className="text-xs leading-relaxed text-[#9EA5A8]">
+              Built with open NASA &amp; ISRO NISAR / ASF / Earthdata / GIBS / POWER data. NASA does not endorse this application.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {onOpenExplorer && (
+              <button
+                type="button"
+                onClick={onOpenExplorer}
+                className="inline-flex items-center gap-2 border border-[#E8913C] px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#E8913C] hover:bg-[#9A4A0B] hover:text-white transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+              >
+                <span>Open 2D Radar Explorer</span>
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            )}
             <button
               type="button"
               onClick={onOpenAbout}
-              className="group inline-flex items-center gap-3 text-left text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-[var(--rr-text)] border-b-2 border-transparent hover:border-[var(--rr-accent)] pb-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="inline-flex items-center gap-2 border border-[rgba(237,231,220,0.22)] px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#EDE7DC] hover:border-[#2E6B72] hover:text-[#6EE7B7] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
             >
-              <span>About Open NASA &amp; ISRO Satellite Data</span>
-              <ArrowUpRight
-                className="h-6 w-6 text-[var(--rr-accent)] transition-transform duration-300 group-hover:rotate-45"
-                aria-hidden="true"
-              />
+              <span>Data Provenance</span>
+              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </div>
+        </div>
 
-          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--rr-muted)] space-y-1">
-            <div>ASF VERTEX · NISAR RADAR</div>
-            <div>ESRI SATELLITE · NASA WEATHER · NASA EVENTS</div>
-          </div>
+        {/* Hairline Footer Strip */}
+        <div className="pt-5 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[10.5px] uppercase tracking-[0.14em] text-[#9EA5A8]">
+          <span>NISAR CYCLE 035 · L-BAND 24 CM · DHDH POLARIMETRY</span>
+          <span>ASF VERTEX · NASA POWER · NASA EONET · SMIAN_P5 .H5 SERVER</span>
         </div>
       </div>
 
-      {/* Massive Low-Opacity Background Marquee */}
+      {/* Full-Width Cropped Syne Wordmark */}
       <div
         aria-hidden="true"
-        className="pointer-events-none select-none overflow-hidden py-2 opacity-10"
+        className="pointer-events-none select-none overflow-hidden px-2 sm:px-6"
       >
-        <div className="marquee-track-slow items-center gap-16">
-          {[0, 1].map((idx) => (
-            <div key={idx} className="flex items-center gap-16 pr-16">
-              <span className="text-[16vw] leading-none font-black uppercase tracking-[-0.05em] whitespace-nowrap">
-                RADAR RHYTHM
-              </span>
-              <span className="text-[16vw] leading-none font-serif-editorial whitespace-nowrap">
-                earth radar
-              </span>
-            </div>
-          ))}
+        <div
+          className="font-display font-extrabold leading-[0.86] tracking-[-0.035em] text-[#EDE7DC] whitespace-nowrap translate-y-[22%]"
+          style={{ fontSize: 'clamp(26px, 7.6vw, 114px)' }}
+        >
+          NISAR PULSE<span className="text-[#E8913C]">.</span>
         </div>
-      </div>
-
-      {/* Bottom Compliance Row */}
-      <div className="relative z-10 mx-auto max-w-[1600px] px-4 sm:px-8 py-5 border-t border-[var(--rr-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--rr-muted)]">
-          Cycle 035 Radar Datasets Ready
-        </div>
-
-        <p className="text-xs text-[var(--rr-muted)] max-w-2xl">
-          Built with open NASA &amp; ISRO NISAR / ASF / Earthdata / GIBS / POWER data. NASA does not endorse this application.
-        </p>
       </div>
     </footer>
   );

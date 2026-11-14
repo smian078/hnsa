@@ -30,6 +30,7 @@ import {
 } from '../utils/sarPhysics.ts';
 import { CloudPiercerMap } from './CloudPiercerMap.tsx';
 import { GranuleInspector } from './GranuleInspector.tsx';
+import { HistoryIssuesPanel } from './HistoryIssuesPanel.tsx';
 import { OrbitalTimeScrubber } from './OrbitalTimeScrubber.tsx';
 import { PhysicalDriverSynthesizer } from './PhysicalDriverSynthesizer.tsx';
 import { TelemetryPanel } from './TelemetryPanel.tsx';
@@ -139,6 +140,13 @@ function getPlainAspectCopy(
         title: 'Plain-English Summary',
         summary:
           'Explains what is happening right here using real measurements.',
+      };
+    case 'history_issues':
+      return {
+        shortTag: 'HISTORY & AI',
+        title: 'History & Past Issues (Laptop Server AI)',
+        summary:
+          "Explore past floods, crop losses, or earthquakes here and ask AI how your laptop's live .h5 scan compares.",
       };
     case 'sources_hdf5':
     default:
@@ -527,6 +535,14 @@ export function RegionExplorerView({
                           onRetryGranules={onRetryGranules}
                           eonetEvents={eonetEvents}
                           demoMode={demoMode}
+                        />
+                      )}
+
+                      {aspect.id === 'history_issues' && (
+                        <HistoryIssuesPanel
+                          region={region}
+                          selectedZone={selectedZone}
+                          passIndex={passIndex}
                         />
                       )}
                     </div>

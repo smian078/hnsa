@@ -58,6 +58,7 @@ export default function App() {
   const [theme, setTheme] = useState<ThemeMode>(readInitialTheme);
   const [pageView, setPageView] = useState<PageViewMode>('HOME_3D_GLOBE');
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [isDiveCrossfading, setIsDiveCrossfading] = useState<boolean>(false);
   const [activeRegionId, setActiveRegionId] =
     useState<RegionId>('maharashtra_gcov');
   const [activeAspect, setActiveAspect] = useState<DatasetAspectId | null>(
@@ -214,22 +215,34 @@ export default function App() {
     return () => window.clearInterval(timer);
   }, [isPlaying]);
 
-  const selectRegionAndEnterMap = useCallback((id: RegionId) => {
-    const nextRegion = REGION_DATASETS[id];
-    setActiveRegionId(id);
-    setSelectedZoneId(nextRegion.zones[0].id);
-    setLayerMode(nextRegion.productType === 'GUNW' ? 'GUNW_LOS' : 'GCOV_HH');
-    setActiveAspect(getDefaultAspectForRegion(id));
-    setSynthesis(null);
-    setSynthesisError(null);
-    setIsTransitioning(true);
-
-    window.setTimeout(() => {
-      setPageView('REGION_2D_MAP');
-      setIsTransitioning(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 180);
+  const handleDiveStart = useCallback(() => {
+    setIsDiveCrossfading(true);
   }, []);
+
+  const selectRegionAndEnterMap = useCallback(
+    (id: RegionId, zoneId?: string) => {
+      const nextRegion = REGION_DATASETS[id];
+      const matchedZone =
+        zoneId && nextRegion.zones.some((z) => z.id === zoneId)
+          ? zoneId
+          : nextRegion.zones[0].id;
+      setActiveRegionId(id);
+      setSelectedZoneId(matchedZone);
+      setLayerMode(nextRegion.productType === 'GUNW' ? 'GUNW_LOS' : 'GCOV_HH');
+      setActiveAspect(getDefaultAspectForRegion(id));
+      setSynthesis(null);
+      setSynthesisError(null);
+      setIsTransitioning(true);
+
+      window.setTimeout(() => {
+        setPageView('REGION_2D_MAP');
+        setIsTransitioning(false);
+        setIsDiveCrossfading(false);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      }, 220);
+    },
+    []
+  );
 
   const handleToggleAspect = (aspectId: DatasetAspectId) => {
     if (activeAspect === aspectId) {
@@ -373,59 +386,77 @@ export default function App() {
           <HomeLandingView
             activeRegionId={activeRegionId}
             onSelectRegionFromGlobe={selectRegionAndEnterMap}
+            onDiveStart={handleDiveStart}
             isTransitioning={isTransitioning}
             onOpenAbout={() => setIsAboutOpen(true)}
           />
         ) : (
-          <RegionExplorerView
-            region={region}
-            activeRegionId={activeRegionId}
-            onSelectRegion={selectRegionAndEnterMap}
-            onReturnToGlobe={() => {
-              setPageView('HOME_3D_GLOBE');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onRefreshAll={() => void handleRefreshAll()}
-            isRefreshing={isRefreshing}
-            lastRefreshedAt={lastRefreshedAt}
-            isDark={isDark}
-            activeAspect={activeAspect}
-            onToggleAspect={handleToggleAspect}
-            selectedZone={selectedZone}
-            onSelectZone={handleSelectZone}
-            layerMode={layerMode}
-            onSelectLayerMode={setLayerMode}
-            passIndex={passIndex}
-            onSelectPass={setPassIndex}
-            coherenceThreshold={coherenceThreshold}
-            onChangeCoherenceThreshold={setCoherenceThreshold}
-            demoMode={demoMode}
-            splitPercent={splitPercent}
-            onChangeSplitPercent={setSplitPercent}
-            isPlaying={isPlaying}
-            onTogglePlay={() => setIsPlaying((prev) => !prev)}
-            onPinSnapshot={handlePinSnapshot}
-            savedSnapshots={savedSnapshots}
-            onLoadSnapshot={handleLoadSnapshot}
-            onDeleteSnapshot={handleDeleteSnapshot}
-            powerData={powerData}
-            isLoadingPower={isLoadingPower}
-            powerError={powerError}
-            onRetryPower={() => void loadRegionalData()}
-            synthesis={synthesis}
-            isSynthesizing={isSynthesizing}
-            synthesisError={synthesisError}
-            onSynthesize={() => void handleSynthesize()}
-            granulesData={granulesData}
-            isLoadingGranules={isLoadingGranules}
-            granulesError={granulesError}
-            onRetryGranules={() => void loadRegionalData()}
-            eonetEvents={eonetEvents}
-          />
+          <div className="pt-[58px]">
+            <RegionExplorerView
+              region={region}
+              activeRegionId={activeRegionId}
+              onSelectRegion={selectRegionAndEnterMap}
+              onReturnToGlobe={() => {
+                setPageView('HOME_3D_GLOBE');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onRefreshAll={() => void handleRefreshAll()}
+              isRefreshing={isRefreshing}
+              lastRefreshedAt={lastRefreshedAt}
+              isDark={isDark}
+              activeAspect={activeAspect}
+              onToggleAspect={handleToggleAspect}
+              selectedZone={selectedZone}
+              onSelectZone={handleSelectZone}
+              layerMode={layerMode}
+              onSelectLayerMode={setLayerMode}
+              passIndex={passIndex}
+              onSelectPass={setPassIndex}
+              coherenceThreshold={coherenceThreshold}
+              onChangeCoherenceThreshold={setCoherenceThreshold}
+              demoMode={demoMode}
+              splitPercent={splitPercent}
+              onChangeSplitPercent={setSplitPercent}
+              isPlaying={isPlaying}
+              onTogglePlay={() => setIsPlaying((prev) => !prev)}
+              onPinSnapshot={handlePinSnapshot}
+              savedSnapshots={savedSnapshots}
+              onLoadSnapshot={handleLoadSnapshot}
+              onDeleteSnapshot={handleDeleteSnapshot}
+              powerData={powerData}
+              isLoadingPower={isLoadingPower}
+              powerError={powerError}
+              onRetryPower={() => void loadRegionalData()}
+              synthesis={synthesis}
+              isSynthesizing={isSynthesizing}
+              synthesisError={synthesisError}
+              onSynthesize={() => void handleSynthesize()}
+              granulesData={granulesData}
+              isLoadingGranules={isLoadingGranules}
+              granulesError={granulesError}
+              onRetryGranules={() => void loadRegionalData()}
+              eonetEvents={eonetEvents}
+            />
+          </div>
         )}
       </main>
 
-      <Footer onOpenAbout={() => setIsAboutOpen(true)} />
+      {/* Atmospheric Dive-Into-Earth Radial Cross-Fade Overlay */}
+      {(isDiveCrossfading || isTransitioning) && (
+        <div
+          aria-hidden="true"
+          className="dive-crossfade-overlay pointer-events-none fixed inset-0 z-[1400]"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 50%, rgba(46, 107, 114, 0.25) 0%, rgba(10, 12, 14, 0.88) 55%, #0A0C0E 100%)',
+          }}
+        />
+      )}
+
+      <Footer
+        onOpenAbout={() => setIsAboutOpen(true)}
+        onOpenExplorer={() => selectRegionAndEnterMap(activeRegionId)}
+      />
 
       <PageAwareAssistant
         pageView={pageView}

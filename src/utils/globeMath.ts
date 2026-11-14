@@ -112,6 +112,14 @@ export function getDatasetAspectsForRegion(
         summary:
           'Exact ASF Vertex HDF5 (.h5) granule schema paths, custom GeoJSON upload, and open NASA/ISRO provenance.',
       },
+      {
+        id: 'history_issues',
+        code: '07',
+        title: 'History & Past Issues (Laptop Server AI)',
+        shortTag: 'HISTORY & AI',
+        summary:
+          "Explore past floods, crop losses, or earthquakes here and ask AI how your laptop's live .h5 scan compares.",
+      },
     ];
   }
 
@@ -159,6 +167,14 @@ export function getDatasetAspectsForRegion(
         summary:
           'Exact Cycle 035 Track 098 Frame 013 HDF5 paths, custom GeoJSON upload, and NASA/ISRO data citations.',
       },
+      {
+        id: 'history_issues',
+        code: '06',
+        title: 'History & Past Issues (Laptop Server AI)',
+        shortTag: 'HISTORY & AI',
+        summary:
+          "Explore past floods, crop losses, or earthquakes here and ask AI how your laptop's live .h5 scan compares.",
+      },
     ];
   }
 
@@ -205,6 +221,14 @@ export function getDatasetAspectsForRegion(
       shortTag: 'DATA SOURCES',
       summary:
         'Cycle 035 Track 084 Frame 013 HDF5 dataset paths, custom GeoJSON inspector, and open data provenance.',
+    },
+    {
+      id: 'history_issues',
+      code: '06',
+      title: 'History & Past Issues (Laptop Server AI)',
+      shortTag: 'HISTORY & AI',
+      summary:
+        "Explore past floods, crop losses, or earthquakes here and ask AI how your laptop's live .h5 scan compares.",
     },
   ];
 }
@@ -340,6 +364,42 @@ export function buildPageAwareAssistantFallback(
     }
     return false;
   }) ?? SMIAN_P5_VERIFIED_RECORDS[1];
+
+  const isHistoryOrPastQuestion =
+    aspect === 'history_issues' ||
+    qLower.includes('history') ||
+    qLower.includes('past') ||
+    qLower.includes('previous') ||
+    qLower.includes('recurring') ||
+    qLower.includes('2019') ||
+    qLower.includes('2020') ||
+    qLower.includes('2022') ||
+    qLower.includes('2023') ||
+    qLower.includes('2024') ||
+    qLower.includes('2025') ||
+    qLower.includes('compare');
+
+  if (isHistoryOrPastQuestion && matchedSmian.historicalIssues?.length) {
+    const firstIssue = matchedSmian.historicalIssues[0];
+    const secondIssue = matchedSmian.historicalIssues[1];
+    const sizeGb = (matchedSmian.fileSizeMB / 1000).toFixed(1);
+    const compareText =
+      matchedSmian.regionId === 'japan'
+        ? `Comparing past events (${firstIssue.year} ${firstIssue.eventTitle}) with your SMIAN_P5 laptop's ${sizeGb} GB Nov 5, 2026 .h5 scan: the land shifted up to ${Math.abs(matchedSmian.losDisplacementCm ?? -18.6).toFixed(1)} cm at ${Math.round((matchedSmian.coherenceMean ?? 0.81) * 100)}% reliability (γ = ${(matchedSmian.coherenceMean ?? 0.81).toFixed(2)}), while calm coastal water reads ${matchedSmian.hhFloodMinDb.toFixed(1)} dB. ${firstIssue.radarSignatureComparison}`
+        : `Comparing past events (${firstIssue.year} ${firstIssue.eventTitle}${secondIssue ? ` and ${secondIssue.year} ${secondIssue.eventTitle}` : ''}) with your SMIAN_P5 laptop's ${sizeGb} GB Nov 11, 2026 .h5 scan: smooth floodwater reads ${matchedSmian.hhFloodMinDb.toFixed(1)} dB (flat-mirror reflection under clouds) with ${Math.round((matchedSmian.soilMoistureIndex ?? 0.78) * 100)}% soaked topsoil and ${matchedSmian.hvGamma0MeanDb.toFixed(1)} dB plant canopy bounce. ${firstIssue.radarSignatureComparison}`;
+
+    return {
+      answer: compareText,
+      suggestedFollowUps: [
+        'What recurring problem affects people most here?',
+        'How does today’s .h5 scan compare to past floods/quakes?',
+        'What should local teams watch next?',
+      ],
+      contextLabel,
+      source: 'DETERMINISTIC_PHYSICS_FALLBACK',
+      generatedAt: new Date().toISOString(),
+    };
+  }
 
   const isH5OrNumbersQuestion =
     qLower.includes('.h5') ||

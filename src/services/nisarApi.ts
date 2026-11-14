@@ -29,7 +29,7 @@ import { buildPageAwareAssistantFallback } from '../utils/globeMath.ts';
 const SNAPSHOTS_STORAGE_KEY = 'nisar_pulse_saved_snapshots_v1';
 export const LAPTOP_DB_URL_STORAGE_KEY = 'nisar_laptop_db_url';
 export const LAPTOP_DB_URL =
-  'https://americans-revolution-nicole-meanwhile.trycloudflare.com';
+  'https://burlington-wayne-concrete-aid.trycloudflare.com';
 export const DEFAULT_LAPTOP_DB_URL = LAPTOP_DB_URL;
 export const LAPTOP_DB_EVENT_NAME = 'nisar-laptop-db-changed';
 

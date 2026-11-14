@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { GoogleGenAI, ThinkingLevel, Type } from '@google/genai';
-import { REGION_DATASETS } from '../src/data/samples/asfVertexSamples.ts';
+import {
+  REGION_DATASETS,
+  SMIAN_P5_VERIFIED_RECORDS,
+} from '../src/data/samples/asfVertexSamples.ts';
 import type {
   AsfGranuleMetadata,
   DatasetAspectId,
@@ -709,7 +712,12 @@ Provide 3 concise, specific items in actionableAdvisory citing the exact dB, cm,
       language,
     };
 
-    const cacheKey = `assist:${payload.currentView}:${payload.regionId ?? 'none'}:${payload.activeAspect ?? 'none'}:${payload.zoneName ?? 'none'}:${payload.language}:${payload.question.toLowerCase()}`;
+    const smianSnapshot = SMIAN_P5_VERIFIED_RECORDS.map(
+      (r) =>
+        `${r.regionId}: ${r.fileName} (${(r.fileSizeMB / 1000).toFixed(2)} GB / ${r.fileSizeMB} MB, digest ${r.headerDigest}, HH mean ${r.hhGamma0MeanDb} dB, HH flood min ${r.hhFloodMinDb} dB, HV mean ${r.hvGamma0MeanDb} dB${typeof r.soilMoistureIndex === 'number' ? `, soil moisture ${Math.round(r.soilMoistureIndex * 100)}%` : ''}${typeof r.losDisplacementCm === 'number' ? `, ground shift ${r.losDisplacementCm} cm` : ''}${typeof r.coherenceMean === 'number' ? `, confidence ${Math.round(r.coherenceMean * 100)}%` : ''}${r.plainEnglishSummary ? `, summary: "${r.plainEnglishSummary}"` : ''}${r.liveDiskSlices?.length ? `, disk slices: ${r.liveDiskSlices.map((s) => `${s.offsetMB}MB/${(s.nonZeroByteRatio * 100).toFixed(1)}%/${s.chunkSha256}`).join(';')}` : ''})`
+    ).join(' | ');
+
+    const cacheKey = `assist:${payload.currentView}:${payload.regionId ?? 'none'}:${payload.activeAspect ?? 'none'}:${payload.zoneName ?? 'none'}:${payload.metricsSummary ?? 'none'}:${payload.language}:${payload.question.toLowerCase()}`;
     const cached = apiCache.get<PageAwareAssistResponse>(cacheKey);
     if (cached && !cached.isStale) {
       res.json(cached.value);
@@ -732,12 +740,18 @@ Provide 3 concise, specific items in actionableAdvisory citing the exact dB, cm,
           ? 'Hindi (हिन्दी)'
           : 'English';
 
-    const assistPrompt = `You are the NISAR Pulse Page-Aware Assistant. Respond concisely (2-4 sentences) in ${languageName}, strictly grounded to the user's active UI context and metrics. Never invent data.
+    const assistPrompt = `You are the Radar Rhythm AI Guide. Explain things in warm, everyday, jargon-free ${languageName} (3-4 short sentences) that anyone can understand, strictly grounded in the telemetry below.
+When explaining .h5 files, HDF5 paths, or radar numbers, ALWAYS use simple everyday analogies:
+- Mirror analogy for HH water: calm standing floodwater acts like a flat mirror and bounces radar away, making flood zones dark (-18 dB or lower) even through 100% clouds.
+- Leaf-bounce analogy for HV crops/forests: radar bounces inside leaves and stems to measure plant thickness.
+- Centimeter ruler analogy for GUNW earthquakes: measures how many centimeters the land rose or sank from space.
+Always cite the exact file size (e.g., 5.1 GB, 6.4 GB, or 6.5 GB) and exact numbers from SMIAN_P5 or Visible Telemetry below. Never invent measurements.
 Active Page: ${payload.currentView}
 Context Label: ${contextLabel}
 ${payload.passDate ? `Orbital Pass Date: ${payload.passDate}` : ''}
 ${payload.layerMode ? `Active 2D Layer: ${payload.layerMode}` : ''}
 ${payload.metricsSummary ? `Visible Telemetry: ${payload.metricsSummary}` : ''}
+SMIAN_P5 Verified .h5 Database: ${smianSnapshot}
 User Question: ${payload.question}`;
 
     const runAssistModel = async (modelName: string) => {
@@ -746,7 +760,7 @@ User Question: ${payload.question}`;
         contents: assistPrompt,
         config: {
           systemInstruction:
-            'You guide users through NISAR Pulse (3D Earth globe home and 2D GCOV/GUNW regional explorer). Always orient the answer to the exact page/aspect/zone they are viewing.',
+            'You are the friendly Radar Rhythm AI Guide helping everyday people understand 3D Earth, 2D satellite/radar maps, and NASA .h5 files using clear analogies (flat mirror for floodwater, leaf bounce for crops, centimeter ruler for ground movement) and exact verified numbers.',
           ...(modelName === 'gemini-4-hydrogen'
             ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } }
             : {}),

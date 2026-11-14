@@ -55,3 +55,16 @@
 ### Fixed
 - **Defensive Laptop `.h5` Granule Parsing (`src/services/nisarApi.ts`, `src/components/GranuleInspector.tsx`)**: Added safe defaults for `parsedGranule` fields returned by `scripts/extract_nisar_h5.py` when filenames omit standard tokens.
 - **Verified `SMIAN_P5` Telemetry Synchronization (`src/data/samples/asfVertexSamples.ts`, `src/services/nisarApi.ts`, `src/components/GranuleInspector.tsx`)**: Exported `LAPTOP_DB_URL` (`https://americans-revolution-nicole-meanwhile.trycloudflare.com`), added automatic startup `/api/local-h5` fetch with deduplicated merging into active region granules, and synced hardcoded verified `SMIAN_P5` file sizes, SHA-256 digests, and HH/HV/soil-moisture/LOS/coherence metrics across Japan (`5132.0 MB`, `0090bc4d60a3e529`), Maharashtra (`6388.0 MB`, `f6066c14dd4b68bb`), and Northeast India (`6516.0 MB`, `0ef3bd2a7b09daa8`).
+
+## [0.3.2] - 2026-11-14 — Plain-English .h5 File Translator & AI Guide Bridge
+### Added
+- **Plain-English `.h5` File Translator (`src/components/GranuleInspector.tsx`, `scripts/extract_nisar_h5.py`)**: Added everyday explanations of NASA `.h5` containers, flat-mirror `HH` flood detection, leaf-bounce `HV` crop/forest thickness, percentage Soil Wetness bars, earthquake ground-shift translations, and 3-line HDF5 Path Decoders (`HHHH`, `HVHV`, `boundingPolygon`).
+- **One-Click AI `.h5` Explanation Bridge (`src/components/GranuleInspector.tsx` ↔ `src/components/PageAwareAssistant.tsx`)**: Added `✨ Ask AI to Explain This .h5 File in Simple Words` buttons dispatching `nisar-ask-ai` custom events with exact `.h5` metrics so `PageAwareAssistant` auto-opens, submits, and exposes a default `"Explain the .h5 satellite file in simple words"` quick chip.
+- **Everyday-Person AI Prompting (`server/routes.ts`, `src/utils/globeMath.ts`)**: Grounded `/api/gemini/assist` and deterministic fallbacks with mirror, leaf-bounce, and centimeter-ruler analogies alongside exact `SMIAN_P5` GB sizes and telemetry numbers.
+
+## [0.3.3] - 2026-11-14 — Live .h5 Plain-English Summaries & Binary Disk Slice Proof
+### Added
+- **Schema Preservation (`src/services/nisarApi.ts`, `src/data/samples/asfVertexSamples.ts`)**: Added `plainEnglishSummary` and `liveDiskSlices` (`offsetMB`, `nonZeroByteRatio`, `chunkSha256`) to `LiveLaptopGranuleRecord`, `parseLiveLaptopPayload`, and `SMIAN_P5_VERIFIED_RECORDS`.
+- **In Simple Words & Disk Slice Proof Badges (`src/components/GranuleInspector.tsx`)**: Highlighted `In Simple Words (What This .h5 File Shows)` boxes displaying `rec.plainEnglishSummary` plus HH/HV/Soil Wetness/Ground Shift plain-English translations and 3 binary disk slice proof badges (`Offset MB`, `Active Radar Fill %`, `Chunk Hash`).
+- **AI Guide `.h5` Summary Bridge (`src/components/GranuleInspector.tsx`, `src/components/PageAwareAssistant.tsx`, `src/utils/globeMath.ts`, `server/routes.ts`)**: Updated `✨ Ask AI Guide to Explain This .h5 File` buttons to dispatch `h5Summary` inside `nisar-ask-ai`, auto-opening the assistant panel and forwarding the `.h5` summary to `/api/gemini/assist`.
+

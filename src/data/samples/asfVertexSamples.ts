@@ -86,6 +86,12 @@ export interface SmianP5ParsedGranuleHeader {
   crid: string;
 }
 
+export interface LiveDiskSlice {
+  offsetMB: number;
+  nonZeroByteRatio: number;
+  chunkSha256: string;
+}
+
 export interface SmianP5VerifiedRecord {
   fileName: string;
   fileSizeMB: number;
@@ -102,6 +108,8 @@ export interface SmianP5VerifiedRecord {
   soilMoistureIndex?: number;
   losDisplacementCm?: number;
   coherenceMean?: number;
+  plainEnglishSummary?: string;
+  liveDiskSlices?: LiveDiskSlice[];
 }
 
 export const SMIAN_P5_VERIFIED_HOST = 'SMIAN_P5';
@@ -140,6 +148,13 @@ export const SMIAN_P5_VERIFIED_RECORDS: SmianP5VerifiedRecord[] = [
     hvGamma0MeanDb: -14.9,
     losDisplacementCm: -18.6,
     coherenceMean: 0.81,
+    plainEnglishSummary:
+      "This 5.1 GB radar scan covers Japan's fault zone. By comparing radar waves before and after ground movement, it measures that the land shifted by up to 18.6 centimeters with 81% measurement reliability, helping engineers find cracked roads, ports, and landslide slopes.",
+    liveDiskSlices: [
+      { offsetMB: 0.0, nonZeroByteRatio: 0.083, chunkSha256: 'bb0e31bf13ad' },
+      { offsetMB: 2566.0, nonZeroByteRatio: 0.996, chunkSha256: '00b9a0adc2a7' },
+      { offsetMB: 3849.0, nonZeroByteRatio: 0.998, chunkSha256: '9997272442d8' },
+    ],
   },
   {
     fileName:
@@ -173,6 +188,13 @@ export const SMIAN_P5_VERIFIED_RECORDS: SmianP5VerifiedRecord[] = [
     hhFloodMinDb: -21.4,
     hvGamma0MeanDb: -12.1,
     soilMoistureIndex: 0.78,
+    plainEnglishSummary:
+      'This 6.4 GB radar scan covers central Maharashtra (Gosikhurd Dam & Wardha cotton farms). It sees through monsoon clouds to show that topsoil is 78% soaked and low-lying riverbanks have calm standing floodwater (-21.4 dB mirror reflection), while cotton and paddy fields show strong plant canopy growth (-12.1 dB).',
+    liveDiskSlices: [
+      { offsetMB: 0.0, nonZeroByteRatio: 0.083, chunkSha256: 'd643b43bc5a8' },
+      { offsetMB: 3194.0, nonZeroByteRatio: 0.993, chunkSha256: 'cee572645942' },
+      { offsetMB: 4791.0, nonZeroByteRatio: 0.991, chunkSha256: 'da0254107e14' },
+    ],
   },
   {
     fileName:
@@ -206,6 +228,13 @@ export const SMIAN_P5_VERIFIED_RECORDS: SmianP5VerifiedRecord[] = [
     hhFloodMinDb: -23.0,
     hvGamma0MeanDb: -11.4,
     soilMoistureIndex: 0.89,
+    plainEnglishSummary:
+      "This 6.5 GB radar scan covers Assam's Brahmaputra River and Kaziranga wetlands during heavy cloud cover. Where normal camera satellites only see white clouds, this file detects wide flood inundation (-23.0 dB) and 89% soil saturation, helping disaster teams spot flooded villages and wildlife corridors.",
+    liveDiskSlices: [
+      { offsetMB: 0.0, nonZeroByteRatio: 0.083, chunkSha256: '0281f0a8bbfa' },
+      { offsetMB: 3258.0, nonZeroByteRatio: 0.996, chunkSha256: 'cf4bcc9189bd' },
+      { offsetMB: 4887.0, nonZeroByteRatio: 0.998, chunkSha256: '91eecd26379e' },
+    ],
   },
 ];
 

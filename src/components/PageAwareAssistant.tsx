@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Bot, MessageSquare, Send, Sparkles, X } from 'lucide-react';
 import { REGION_DATASETS } from '../data/samples/asfVertexSamples.ts';
 import { askPageAwareAssistant } from '../services/nisarApi.ts';
@@ -10,6 +10,25 @@ import type {
   RegionId,
 } from '../types/sar.ts';
 import { formatPageContextLabel } from '../utils/globeMath.ts';
+
+export interface H5AskAiContext {
+  fileName: string;
+  fileSizeMB: number;
+  regionName?: string;
+  hhGamma0MeanDb?: number;
+  hhFloodMinDb?: number;
+  hvGamma0MeanDb?: number;
+  soilMoistureIndex?: number;
+  losDisplacementCm?: number;
+  coherenceMean?: number;
+  headerDigest?: string;
+}
+
+export interface NisarAskAiEventDetail {
+  question: string;
+  h5Summary?: string;
+  h5Context?: H5AskAiContext;
+}
 
 interface PageAwareAssistantProps {
   pageView: PageViewMode;
@@ -36,6 +55,8 @@ export function PageAwareAssistant({
   const [messages, setMessages] = useState<AssistChatMessage[]>([]);
   const [followUps, setFollowUps] = useState<string[]>([]);
 
+  const isSendingRef = useRef(false);
+
   const contextLabel = formatPageContextLabel({
     currentView: pageView,
     regionId: pageView === 'REGION_2D_MAP' ? activeRegionId : undefined,
@@ -46,24 +67,28 @@ export function PageAwareAssistant({
   const defaultPrompts =
     pageView === 'HOME_3D_GLOBE'
       ? [
+          'Explain the .h5 satellite file in simple words',
           'Compare the 3 places',
           'How does radar see through clouds?',
-          'Which place shows earthquakes?',
         ]
       : [
+          'Explain the .h5 satellite file in simple words',
           `Explain ${zoneName?.split(' ')[0] ?? 'this area'} in simple words`,
-          'What does this view show?',
           'What should people watch out for?',
         ];
 
   const activeSuggestions = followUps.length > 0 ? followUps : defaultPrompts;
 
-  const submitQuestion = async (questionText: string) => {
+  const submitQuestion = async (
+    questionText: string,
+    overrideMetricsSummary?: string
+  ) => {
     const trimmed = questionText.trim();
-    if (!trimmed || isSending) return;
+    if (!trimmed || isSendingRef.current) return;
 
+    isSendingRef.current = true;
     const userMsg: AssistChatMessage = {
-      id: `u-${Date.now()}`,
+      id: `u-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       role: 'user',
       text: trimmed,
       timestamp: new Date().toISOString(),
@@ -72,29 +97,90 @@ export function PageAwareAssistant({
     setInput('');
     setIsSending(true);
 
-    const resp = await askPageAwareAssistant({
-      currentView: pageView,
-      regionId: pageView === 'REGION_2D_MAP' ? activeRegionId : undefined,
-      activeAspect: activeAspect ?? undefined,
-      zoneName: pageView === 'REGION_2D_MAP' ? zoneName : undefined,
-      passDate,
-      layerMode: pageView === 'REGION_2D_MAP' ? layerMode : undefined,
-      metricsSummary: pageView === 'REGION_2D_MAP' ? metricsSummary : undefined,
-      question: trimmed,
-      language: 'en',
-    });
+    const combinedMetrics = overrideMetricsSummary
+      ? pageView === 'REGION_2D_MAP' && metricsSummary
+        ? `${metricsSummary} | ${overrideMetricsSummary}`
+        : overrideMetricsSummary
+      : pageView === 'REGION_2D_MAP'
+        ? metricsSummary
+        : undefined;
 
-    const assistantMsg: AssistChatMessage = {
-      id: `a-${Date.now()}`,
-      role: 'assistant',
-      text: resp.answer,
-      source: resp.source,
-      timestamp: resp.generatedAt,
-    };
-    setMessages((prev) => [...prev, assistantMsg]);
-    setFollowUps(resp.suggestedFollowUps);
-    setIsSending(false);
+    try {
+      const resp = await askPageAwareAssistant({
+        currentView: pageView,
+        regionId: pageView === 'REGION_2D_MAP' ? activeRegionId : undefined,
+        activeAspect: activeAspect ?? undefined,
+        zoneName: pageView === 'REGION_2D_MAP' ? zoneName : undefined,
+        passDate,
+        layerMode: pageView === 'REGION_2D_MAP' ? layerMode : undefined,
+        metricsSummary: combinedMetrics,
+        question: trimmed,
+        language: 'en',
+      });
+
+      const assistantMsg: AssistChatMessage = {
+        id: `a-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        role: 'assistant',
+        text: resp.answer,
+        source: resp.source,
+        timestamp: resp.generatedAt,
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setFollowUps(resp.suggestedFollowUps);
+    } finally {
+      isSendingRef.current = false;
+      setIsSending(false);
+    }
   };
+
+  const submitQuestionRef = useRef(submitQuestion);
+  submitQuestionRef.current = submitQuestion;
+
+  useEffect(() => {
+    const handleAskAiEvent = (evt: Event) => {
+      const customEvt = evt as CustomEvent<NisarAskAiEventDetail>;
+      const detail = customEvt.detail;
+      if (!detail?.question) return;
+
+      setIsOpen(true);
+
+      let h5Stats: string | undefined = detail.h5Summary?.trim() || undefined;
+      if (!h5Stats && detail.h5Context) {
+        const ctx = detail.h5Context;
+        const sizeGb = (ctx.fileSizeMB / 1000).toFixed(2);
+        const parts = [
+          `.h5 File: ${ctx.fileName}`,
+          `Size: ${ctx.fileSizeMB.toLocaleString('en-US')} MB (${sizeGb} GB)`,
+          ctx.regionName ? `Place: ${ctx.regionName}` : null,
+          typeof ctx.hhGamma0MeanDb === 'number'
+            ? `hhGamma0MeanDb: ${ctx.hhGamma0MeanDb.toFixed(1)} dB`
+            : null,
+          typeof ctx.hhFloodMinDb === 'number'
+            ? `hhFloodMinDb: ${ctx.hhFloodMinDb.toFixed(1)} dB`
+            : null,
+          typeof ctx.hvGamma0MeanDb === 'number'
+            ? `hvGamma0MeanDb: ${ctx.hvGamma0MeanDb.toFixed(1)} dB`
+            : null,
+          typeof ctx.soilMoistureIndex === 'number'
+            ? `soilMoistureIndex: ${ctx.soilMoistureIndex.toFixed(2)} (${Math.round(ctx.soilMoistureIndex * 100)}%)`
+            : null,
+          typeof ctx.losDisplacementCm === 'number'
+            ? `losDisplacementCm: ${ctx.losDisplacementCm.toFixed(1)} cm`
+            : null,
+          typeof ctx.coherenceMean === 'number'
+            ? `coherenceMean: ${ctx.coherenceMean.toFixed(2)} (${Math.round(ctx.coherenceMean * 100)}%)`
+            : null,
+          ctx.headerDigest ? `SHA-256: ${ctx.headerDigest}` : null,
+        ].filter(Boolean);
+        h5Stats = parts.join(', ');
+      }
+
+      void submitQuestionRef.current(detail.question, h5Stats);
+    };
+
+    window.addEventListener('nisar-ask-ai', handleAskAiEvent);
+    return () => window.removeEventListener('nisar-ask-ai', handleAskAiEvent);
+  }, []);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();

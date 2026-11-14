@@ -1,7 +1,10 @@
 import {
   REGION_DATASETS,
   SMIAN_P5_VERIFIED_RECORDS,
+  type LiveDiskSlice,
 } from '../data/samples/asfVertexSamples.ts';
+
+export type { LiveDiskSlice };
 import type {
   AsfGranuleMetadata,
   AsfGranulesApiResponse,
@@ -58,6 +61,8 @@ export interface LiveLaptopGranuleRecord {
   soilMoistureIndex?: number;
   losDisplacementCm?: number;
   coherenceMean?: number;
+  plainEnglishSummary?: string;
+  liveDiskSlices?: LiveDiskSlice[];
 }
 
 export interface LiveLaptopH5DbResponse {
@@ -220,6 +225,26 @@ function parseLiveLaptopPayload(
           typeof g.coherenceMean === 'number'
             ? g.coherenceMean
             : verifiedMatch?.coherenceMean,
+        plainEnglishSummary:
+          typeof g.plainEnglishSummary === 'string' &&
+          g.plainEnglishSummary.trim().length > 0
+            ? g.plainEnglishSummary.trim()
+            : verifiedMatch?.plainEnglishSummary,
+        liveDiskSlices:
+          Array.isArray(g.liveDiskSlices) && g.liveDiskSlices.length > 0
+            ? g.liveDiskSlices
+                .filter(
+                  (slice): slice is LiveDiskSlice =>
+                    Boolean(slice) &&
+                    typeof slice === 'object' &&
+                    typeof slice.chunkSha256 === 'string'
+                )
+                .map((slice) => ({
+                  offsetMB: Number(slice.offsetMB ?? 0),
+                  nonZeroByteRatio: Number(slice.nonZeroByteRatio ?? 0),
+                  chunkSha256: String(slice.chunkSha256),
+                }))
+            : verifiedMatch?.liveDiskSlices,
       };
     });
 

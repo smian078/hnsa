@@ -30,6 +30,7 @@ REGION_MAP = {
         "hhFloodMinDb": -21.4,
         "hvGamma0MeanDb": -12.1,
         "soilMoistureIndex": 0.78,
+        "plainEnglishSummary": "Calm dam floodwater acts like a mirror (-21.4 dB), crops bounce off leaves (-12.1 dB), and topsoil is 78% soaked.",
     },
     "098": {
         "regionId": "northeast_india",
@@ -39,6 +40,7 @@ REGION_MAP = {
         "hhFloodMinDb": -23.0,
         "hvGamma0MeanDb": -11.4,
         "soilMoistureIndex": 0.89,
+        "plainEnglishSummary": "Monsoon floodwater acts like a flat mirror (-23.0 dB) beneath clouds, wetlands bounce at -11.4 dB, and soil is 89% saturated.",
     },
     "009": {
         "regionId": "japan",
@@ -49,7 +51,14 @@ REGION_MAP = {
         "hvGamma0MeanDb": -14.9,
         "losDisplacementCm": -18.6,
         "coherenceMean": 0.81,
+        "plainEnglishSummary": "Measured ground sinking 18.6 cm like a space ruler (81% confidence), with smooth coastal water at -18.2 dB.",
     },
+}
+
+HDF5_PATH_DESCRIPTIONS = {
+    "/science/LSAR/GCOV/grids/frequencyA/HHHH": "Water & Surface Roughness Grid",
+    "/science/LSAR/GCOV/grids/frequencyA/HVHV": "Crop & Tree Volume Grid",
+    "/science/LSAR/identification/boundingPolygon": "GPS Map Outline",
 }
 
 
@@ -68,13 +77,11 @@ def inspect_h5_file(filepath: Path) -> dict:
     return {
         "fileName": filepath.name,
         "fileSizeMB": round(size_bytes / (1024 * 1024), 2),
+        "fileSizeGB": round(size_bytes / (1000 * 1000 * 1000), 2),
         "hdf5MagicVerified": is_valid_hdf5,
         "headerDigest": header_sha256,
-        "hdf5InternalPaths": [
-            "/science/LSAR/GCOV/grids/frequencyA/HHHH",
-            "/science/LSAR/GCOV/grids/frequencyA/HVHV",
-            "/science/LSAR/identification/boundingPolygon",
-        ],
+        "hdf5InternalPaths": list(HDF5_PATH_DESCRIPTIONS.keys()),
+        "hdf5PathDescriptions": HDF5_PATH_DESCRIPTIONS,
         "parsedGranule": meta,
         **region_info,
     }

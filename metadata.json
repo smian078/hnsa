@@ -1,0 +1,6 @@
+{
+  "name": "NISAR Pulse",
+  "description": "Cloud-Piercing L-Band GCOV & GUNW Radar Intelligence for Floods, Farms, and Faults",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

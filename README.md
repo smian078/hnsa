@@ -1,5 +1,3 @@
-Live Cloud Run Deployment: https://ais-dev-swclensx37jgkkqkwuncx6-367292566887.asia-southeast1.run.app
-
 # 1. Project Title & Problem Statement
 
 **Radar Rhythm: Cloud-Piercing Satellite Radar Maps for Floods, Farms, and Faults**

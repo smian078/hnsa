@@ -13,7 +13,10 @@ import {
   RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
-import { NISAR_HDF5_MANIFEST } from '../data/samples/asfVertexSamples.ts';
+import {
+  NISAR_HDF5_MANIFEST,
+  SMIAN_P5_VERIFIED_RECORDS,
+} from '../data/samples/asfVertexSamples.ts';
 import {
   getLaptopDbUrl,
   LAPTOP_DB_EVENT_NAME,
@@ -40,105 +43,8 @@ interface GranuleInspectorProps {
   demoMode: boolean;
 }
 
-const FALLBACK_SMIAN_P5_RECORDS: LiveLaptopGranuleRecord[] = [
-  {
-    fileName:
-      'NISAR_L2_PR_GCOV_035_009_A_024_4005_DHDH_A_20261105T193406_20261105T193442_P05036_N_F_J_001.h5',
-    fileSizeMB: 5132.0,
-    hdf5MagicVerified: true,
-    headerDigest: '0090bc4d60a3e529',
-    hdf5InternalPaths: [
-      '/science/LSAR/GCOV/grids/frequencyA/HHHH',
-      '/science/LSAR/GCOV/grids/frequencyA/HVHV',
-    ],
-    parsedGranule: {
-      level: 'L2',
-      mode: 'PR',
-      product: 'GCOV',
-      cycle: '035',
-      rel_orbit: '009',
-      direction: 'A',
-      frame: '024',
-      bandwidth: '4005',
-      polar: 'DHDH',
-      start: '20261105T193406',
-      end: '20261105T193442',
-      crid: 'P05036',
-    },
-    regionId: 'japan',
-    regionName: 'Japan (Noto Peninsula)',
-    bbox: [136.5, 36.9, 137.6, 37.65],
-    hhGamma0MeanDb: -11.6,
-    hhFloodMinDb: -18.2,
-    hvGamma0MeanDb: -14.9,
-    losDisplacementCm: -18.6,
-    coherenceMean: 0.81,
-  },
-  {
-    fileName:
-      'NISAR_L2_PR_GCOV_035_084_A_013_4005_DHDH_A_20261111T001915_20261111T001949_P05036_N_F_J_001.h5',
-    fileSizeMB: 6388.0,
-    hdf5MagicVerified: true,
-    headerDigest: 'f6066c14dd4b68bb',
-    hdf5InternalPaths: [
-      '/science/LSAR/GCOV/grids/frequencyA/HHHH',
-      '/science/LSAR/GCOV/grids/frequencyA/HVHV',
-    ],
-    parsedGranule: {
-      level: 'L2',
-      mode: 'PR',
-      product: 'GCOV',
-      cycle: '035',
-      rel_orbit: '084',
-      direction: 'A',
-      frame: '013',
-      bandwidth: '4005',
-      polar: 'DHDH',
-      start: '20261111T001915',
-      end: '20261111T001949',
-      crid: 'P05036',
-    },
-    regionId: 'maharashtra',
-    regionName: 'Maharashtra (Wainganga & Wardha)',
-    bbox: [78.8, 19.9, 80.5, 21.6],
-    hhGamma0MeanDb: -14.2,
-    hhFloodMinDb: -21.4,
-    hvGamma0MeanDb: -12.1,
-    soilMoistureIndex: 0.78,
-  },
-  {
-    fileName:
-      'NISAR_L2_PR_GCOV_035_098_A_013_4005_DHDH_A_20261111T233738_20261111T233812_P05036_N_F_J_001.h5',
-    fileSizeMB: 6516.0,
-    hdf5MagicVerified: true,
-    headerDigest: '0ef3bd2a7b09daa8',
-    hdf5InternalPaths: [
-      '/science/LSAR/GCOV/grids/frequencyA/HHHH',
-      '/science/LSAR/GCOV/grids/frequencyA/HVHV',
-    ],
-    parsedGranule: {
-      level: 'L2',
-      mode: 'PR',
-      product: 'GCOV',
-      cycle: '035',
-      rel_orbit: '098',
-      direction: 'A',
-      frame: '013',
-      bandwidth: '4005',
-      polar: 'DHDH',
-      start: '20261111T233738',
-      end: '20261111T233812',
-      crid: 'P05036',
-    },
-    regionId: 'northeast_india',
-    regionName: 'Northeast India (Brahmaputra)',
-    bbox: [92.6, 26.2, 94.3, 27.1],
-    hhGamma0MeanDb: -15.9,
-    hhFloodMinDb: -22.8,
-    hvGamma0MeanDb: -11.4,
-    soilMoistureIndex: 0.89,
-  },
-];
+const FALLBACK_SMIAN_P5_RECORDS: LiveLaptopGranuleRecord[] =
+  SMIAN_P5_VERIFIED_RECORDS;
 
 export function GranuleInspector({
   region,
@@ -327,6 +233,31 @@ export function GranuleInspector({
                     {rec.parsedGranule?.rel_orbit ?? '---'}/
                     {rec.parsedGranule?.frame ?? '---'}
                   </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[var(--rr-border)] pt-1.5 font-mono text-[10px] text-[var(--rr-text)] tabular-nums">
+                  {typeof rec.hhGamma0MeanDb === 'number' && (
+                    <span>HH Mean: {rec.hhGamma0MeanDb.toFixed(1)} dB</span>
+                  )}
+                  {typeof rec.hhFloodMinDb === 'number' && (
+                    <span className="text-[var(--rr-accent)]">
+                      HH Flood Min: {rec.hhFloodMinDb.toFixed(1)} dB
+                    </span>
+                  )}
+                  {typeof rec.hvGamma0MeanDb === 'number' && (
+                    <span>HV Mean: {rec.hvGamma0MeanDb.toFixed(1)} dB</span>
+                  )}
+                  {typeof rec.soilMoistureIndex === 'number' && (
+                    <span>Soil Moisture: {rec.soilMoistureIndex.toFixed(2)}</span>
+                  )}
+                  {typeof rec.losDisplacementCm === 'number' && (
+                    <span className="text-[#F97316]">
+                      LOS Shift: {rec.losDisplacementCm.toFixed(1)} cm
+                    </span>
+                  )}
+                  {typeof rec.coherenceMean === 'number' && (
+                    <span>Coherence γ: {rec.coherenceMean.toFixed(2)}</span>
+                  )}
                 </div>
               </div>
             );

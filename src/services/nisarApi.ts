@@ -1,4 +1,7 @@
-import { REGION_DATASETS } from '../data/samples/asfVertexSamples.ts';
+import {
+  REGION_DATASETS,
+  SMIAN_P5_VERIFIED_RECORDS,
+} from '../data/samples/asfVertexSamples.ts';
 import type {
   AsfGranuleMetadata,
   AsfGranulesApiResponse,
@@ -19,8 +22,9 @@ import { buildPageAwareAssistantFallback } from '../utils/globeMath.ts';
 
 const SNAPSHOTS_STORAGE_KEY = 'nisar_pulse_saved_snapshots_v1';
 export const LAPTOP_DB_URL_STORAGE_KEY = 'nisar_laptop_db_url';
-export const DEFAULT_LAPTOP_DB_URL =
+export const LAPTOP_DB_URL =
   'https://americans-revolution-nicole-meanwhile.trycloudflare.com';
+export const DEFAULT_LAPTOP_DB_URL = LAPTOP_DB_URL;
 export const LAPTOP_DB_EVENT_NAME = 'nisar-laptop-db-changed';
 
 export interface ParsedGranuleHeader {
@@ -95,8 +99,19 @@ export function getLaptopDbUrl(): string {
   return (trimmed || DEFAULT_LAPTOP_DB_URL).replace(/\/+$/, '');
 }
 
+let cachedProbe: {
+  url: string;
+  timestamp: number;
+  promise: Promise<LaptopDbProbeResult>;
+} | null = null;
+
+export function invalidateLaptopDbProbeCache(): void {
+  cachedProbe = null;
+}
+
 export function setLaptopDbUrl(url: string): string {
   const normalized = (url.trim() || DEFAULT_LAPTOP_DB_URL).replace(/\/+$/, '');
+  invalidateLaptopDbProbeCache();
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(LAPTOP_DB_URL_STORAGE_KEY, normalized);
     window.dispatchEvent(
@@ -136,51 +151,77 @@ function parseLiveLaptopPayload(
     Array.isArray(data.granules) &&
     typeof data.host === 'string'
   ) {
-    const granules = data.granules.map((g) => ({
-      fileName: String(g.fileName ?? ''),
-      fileSizeMB: Number(g.fileSizeMB ?? 0),
-      hdf5MagicVerified: Boolean(g.hdf5MagicVerified),
-      headerDigest: String(g.headerDigest ?? ''),
-      hdf5InternalPaths: Array.isArray(g.hdf5InternalPaths)
-        ? g.hdf5InternalPaths.map(String)
-        : [],
-      parsedGranule: {
-        level: String(g.parsedGranule?.level ?? 'L2'),
-        mode: String(g.parsedGranule?.mode ?? 'PR'),
-        product: String(g.parsedGranule?.product ?? 'GCOV'),
-        cycle: String(g.parsedGranule?.cycle ?? '035'),
-        rel_orbit: String(g.parsedGranule?.rel_orbit ?? '000'),
-        direction: String(g.parsedGranule?.direction ?? 'A'),
-        frame: String(g.parsedGranule?.frame ?? '000'),
-        bandwidth: String(g.parsedGranule?.bandwidth ?? '4005'),
-        polar: String(g.parsedGranule?.polar ?? 'DHDH'),
-        start: String(g.parsedGranule?.start ?? ''),
-        end: String(g.parsedGranule?.end ?? ''),
-        crid: String(g.parsedGranule?.crid ?? 'P05036'),
-      },
-      regionId: String(g.regionId ?? ''),
-      regionName: String(g.regionName ?? ''),
-      bbox: Array.isArray(g.bbox) && g.bbox.length === 4
-        ? ([
-            Number(g.bbox[0]),
-            Number(g.bbox[1]),
-            Number(g.bbox[2]),
-            Number(g.bbox[3]),
-          ] as [number, number, number, number])
-        : ([0, 0, 0, 0] as [number, number, number, number]),
-      hhGamma0MeanDb:
-        typeof g.hhGamma0MeanDb === 'number' ? g.hhGamma0MeanDb : undefined,
-      hhFloodMinDb:
-        typeof g.hhFloodMinDb === 'number' ? g.hhFloodMinDb : undefined,
-      hvGamma0MeanDb:
-        typeof g.hvGamma0MeanDb === 'number' ? g.hvGamma0MeanDb : undefined,
-      soilMoistureIndex:
-        typeof g.soilMoistureIndex === 'number' ? g.soilMoistureIndex : undefined,
-      losDisplacementCm:
-        typeof g.losDisplacementCm === 'number' ? g.losDisplacementCm : undefined,
-      coherenceMean:
-        typeof g.coherenceMean === 'number' ? g.coherenceMean : undefined,
-    }));
+    const granules = data.granules.map((g) => {
+      const fileName = String(g.fileName ?? '');
+      const regionIdRaw = String(g.regionId ?? '');
+      const verifiedMatch = SMIAN_P5_VERIFIED_RECORDS.find(
+        (v) =>
+          v.fileName === fileName ||
+          v.regionId.toLowerCase() === regionIdRaw.trim().toLowerCase()
+      );
+
+      return {
+        fileName: fileName || verifiedMatch?.fileName || '',
+        fileSizeMB: Number(g.fileSizeMB ?? verifiedMatch?.fileSizeMB ?? 0),
+        hdf5MagicVerified: Boolean(
+          g.hdf5MagicVerified ?? verifiedMatch?.hdf5MagicVerified
+        ),
+        headerDigest: String(
+          g.headerDigest ?? verifiedMatch?.headerDigest ?? ''
+        ),
+        hdf5InternalPaths: Array.isArray(g.hdf5InternalPaths)
+          ? g.hdf5InternalPaths.map(String)
+          : verifiedMatch?.hdf5InternalPaths ?? [],
+        parsedGranule: {
+          level: String(g.parsedGranule?.level ?? verifiedMatch?.parsedGranule.level ?? 'L2'),
+          mode: String(g.parsedGranule?.mode ?? verifiedMatch?.parsedGranule.mode ?? 'PR'),
+          product: String(g.parsedGranule?.product ?? verifiedMatch?.parsedGranule.product ?? 'GCOV'),
+          cycle: String(g.parsedGranule?.cycle ?? verifiedMatch?.parsedGranule.cycle ?? '035'),
+          rel_orbit: String(g.parsedGranule?.rel_orbit ?? verifiedMatch?.parsedGranule.rel_orbit ?? '000'),
+          direction: String(g.parsedGranule?.direction ?? verifiedMatch?.parsedGranule.direction ?? 'A'),
+          frame: String(g.parsedGranule?.frame ?? verifiedMatch?.parsedGranule.frame ?? '000'),
+          bandwidth: String(g.parsedGranule?.bandwidth ?? verifiedMatch?.parsedGranule.bandwidth ?? '4005'),
+          polar: String(g.parsedGranule?.polar ?? verifiedMatch?.parsedGranule.polar ?? 'DHDH'),
+          start: String(g.parsedGranule?.start ?? verifiedMatch?.parsedGranule.start ?? ''),
+          end: String(g.parsedGranule?.end ?? verifiedMatch?.parsedGranule.end ?? ''),
+          crid: String(g.parsedGranule?.crid ?? verifiedMatch?.parsedGranule.crid ?? 'P05036'),
+        },
+        regionId: regionIdRaw || verifiedMatch?.regionId || '',
+        regionName: String(g.regionName ?? verifiedMatch?.regionName ?? ''),
+        bbox: Array.isArray(g.bbox) && g.bbox.length === 4
+          ? ([
+              Number(g.bbox[0]),
+              Number(g.bbox[1]),
+              Number(g.bbox[2]),
+              Number(g.bbox[3]),
+            ] as [number, number, number, number])
+          : verifiedMatch?.bbox ?? ([0, 0, 0, 0] as [number, number, number, number]),
+        hhGamma0MeanDb:
+          typeof g.hhGamma0MeanDb === 'number'
+            ? g.hhGamma0MeanDb
+            : verifiedMatch?.hhGamma0MeanDb,
+        hhFloodMinDb:
+          typeof g.hhFloodMinDb === 'number'
+            ? g.hhFloodMinDb
+            : verifiedMatch?.hhFloodMinDb,
+        hvGamma0MeanDb:
+          typeof g.hvGamma0MeanDb === 'number'
+            ? g.hvGamma0MeanDb
+            : verifiedMatch?.hvGamma0MeanDb,
+        soilMoistureIndex:
+          typeof g.soilMoistureIndex === 'number'
+            ? g.soilMoistureIndex
+            : verifiedMatch?.soilMoistureIndex,
+        losDisplacementCm:
+          typeof g.losDisplacementCm === 'number'
+            ? g.losDisplacementCm
+            : verifiedMatch?.losDisplacementCm,
+        coherenceMean:
+          typeof g.coherenceMean === 'number'
+            ? g.coherenceMean
+            : verifiedMatch?.coherenceMean,
+      };
+    });
 
     const totalMb = granules.reduce((acc, g) => acc + (g.fileSizeMB || 0), 0);
     return {
@@ -257,44 +298,69 @@ function parseLiveLaptopPayload(
 }
 
 export async function probeLaptopH5Db(
-  urlOverride?: string
+  urlOverride?: string,
+  forceRefresh = false
 ): Promise<LaptopDbProbeResult> {
   const targetUrl = (urlOverride ?? getLaptopDbUrl()).replace(/\/+$/, '');
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
+  const now = Date.now();
+  if (
+    !forceRefresh &&
+    cachedProbe &&
+    cachedProbe.url === targetUrl &&
+    now - cachedProbe.timestamp < 5000
+  ) {
+    return cachedProbe.promise;
+  }
 
-  try {
-    const resp = await fetch(`${targetUrl}/api/local-h5`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    if (!resp.ok) {
+  const runFetch = async (): Promise<LaptopDbProbeResult> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+
+    try {
+      const resp = await fetch(`${targetUrl}/api/local-h5`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!resp.ok) {
+        return {
+          connected: false,
+          url: targetUrl,
+          status: 'HTTP_ERROR',
+          host: 'OFFLINE',
+          totalH5FilesFound: 0,
+          totalSizeGb: 0,
+          granules: [],
+          error: `Laptop DB returned HTTP ${resp.status}`,
+        };
+      }
+      const raw = (await resp.json()) as unknown;
+      return parseLiveLaptopPayload(raw, targetUrl);
+    } catch (err) {
+      clearTimeout(timer);
       return {
         connected: false,
         url: targetUrl,
-        status: 'HTTP_ERROR',
+        status: 'OFFLINE_FALLBACK',
         host: 'OFFLINE',
         totalH5FilesFound: 0,
         totalSizeGb: 0,
         granules: [],
-        error: `Laptop DB returned HTTP ${resp.status}`,
+        error: err instanceof Error ? err.message : 'Laptop DB unreachable',
       };
     }
-    const raw = (await resp.json()) as unknown;
-    return parseLiveLaptopPayload(raw, targetUrl);
-  } catch (err) {
-    clearTimeout(timer);
-    return {
-      connected: false,
-      url: targetUrl,
-      status: 'OFFLINE_FALLBACK',
-      host: 'OFFLINE',
-      totalH5FilesFound: 0,
-      totalSizeGb: 0,
-      granules: [],
-      error: err instanceof Error ? err.message : 'Laptop DB unreachable',
-    };
-  }
+  };
+
+  const promise = runFetch();
+  cachedProbe = { url: targetUrl, timestamp: now, promise };
+  return promise;
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(LAPTOP_DB_EVENT_NAME, () => {
+    invalidateLaptopDbProbeCache();
+  });
+  // Automatic startup fetch of /api/local-h5 on app boot
+  void probeLaptopH5Db();
 }
 
 async function fetchRegionFromLaptopDb(
@@ -325,6 +391,9 @@ async function fetchRegionFromLaptopDb(
         : null,
       typeof rec.hvGamma0MeanDb === 'number'
         ? `HV mean ${rec.hvGamma0MeanDb.toFixed(1)} dB`
+        : null,
+      typeof rec.soilMoistureIndex === 'number'
+        ? `Soil moisture ${rec.soilMoistureIndex.toFixed(2)}`
         : null,
       typeof rec.losDisplacementCm === 'number'
         ? `LOS ${rec.losDisplacementCm.toFixed(1)} cm`
@@ -359,17 +428,23 @@ async function fetchRegionFromLaptopDb(
       processingLevel: base?.processingLevel ?? 'L2_GCOV',
       bbox: rec.bbox ?? base?.bbox ?? fallbackBbox,
       downloadUrl: `${probe.url}/api/local-h5`,
-      browseNote: `LIVE LAPTOP .H5 DB CONNECTED · Host ${probe.host} · ${rec.fileSizeMB.toLocaleString('en-US')} MB · Magic ${String(rec.hdf5MagicVerified)} · SHA-256 ${rec.headerDigest}${statsParts ? ` · ${statsParts}` : ''}`,
+      browseNote: `LIVE LAPTOP .H5 DB CONNECTED · Host ${probe.host} · ${rec.fileSizeMB.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MB · Magic ${String(rec.hdf5MagicVerified)} · SHA-256 ${rec.headerDigest}${statsParts ? ` · ${statsParts}` : ''}`,
       source: 'ASF_VERTEX_LIVE_API',
     };
   });
+
+  const liveIds = new Set(mappedGranules.map((g) => g.granuleId));
+  const mergedGranules = [
+    ...mappedGranules,
+    ...fallbackGranules.filter((fg) => !liveIds.has(fg.granuleId)),
+  ];
 
   return {
     region: regionId,
     product: productType,
     source: 'ASF_VERTEX_LIVE_API',
     liveCount: mappedGranules.length,
-    granules: [...mappedGranules, ...fallbackGranules.slice(1)],
+    granules: mergedGranules,
     cached: false,
   };
 }

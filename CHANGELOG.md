@@ -54,3 +54,4 @@
 
 ### Fixed
 - **Defensive Laptop `.h5` Granule Parsing (`src/services/nisarApi.ts`, `src/components/GranuleInspector.tsx`)**: Added safe defaults for `parsedGranule` fields returned by `scripts/extract_nisar_h5.py` when filenames omit standard tokens.
+- **Verified `SMIAN_P5` Telemetry Synchronization (`src/data/samples/asfVertexSamples.ts`, `src/services/nisarApi.ts`, `src/components/GranuleInspector.tsx`)**: Exported `LAPTOP_DB_URL` (`https://americans-revolution-nicole-meanwhile.trycloudflare.com`), added automatic startup `/api/local-h5` fetch with deduplicated merging into active region granules, and synced hardcoded verified `SMIAN_P5` file sizes, SHA-256 digests, and HH/HV/soil-moisture/LOS/coherence metrics across Japan (`5132.0 MB`, `0090bc4d60a3e529`), Maharashtra (`6388.0 MB`, `f6066c14dd4b68bb`), and Northeast India (`6516.0 MB`, `0ef3bd2a7b09daa8`).

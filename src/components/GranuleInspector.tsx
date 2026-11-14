@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import {
   AlertTriangle,
+  Bot,
   CheckCircle2,
   Code2,
   Cpu,
@@ -12,7 +13,6 @@ import {
   Layers,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react';
 import {
   NISAR_HDF5_MANIFEST,
@@ -261,7 +261,7 @@ export function GranuleInspector({
           <button
             type="button"
             onClick={onRetryGranules}
-            className="inline-flex items-center gap-1 border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:text-white"
+            className="inline-flex items-center gap-1 border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:text-survey-basalt-text"
           >
             <RefreshCw className="h-3 w-3" aria-hidden="true" />
             <span>Retry</span>
@@ -288,7 +288,11 @@ export function GranuleInspector({
                 : 'border-[var(--rr-warn-border)] bg-[var(--rr-warn-bg)] text-[var(--rr-warn-text)]'
             }`}
           >
-            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+            {laptopProbe?.connected ? (
+              <CheckCircle2 className="h-3 w-3 shrink-0" aria-hidden="true" />
+            ) : (
+              <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
+            )}
             <span>
               {isLoadingHardware
                 ? 'CHECKING...'
@@ -335,7 +339,7 @@ export function GranuleInspector({
                       {rec.regionName}
                     </span>
                     {isActiveRegion && (
-                      <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 bg-[var(--rr-accent-solid)] text-white">
+                      <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 bg-survey-basalt text-survey-basalt-text">
                         Active
                       </span>
                     )}
@@ -370,7 +374,8 @@ export function GranuleInspector({
                     <span>HH Mean: {rec.hhGamma0MeanDb.toFixed(1)} dB</span>
                   )}
                   {typeof rec.hhFloodMinDb === 'number' && (
-                    <span className="text-[var(--rr-accent)]">
+                    <span className="inline-flex items-center gap-1.5 text-survey-ink font-semibold">
+                      <span className="h-2 w-2 bg-data-water inline-block" aria-hidden="true" />
                       HH Flood Min: {rec.hhFloodMinDb.toFixed(1)} dB
                     </span>
                   )}
@@ -381,7 +386,8 @@ export function GranuleInspector({
                     <span>Soil Moisture: {rec.soilMoistureIndex.toFixed(2)}</span>
                   )}
                   {typeof rec.losDisplacementCm === 'number' && (
-                    <span className="text-[#F97316]">
+                    <span className="inline-flex items-center gap-1.5 text-survey-ink font-semibold">
+                      <span className="h-2 w-2 bg-data-hh inline-block" aria-hidden="true" />
                       LOS Shift: {rec.losDisplacementCm.toFixed(1)} cm
                     </span>
                   )}
@@ -393,16 +399,16 @@ export function GranuleInspector({
                 {/* Highlighted Plain-English Summary & Translations */}
                 <div
                   data-testid={`h5-translator-${rec.regionId}`}
-                  className="border border-[var(--rr-accent)]/60 bg-[var(--rr-surface)] p-3 space-y-2 text-[11px]"
+                  className="border border-survey-border-strong bg-survey-surface p-3 space-y-2 text-[11px]"
                 >
-                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-accent)]">
+                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-ink">
                     In Simple Words (What This .h5 File Shows)
                   </div>
 
                   {rec.plainEnglishSummary && (
                     <p
                       data-testid={`h5-plain-summary-${rec.regionId}`}
-                      className="border-l-2 border-[var(--rr-accent)] bg-[var(--rr-bg)] px-2.5 py-2 text-xs font-medium leading-relaxed text-[var(--rr-text)]"
+                      className="border border-survey-border bg-survey-bg px-3 py-2 text-xs font-medium leading-relaxed text-survey-ink"
                     >
                       {rec.plainEnglishSummary}
                     </p>
@@ -422,13 +428,13 @@ export function GranuleInspector({
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2 text-[11px]">
                         <span className="font-bold text-[var(--rr-text)]">Soil Wetness</span>
-                        <span className="font-mono font-bold text-[var(--rr-accent)] tabular-nums">
+                        <span className="font-mono font-bold text-survey-ink tabular-nums">
                           {moisture.pct}%
                         </span>
                       </div>
-                      <div className="h-2 w-full border border-[var(--rr-border)] bg-[var(--rr-bg)] overflow-hidden">
+                      <div className="h-2 w-full border border-survey-border bg-survey-bg overflow-hidden">
                         <div
-                          className="h-full bg-[var(--rr-accent-solid)] transition-all"
+                          className="h-full bg-data-water transition-all"
                           style={{ width: `${moisture.pct}%` }}
                         />
                       </div>
@@ -437,8 +443,11 @@ export function GranuleInspector({
                   )}
 
                   {groundShiftText && (
-                    <p className="text-[var(--rr-muted)] leading-snug">
-                      <strong className="text-[#F97316]">Ground Shift (cm): </strong>
+                    <p className="text-survey-muted leading-snug">
+                      <strong className="inline-flex items-center gap-1.5 text-survey-ink">
+                        <span className="h-2 w-2 bg-data-hh inline-block" aria-hidden="true" />
+                        Ground Shift (cm):{' '}
+                      </strong>
                       {groundShiftText}
                     </p>
                   )}
@@ -502,10 +511,10 @@ export function GranuleInspector({
                   type="button"
                   data-testid={`ask-ai-h5-${rec.regionId}`}
                   onClick={() => askAiToExplainH5(rec)}
-                  className="w-full inline-flex items-center justify-center gap-2 border border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)]/12 px-3 py-2 text-xs font-bold text-[var(--rr-accent)] hover:bg-[var(--rr-accent-solid)] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                  className="w-full inline-flex items-center justify-center gap-2 border border-survey-basalt bg-survey-surface px-3 py-2 text-xs font-bold text-survey-ink hover:bg-survey-basalt hover:text-survey-basalt-text transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
                 >
-                  <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span>✨ Ask AI Guide to Explain This .h5 File</span>
+                  <Bot className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>Ask AI Guide to Explain This .h5 File</span>
                 </button>
               </div>
             );
@@ -554,7 +563,7 @@ export function GranuleInspector({
               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--rr-text)]">
                 Primary Radar File (.h5)
               </span>
-              <span className="font-mono text-[10px] font-bold px-2 py-0.5 border border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white">
+              <span className="font-mono text-[10px] font-bold px-2 py-0.5 border border-survey-basalt bg-survey-basalt text-survey-basalt-text">
                 Cycle {String(hdf5Manifest.cycle).padStart(3, '0')} · {hdf5Manifest.crid}
               </span>
             </div>
@@ -611,18 +620,21 @@ export function GranuleInspector({
                           {primaryMoisture.pct}%
                         </span>
                       </div>
-                      <div className="h-2 w-full border border-[var(--rr-border)] bg-[var(--rr-bg)] overflow-hidden">
+                      <div className="h-2 w-full border border-survey-border bg-survey-bg overflow-hidden">
                         <div
-                          className="h-full bg-[var(--rr-accent-solid)]"
+                          className="h-full bg-data-water"
                           style={{ width: `${primaryMoisture.pct}%` }}
                         />
                       </div>
-                      <p className="text-[var(--rr-muted)]">{primaryMoisture.label}</p>
+                      <p className="text-survey-muted">{primaryMoisture.label}</p>
                     </div>
                   )}
                   {primaryShift && (
-                    <p className="text-[var(--rr-muted)] leading-snug">
-                      <strong className="text-[#F97316]">Ground Shift: </strong>
+                    <p className="text-survey-muted leading-snug">
+                      <strong className="inline-flex items-center gap-1.5 text-survey-ink">
+                        <span className="h-2 w-2 bg-data-hh inline-block" aria-hidden="true" />
+                        Ground Shift:{' '}
+                      </strong>
                       {primaryShift}
                     </p>
                   )}
@@ -661,10 +673,10 @@ export function GranuleInspector({
                 type="button"
                 data-testid="ask-ai-primary-h5-btn"
                 onClick={() => askAiToExplainH5(activeHardwareRec)}
-                className="w-full inline-flex items-center justify-center gap-2 border border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] px-3 py-2 text-xs font-bold text-white hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="w-full inline-flex items-center justify-center gap-2 border border-survey-basalt bg-survey-basalt px-3 py-2 text-xs font-bold text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
               >
-                <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                <span>✨ Ask AI Guide to Explain This .h5 File</span>
+                <Bot className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>Ask AI Guide to Explain This .h5 File</span>
               </button>
             )}
           </div>
@@ -682,7 +694,7 @@ export function GranuleInspector({
               Load custom radar scene files right inside your browser.
             </p>
           </div>
-          <label className="inline-flex cursor-pointer items-center gap-1.5 border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-text-inverse)] hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white focus-within:ring-2 focus-within:ring-[var(--rr-accent)]">
+          <label className="inline-flex cursor-pointer items-center gap-1.5 border border-survey-border-strong bg-survey-basalt px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-basalt-text hover:opacity-90 focus-within:ring-2 focus-within:ring-survey-basalt">
             <FileUp className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Upload JSON</span>
             <input
@@ -792,7 +804,7 @@ export function GranuleInspector({
                 </div>
 
                 {isExpanded && (
-                  <pre className="mt-2 max-h-48 overflow-auto border border-[var(--rr-border)] bg-black p-2.5 font-mono text-[11px] text-[#FAFAFA]">
+                  <pre className="mt-2 max-h-48 overflow-auto border border-survey-border bg-[var(--rr-space-bg)] p-2.5 font-mono text-[11px] text-[var(--rr-space-text)]">
                     {JSON.stringify(g, null, 2)}
                   </pre>
                 )}

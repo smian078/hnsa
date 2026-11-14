@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type L from 'leaflet';
 import {
   MapContainer,
@@ -25,6 +25,7 @@ import {
   formatSigned,
   getPolygonVisualStyle,
 } from '../utils/sarPhysics.ts';
+import { getSurveyMapColors } from '../utils/surveyTheme.ts';
 
 interface CloudPiercerMapProps {
   region: RegionDataset;
@@ -168,13 +169,15 @@ export function CloudPiercerMap({
     [onChangeSplitPercent]
   );
 
+  const mapColors = useMemo(() => getSurveyMapColors(), [isDark]);
+
   const activePass =
     selectedZone?.passes[passIndex] ?? region.zones[0].passes[passIndex];
   const activeDelta = selectedZone
     ? computePassDelta(selectedZone, passIndex)
     : null;
   const activeStyle = activePass
-    ? getPolygonVisualStyle(activePass, layerMode, coherenceThreshold)
+    ? getPolygonVisualStyle(activePass, layerMode, coherenceThreshold, isDark)
     : null;
 
   const isGunw = region.productType === 'GUNW';
@@ -228,7 +231,7 @@ export function CloudPiercerMap({
                 aria-pressed={active}
                 className={`px-2.5 py-1.5 border font-mono text-[10px] font-bold tracking-[0.12em] whitespace-nowrap shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                   active
-                    ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white'
+                    ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-survey-basalt-text'
                     : 'border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-muted)] hover:border-[var(--rr-border-strong)] hover:text-[var(--rr-text)]'
                 }`}
               >
@@ -316,7 +319,8 @@ export function CloudPiercerMap({
             const style = getPolygonVisualStyle(
               pass,
               layerMode,
-              coherenceThreshold
+              coherenceThreshold,
+              isDark
             );
             const isSelected = selectedZone?.id === zone.id;
 
@@ -326,9 +330,7 @@ export function CloudPiercerMap({
                 positions={zone.coordinates}
                 pathOptions={{
                   color: isSelected
-                    ? isDark
-                      ? '#FFFFFF'
-                      : '#18181B'
+                    ? mapColors.selectedOutline
                     : style.strokeColor,
                   weight: isSelected ? 3.5 : 1.75,
                   fillColor: style.fillColor,
@@ -343,8 +345,8 @@ export function CloudPiercerMap({
               >
                 <Tooltip sticky>
                   <div className="text-xs font-sans">
-                    <div className="font-semibold text-[#18181B]">{zone.name}</div>
-                    <div className="font-mono text-[#52525B]">
+                    <div className="font-semibold text-survey-ink">{zone.name}</div>
+                    <div className="font-mono text-survey-muted">
                       {style.formattedValue} {style.unit} · {style.classificationLabel}
                     </div>
                   </div>
@@ -395,11 +397,13 @@ export function CloudPiercerMap({
                   key={`sat-outline-${region.id}-${zone.id}`}
                   positions={zone.coordinates}
                   pathOptions={{
-                    color: isSelected ? '#38BDF8' : '#FFFFFF',
+                    color: isSelected
+                      ? mapColors.satSelectedOutline
+                      : mapColors.satOutline,
                     weight: isSelected ? 2.5 : 1.25,
-                    opacity: isSelected ? 0.95 : 0.7,
-                    fillOpacity: 0.06,
-                    fillColor: '#38BDF8',
+                    opacity: isSelected ? 0.95 : 0.75,
+                    fillOpacity: 0.08,
+                    fillColor: mapColors.satSelectedFill,
                     dashArray: isSelected ? undefined : '4 4',
                   }}
                 />
@@ -410,15 +414,15 @@ export function CloudPiercerMap({
 
         {/* Pane Corner Badges */}
         {splitPercent > 8 && (
-          <div className="pointer-events-none absolute bottom-3 left-3 sm:bottom-auto sm:top-3 sm:left-14 z-[460] flex items-center gap-1.5 border border-[var(--rr-border-strong)] bg-black/85 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-            <Satellite className="h-3.5 w-3.5 text-[#38BDF8]" aria-hidden="true" />
+          <div className="pointer-events-none absolute bottom-3 left-3 sm:bottom-auto sm:top-3 sm:left-14 z-[460] flex items-center gap-1.5 rounded-md border border-survey-border-strong bg-survey-surface px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-ink">
+            <Satellite className="h-3.5 w-3.5 text-data-water" aria-hidden="true" />
             <span>2D Satellite View</span>
           </div>
         )}
 
         {splitPercent < 92 && (
-          <div className="pointer-events-none absolute top-3 right-3 z-[460] flex items-center gap-1.5 border border-[#38BDF8] bg-black/85 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-            <Radar className="h-3.5 w-3.5 text-[#38BDF8]" aria-hidden="true" />
+          <div className="pointer-events-none absolute top-3 right-3 z-[460] flex items-center gap-1.5 rounded-md border border-survey-border-strong bg-survey-surface px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-ink">
+            <Radar className="h-3.5 w-3.5 text-data-hh" aria-hidden="true" />
             <span>Radar View ({region.productType})</span>
           </div>
         )}
@@ -426,7 +430,7 @@ export function CloudPiercerMap({
         {/* Draggable Split Divider Handle (Shown in Split / partial states) */}
         {splitPercent > 0 && splitPercent < 100 && (
           <div
-            className="absolute top-0 bottom-0 z-[480] w-0.5 bg-[#38BDF8]"
+            className="absolute top-0 bottom-0 z-[480] w-0.5 bg-survey-basalt"
             style={{ left: `${splitPercent}%` }}
           >
             <button
@@ -458,7 +462,7 @@ export function CloudPiercerMap({
                 }
               }}
               aria-label={`Satellite and Radar split handle at ${splitPercent}%. Drag or use Left and Right arrow keys.`}
-              className="touch-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-11 w-7 cursor-ew-resize items-center justify-center border-2 border-[#38BDF8] bg-black text-white shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+              className="touch-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-11 w-7 cursor-ew-resize items-center justify-center rounded-md border-2 border-survey-border-strong bg-survey-basalt text-survey-basalt-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
               <GripVertical className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -526,36 +530,32 @@ export function CloudPiercerMap({
             </div>
           )}
 
-          {/* Map Color Key */}
-          <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--rr-muted)] font-mono">
+          {/* Map Color Key (Synchronized with Survey Sheet Data Colors) */}
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-survey-muted font-mono">
             {layerMode === 'GCOV_HH' && (
               <>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#00F0FF]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
                   <span>Flood (&le; -18 dB)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#C04CFD]" />
-                  <span>Wet Soil</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#E8559D]" />
-                  <span>Dry Ground</span>
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
+                  <span>Wet / Rough Ground (&gt; -18 dB)</span>
                 </span>
               </>
             )}
             {layerMode === 'GCOV_HV' && (
               <>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#D4F844]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hv" />
                   <span>Thick Crops (&ge; -12.5 dB)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#C04CFD]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
                   <span>Light Cover</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#00F0FF]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
                   <span>Open Water</span>
                 </span>
               </>
@@ -563,23 +563,35 @@ export function CloudPiercerMap({
             {layerMode === 'GCOV_RATIO' && (
               <>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#00F0FF]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
                   <span>Water Under Plants</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#D4F844]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hv" />
                   <span>Healthy Canopy</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
+                  <span>Surface Ground</span>
                 </span>
               </>
             )}
             {layerMode === 'GUNW_LOS' && (
               <>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#EF4444]" />
-                  <span>Sinking (&le; -10 cm)</span>
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-status-error" />
+                  <span>Major Sink (&le; -10 cm)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#00F0FF]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
+                  <span>Mod. Sink (-2 to -10 cm)</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-survey-bg" />
+                  <span>No Change</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
                   <span>Rising (&ge; +2 cm)</span>
                 </span>
               </>
@@ -587,11 +599,15 @@ export function CloudPiercerMap({
             {layerMode === 'GUNW_COHERENCE' && (
               <>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#D4F844]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hv" />
                   <span>High Trust (&ge; 0.70)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 border border-[var(--rr-border-strong)] bg-[#F59E0B]" />
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
+                  <span>Moderate (0.40–0.69)</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 border border-survey-border-strong bg-status-warning" />
                   <span>Noisy (&lt; 0.40)</span>
                 </span>
               </>

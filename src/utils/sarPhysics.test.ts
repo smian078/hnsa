@@ -75,9 +75,12 @@ test('phaseToLosDisplacementCm converts L-band 2pi fringe to 12 cm LOS', () => {
 
 test('getPolygonVisualStyle classifies specular flood and respects coherence threshold', () => {
   const floodStyle = getPolygonVisualStyle(mockZone.passes[1], 'GCOV_HH', 0.35);
-  assert.equal(floodStyle.fillColor, '#00F0FF');
+  assert.equal(floodStyle.fillColor, '#1D6FA3');
   assert.equal(floodStyle.unit, 'dB');
   assert.equal(floodStyle.dimmed, false);
+
+  const darkFloodStyle = getPolygonVisualStyle(mockZone.passes[1], 'GCOV_HH', 0.35, true);
+  assert.equal(darkFloodStyle.fillColor, '#5AA9D6');
 
   const gunwPass: OrbitalPassTelemetry = {
     ...mockZone.passes[1],

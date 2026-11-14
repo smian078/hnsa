@@ -52,14 +52,23 @@ export function phaseToLosDisplacementCm(
 export function getPolygonVisualStyle(
   pass: OrbitalPassTelemetry,
   layerMode: LayerMode,
-  coherenceThreshold: number
+  coherenceThreshold: number,
+  isDark = false
 ): PolygonVisualStyle {
+  const hhColor = isDark ? '#E0803F' : '#B8531F';
+  const hvColor = isDark ? '#6FBF8E' : '#2F6B4F';
+  const waterColor = isDark ? '#5AA9D6' : '#1D6FA3';
+  const neutralColor = isDark ? '#36424A' : '#E8EBE6';
+  const mutedStroke = isDark ? '#A3AFA7' : '#55625B';
+  const warnColor = '#B7791F';
+  const errColor = '#B3382C';
+
   if (layerMode === 'GCOV_HH') {
     const val = pass.hhGamma0Db;
     if (val <= -18.0) {
       return {
-        fillColor: '#00F0FF',
-        strokeColor: '#00F0FF',
+        fillColor: waterColor,
+        strokeColor: waterColor,
         fillOpacity: 0.52,
         formattedValue: val.toFixed(1),
         unit: 'dB',
@@ -69,8 +78,8 @@ export function getPolygonVisualStyle(
     }
     if (val <= -13.0) {
       return {
-        fillColor: '#C04CFD',
-        strokeColor: '#C04CFD',
+        fillColor: hhColor,
+        strokeColor: hhColor,
         fillOpacity: 0.44,
         formattedValue: val.toFixed(1),
         unit: 'dB',
@@ -79,8 +88,8 @@ export function getPolygonVisualStyle(
       };
     }
     return {
-      fillColor: '#E8559D',
-      strokeColor: '#E8559D',
+      fillColor: hhColor,
+      strokeColor: hhColor,
       fillOpacity: 0.42,
       formattedValue: val.toFixed(1),
       unit: 'dB',
@@ -93,8 +102,8 @@ export function getPolygonVisualStyle(
     const val = pass.hvGamma0Db;
     if (val >= -12.5) {
       return {
-        fillColor: '#D4F844',
-        strokeColor: '#D4F844',
+        fillColor: hvColor,
+        strokeColor: hvColor,
         fillOpacity: 0.48,
         formattedValue: val.toFixed(1),
         unit: 'dB',
@@ -104,8 +113,8 @@ export function getPolygonVisualStyle(
     }
     if (val >= -16.0) {
       return {
-        fillColor: '#C04CFD',
-        strokeColor: '#C04CFD',
+        fillColor: hhColor,
+        strokeColor: hhColor,
         fillOpacity: 0.42,
         formattedValue: val.toFixed(1),
         unit: 'dB',
@@ -114,8 +123,8 @@ export function getPolygonVisualStyle(
       };
     }
     return {
-      fillColor: '#00F0FF',
-      strokeColor: '#00F0FF',
+      fillColor: waterColor,
+      strokeColor: waterColor,
       fillOpacity: 0.44,
       formattedValue: val.toFixed(1),
       unit: 'dB',
@@ -128,8 +137,8 @@ export function getPolygonVisualStyle(
     const val = pass.hvHhRatioDb;
     if (val >= 5.0) {
       return {
-        fillColor: '#00F0FF',
-        strokeColor: '#00F0FF',
+        fillColor: waterColor,
+        strokeColor: waterColor,
         fillOpacity: 0.5,
         formattedValue: `+${val.toFixed(1)}`,
         unit: 'dB',
@@ -139,8 +148,8 @@ export function getPolygonVisualStyle(
     }
     if (val >= -3.0) {
       return {
-        fillColor: '#D4F844',
-        strokeColor: '#D4F844',
+        fillColor: hvColor,
+        strokeColor: hvColor,
         fillOpacity: 0.44,
         formattedValue: val >= 0 ? `+${val.toFixed(1)}` : val.toFixed(1),
         unit: 'dB',
@@ -149,8 +158,8 @@ export function getPolygonVisualStyle(
       };
     }
     return {
-      fillColor: '#C04CFD',
-      strokeColor: '#C04CFD',
+      fillColor: hhColor,
+      strokeColor: hhColor,
       fillOpacity: 0.4,
       formattedValue: val.toFixed(1),
       unit: 'dB',
@@ -164,23 +173,27 @@ export function getPolygonVisualStyle(
     const coh = pass.coherence ?? 1;
     const dimmed = coh < coherenceThreshold;
 
-    let fillColor = '#C04CFD';
+    let fillColor = neutralColor;
+    let strokeColor = mutedStroke;
     let classificationLabel = 'Stable Crustal Block';
 
     if (los <= -10.0) {
-      fillColor = '#EF4444';
+      fillColor = errColor;
+      strokeColor = errColor;
       classificationLabel = 'Major Subsidence';
     } else if (los <= -2.0) {
-      fillColor = '#E8559D';
+      fillColor = hhColor;
+      strokeColor = hhColor;
       classificationLabel = 'Moderate Subsidence';
     } else if (los >= 2.0) {
-      fillColor = '#00F0FF';
+      fillColor = waterColor;
+      strokeColor = waterColor;
       classificationLabel = 'Co-Seismic Uplift';
     }
 
     return {
       fillColor,
-      strokeColor: dimmed ? '#64748B' : fillColor,
+      strokeColor: dimmed ? mutedStroke : strokeColor,
       fillOpacity: dimmed ? 0.14 : 0.54,
       formattedValue: los > 0 ? `+${los.toFixed(1)}` : los.toFixed(1),
       unit: 'cm',
@@ -196,8 +209,8 @@ export function getPolygonVisualStyle(
   const dimmed = coh < coherenceThreshold;
   if (coh >= 0.7) {
     return {
-      fillColor: '#D4F844',
-      strokeColor: '#D4F844',
+      fillColor: hvColor,
+      strokeColor: hvColor,
       fillOpacity: dimmed ? 0.15 : 0.5,
       formattedValue: coh.toFixed(2),
       unit: 'γ',
@@ -207,8 +220,8 @@ export function getPolygonVisualStyle(
   }
   if (coh >= 0.4) {
     return {
-      fillColor: '#00F0FF',
-      strokeColor: '#00F0FF',
+      fillColor: waterColor,
+      strokeColor: waterColor,
       fillOpacity: dimmed ? 0.15 : 0.45,
       formattedValue: coh.toFixed(2),
       unit: 'γ',
@@ -217,8 +230,8 @@ export function getPolygonVisualStyle(
     };
   }
   return {
-    fillColor: '#F59E0B',
-    strokeColor: '#F59E0B',
+    fillColor: warnColor,
+    strokeColor: warnColor,
     fillOpacity: dimmed ? 0.14 : 0.45,
     formattedValue: coh.toFixed(2),
     unit: 'γ',

@@ -357,12 +357,6 @@ export default function App() {
         ))}
       </div>
 
-      {/* Subtle Analog Texture Overlay */}
-      <div
-        aria-hidden="true"
-        className="industrial-noise-overlay pointer-events-none fixed inset-0 z-[1500]"
-      />
-
       <Navbar
         pageView={pageView}
         onNavigateHome={() => {
@@ -376,7 +370,11 @@ export default function App() {
         onToggleDemoMode={() => setDemoMode((prev) => !prev)}
         theme={theme}
         onToggleTheme={() =>
-          setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+          setTheme((prev) => {
+            const next = prev === 'dark' ? 'light' : 'dark';
+            document.documentElement.classList.toggle('dark', next === 'dark');
+            return next;
+          })
         }
         onOpenAbout={() => setIsAboutOpen(true)}
       />
@@ -441,15 +439,11 @@ export default function App() {
         )}
       </main>
 
-      {/* Atmospheric Dive-Into-Earth Radial Cross-Fade Overlay */}
+      {/* Flat Matte Dive-Into-Earth Transition Overlay (Zero Gradients) */}
       {(isDiveCrossfading || isTransitioning) && (
         <div
           aria-hidden="true"
           className="dive-crossfade-overlay pointer-events-none fixed inset-0 z-[1400]"
-          style={{
-            background:
-              'radial-gradient(circle at 50% 50%, rgba(75, 114, 133, 0.24) 0%, var(--rr-bg) 68%)',
-          }}
         />
       )}
 

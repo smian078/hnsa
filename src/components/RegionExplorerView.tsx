@@ -238,7 +238,7 @@ export function RegionExplorerView({
               type="button"
               data-testid="back-to-globe-btn"
               onClick={onReturnToGlobe}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-text-inverse)] hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="inline-flex items-center gap-2 rounded-full border border-survey-border-strong bg-survey-basalt px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               <span>3D Earth</span>
@@ -303,9 +303,9 @@ export function RegionExplorerView({
                   type="button"
                   onClick={() => onSelectRegion(item.id)}
                   aria-pressed={active}
-                  className={`rounded-full border px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
+                  className={`rounded-full border px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                     active
-                      ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white shadow-sm'
+                      ? 'border-survey-basalt bg-survey-basalt text-survey-basalt-text'
                       : 'border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-text)] hover:border-[var(--rr-border-strong)]'
                   }`}
                 >
@@ -359,7 +359,7 @@ export function RegionExplorerView({
           aria-label="Details and topic toggles"
           className="lg:col-span-5 space-y-3"
         >
-          <div className="flex items-center justify-between rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 py-3 shadow-sm">
+          <div className="flex items-center justify-between rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 py-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-[var(--rr-accent)]" aria-hidden="true" />
               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--rr-text)]">
@@ -379,9 +379,9 @@ export function RegionExplorerView({
               return (
                 <div
                   key={aspect.id}
-                  className={`rounded-2xl border overflow-hidden transition-all ${
+                  className={`rounded-2xl border overflow-hidden transition-colors ${
                     isOpen
-                      ? 'border-[var(--rr-border-strong)] bg-[var(--rr-bg)] shadow-sm'
+                      ? 'border-[var(--rr-border-strong)] bg-[var(--rr-bg)]'
                       : 'border-[var(--rr-border)] bg-[var(--rr-surface)] hover:border-[var(--rr-border-strong)]'
                   }`}
                 >
@@ -409,7 +409,7 @@ export function RegionExplorerView({
                     <span
                       className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors ${
                         isOpen
-                          ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white'
+                          ? 'border-survey-basalt bg-survey-basalt text-survey-basalt-text'
                           : 'border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-text)]'
                       }`}
                     >
@@ -463,7 +463,8 @@ export function RegionExplorerView({
                                 const st = getPolygonVisualStyle(
                                   p,
                                   layerMode,
-                                  coherenceThreshold
+                                  coherenceThreshold,
+                                  isDark
                                 );
                                 const isSel = z.id === activeZone.id;
                                 return (
@@ -473,7 +474,7 @@ export function RegionExplorerView({
                                     onClick={() => onSelectZone(z.id)}
                                     className={`w-full px-3 py-2.5 text-left flex items-center justify-between gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                                       isSel
-                                        ? 'bg-[var(--rr-accent-solid)] text-white'
+                                        ? 'bg-survey-basalt text-survey-basalt-text'
                                         : 'hover:bg-[var(--rr-surface-2)] text-[var(--rr-text)]'
                                     }`}
                                   >
@@ -483,7 +484,7 @@ export function RegionExplorerView({
                                       </div>
                                       <div
                                         className={`text-[11px] truncate ${
-                                          isSel ? 'text-white/85' : 'text-[var(--rr-muted)]'
+                                          isSel ? 'text-survey-basalt-text/85' : 'text-[var(--rr-muted)]'
                                         }`}
                                       >
                                         {st.classificationLabel}

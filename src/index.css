@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-survey-bg: var(--rr-bg);
+  --color-survey-surface: var(--rr-surface);
+  --color-survey-raised: var(--rr-surface-2);
+  --color-survey-border: var(--rr-border);
+  --color-survey-border-strong: var(--rr-border-strong);
+  --color-survey-ink: var(--rr-text);
+  --color-survey-muted: var(--rr-muted);
+  --color-survey-basalt: var(--rr-accent-solid);
+  --color-survey-basalt-text: var(--rr-text-inverse);
+  --color-data-hh: var(--rr-hh);
+  --color-data-hv: var(--rr-hv);
+  --color-data-water: var(--rr-water);
+  --color-status-success: var(--rr-success-border);
+  --color-status-success-bg: var(--rr-success-bg);
+  --color-status-success-text: var(--rr-success-text);
+  --color-status-warning: var(--rr-warn-border);
+  --color-status-warning-bg: var(--rr-warn-bg);
+  --color-status-warning-text: var(--rr-warn-text);
+  --color-status-error: var(--rr-danger-border);
+  --color-status-error-bg: var(--rr-danger-bg);
+  --color-status-error-text: var(--rr-danger-text);
+}
+
 @layer base {
   :root {
     --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -8,69 +32,95 @@
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
     --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
 
-    /* Comfortable Bedroom-Inspired Linen, Mauve-Taupe, Slate Blue & Verdigris Teal Palette */
-    --rr-bg: #F5F2ED;
-    --rr-header-bg: rgba(245, 242, 237, 0.86);
-    --rr-surface: #ECE7DF;
-    --rr-surface-2: #E2DCD2;
-    --rr-surface-inverse: #283139;
-    --rr-text-inverse: #F5F2ED;
-    --rr-border: rgba(115, 98, 102, 0.18);
-    --rr-border-strong: rgba(75, 114, 133, 0.44);
-    --rr-text: #252A30;
-    --rr-muted: #585D66;
-    --rr-subtle: #78696D;
-    --rr-accent: #4B7285;
-    --rr-accent-solid: #3B6073;
-    --rr-teal: #2A6B6E;
-    --rr-warm: #B8837C;
-    --rr-grid-line: rgba(115, 98, 102, 0.055);
-    --rr-map-bg: #E5E0D8;
+    /* COLOUR PROFILE: "Survey sheet" — Light Theme (Default) */
+    --rr-bg: #E8EBE6;               /* Background (Ash) */
+    --rr-header-bg: #F5F6F2;        /* Flat Paper surface */
+    --rr-surface: #F5F6F2;          /* Surface for cards and panels (Paper) */
+    --rr-surface-2: #E8EBE6;        /* Secondary Ash surface */
+    --rr-surface-inverse: #26343D;  /* Primary buttons and links (Deccan basalt) */
+    --rr-text-inverse: #F5F6F2;     /* Button text on Deccan basalt */
+    --rr-border: #C5CDC6;           /* Borders and dividers (Slate line) */
+    --rr-border-strong: #55625B;    /* Emphasized 1px Slate/Lichen rule */
+    --rr-text: #16201B;             /* Main text (Basalt ink) — 15.4:1 on Paper */
+    --rr-muted: #55625B;            /* Muted text and labels (Lichen grey) — 5.9:1 on Paper */
+    --rr-subtle: #55625B;           /* Lichen grey */
+    --rr-accent: #26343D;           /* Primary links & controls (Deccan basalt) */
+    --rr-accent-solid: #26343D;     /* Primary buttons (Deccan basalt) */
 
-    --rr-success-bg: #DFECEA;
-    --rr-success-border: #2A6B6E;
-    --rr-success-text: #1B4E50;
+    /* DATA COLOURS (Consistent across overlays, legends, charts, physics cards) */
+    --rr-hh: #B8531F;               /* HH polarization, ground & double-bounce (Laterite) */
+    --rr-hv: #2F6B4F;               /* HV polarization, vegetation & crops (Teak green) */
+    --rr-water: #1D6FA3;            /* Water & "radar got darker" (Monsoon blue) */
+    --rr-teal: #2F6B4F;             /* Teak green alias */
+    --rr-warm: #B8531F;             /* Laterite alias */
 
-    --rr-warn-bg: #F5EAE5;
-    --rr-warn-border: #B8837C;
-    --rr-warn-text: #7A4B45;
+    --rr-grid-line: rgba(22, 32, 27, 0.05);
+    --rr-map-bg: #E8EBE6;
 
-    --rr-danger-bg: #F5E1E1;
-    --rr-danger-border: #B85D5D;
-    --rr-danger-text: #853535;
+    /* Warm-grey dark orbital space & technical diagram surface (never navy) */
+    --rr-space-bg: #151A1D;
+    --rr-space-surface: #1E2529;
+    --rr-space-raised: #273035;
+    --rr-space-border: #36424A;
+    --rr-space-border-strong: #A3AFA7;
+    --rr-space-text: #E6EAE4;
+    --rr-space-muted: #A3AFA7;
+    --rr-space-hh: #E0803F;
+    --rr-space-hv: #6FBF8E;
+    --rr-space-water: #5AA9D6;
+
+    /* STATUS COLOURS (WCAG AA verified text & border pairs) */
+    --rr-success-bg: #E4EFE8;
+    --rr-success-border: #2E7D4F;   /* Success (Moss) */
+    --rr-success-text: #1E5636;     /* AA contrast on #E4EFE8 */
+
+    --rr-warn-bg: #F4ECE0;
+    --rr-warn-border: #B7791F;      /* Warning (Ochre) */
+    --rr-warn-text: #6E470B;        /* AA contrast on #F4ECE0 */
+
+    --rr-danger-bg: #F5E5E3;
+    --rr-danger-border: #B3382C;    /* Error (Brick) */
+    --rr-danger-text: #8A251B;      /* AA contrast on #F5E5E3 */
   }
 
   html.dark {
-    /* Soft Slate Companion Dark Mode */
-    --rr-bg: #191C21;
-    --rr-header-bg: rgba(25, 28, 33, 0.84);
-    --rr-surface: #21252C;
-    --rr-surface-2: #292E37;
-    --rr-surface-inverse: #F0EDE7;
-    --rr-text-inverse: #191C21;
-    --rr-border: rgba(240, 237, 231, 0.13);
-    --rr-border-strong: rgba(120, 159, 179, 0.48);
-    --rr-text: #F0EDE7;
-    --rr-muted: #B0ACA6;
-    --rr-subtle: #8C8285;
-    --rr-accent: #7BA1B5;
-    --rr-accent-solid: #456A7E;
-    --rr-teal: #4E9699;
-    --rr-warm: #D49E96;
-    --rr-grid-line: rgba(240, 237, 231, 0.04);
-    --rr-map-bg: #13161B;
+    /* DARK VARIANT — Warm Grey, Never Navy */
+    --rr-bg: #151A1D;               /* Background */
+    --rr-header-bg: #1E2529;        /* Flat Surface */
+    --rr-surface: #1E2529;          /* Surface */
+    --rr-surface-2: #273035;        /* Raised surface */
+    --rr-surface-inverse: #26343D;  /* Deccan basalt primary button */
+    --rr-text-inverse: #F5F6F2;     /* Crisp light text */
+    --rr-border: #36424A;           /* Border */
+    --rr-border-strong: #A3AFA7;    /* Strong border */
+    --rr-text: #E6EAE4;             /* Text — 13.8:1 on #151A1D */
+    --rr-muted: #A3AFA7;            /* Muted text — 7.1:1 on #151A1D */
+    --rr-subtle: #A3AFA7;
+    --rr-accent: #E6EAE4;           /* High-contrast control label in dark mode */
+    --rr-accent-solid: #26343D;     /* Deccan basalt button fill */
 
-    --rr-success-bg: #142A2B;
-    --rr-success-border: #4E9699;
-    --rr-success-text: #8ED0D2;
+    /* DATA COLOURS (Dark Variant) */
+    --rr-hh: #E0803F;               /* HH Laterite (Dark mode) */
+    --rr-hv: #6FBF8E;               /* HV Teak green (Dark mode) */
+    --rr-water: #5AA9D6;            /* Water Monsoon blue (Dark mode) */
+    --rr-teal: #6FBF8E;
+    --rr-warm: #E0803F;
 
-    --rr-warn-bg: #2D2220;
-    --rr-warn-border: #D49E96;
-    --rr-warn-text: #E9BEB7;
+    --rr-grid-line: rgba(230, 234, 228, 0.04);
+    --rr-map-bg: #151A1D;
 
-    --rr-danger-bg: #311D1E;
-    --rr-danger-border: #D47272;
-    --rr-danger-text: #F2B2B2;
+    /* STATUS COLOURS (Dark Variant) */
+    --rr-success-bg: #1A2821;
+    --rr-success-border: #2E7D4F;
+    --rr-success-text: #6FBF8E;
+
+    --rr-warn-bg: #282117;
+    --rr-warn-border: #B7791F;
+    --rr-warn-text: #E0803F;
+
+    --rr-danger-bg: #2A1C1A;
+    --rr-danger-border: #B3382C;
+    --rr-danger-text: #E58278;
   }
 
   html {
@@ -116,11 +166,11 @@
   }
 }
 
-/* 3D Globe -> 2D Map smooth high-resolution reveal */
+/* 3D Globe -> 2D Map smooth reveal (no gradients) */
 @keyframes mapClipReveal {
   0% {
     opacity: 0;
-    transform: scale(0.985);
+    transform: scale(0.99);
   }
   100% {
     opacity: 1;
@@ -129,47 +179,41 @@
 }
 
 .map-enter-reveal {
-  animation: mapClipReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: mapClipReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Dive-into-Earth radial atmospheric cross-fade */
+/* Flat matte transition overlay (zero gradients) */
 @keyframes atmosphericDiveFade {
   0% {
     opacity: 0;
-    transform: scale(0.94);
   }
   55% {
     opacity: 0.85;
-    transform: scale(1.02);
   }
   100% {
     opacity: 1;
-    transform: scale(1.05);
   }
 }
 
 .dive-crossfade-overlay {
-  animation: atmosphericDiveFade 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  background-color: var(--rr-bg);
+  animation: atmosphericDiveFade 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Loading skeleton shimmer */
+/* Flat matte loading skeleton pulse (zero gradients) */
 .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(115, 98, 102, 0.08) 25%,
-    rgba(75, 114, 133, 0.16) 50%,
-    rgba(115, 98, 102, 0.08) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite linear;
+  background-color: var(--rr-surface-2);
+  border: 1px solid var(--rr-border);
+  animation: flatPulse 1.4s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
+@keyframes flatPulse {
+  0%,
   100% {
-    background-position: -200% 0;
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
   }
 }
 
@@ -203,7 +247,7 @@
 }
 
 .leaflet-control-attribution {
-  background: var(--rr-header-bg) !important;
+  background: var(--rr-surface) !important;
   color: var(--rr-muted) !important;
   font-size: 10px !important;
   border-top: 1px solid var(--rr-border);
@@ -211,22 +255,31 @@
 }
 
 .leaflet-control-attribution a {
-  color: var(--rr-accent) !important;
+  color: var(--rr-text) !important;
+  text-decoration: underline;
 }
 
 .leaflet-control-zoom a {
   background: var(--rr-surface) !important;
   color: var(--rr-text) !important;
   border-color: var(--rr-border) !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
 }
 
 .leaflet-control-zoom a:hover {
   background: var(--rr-accent-solid) !important;
-  color: #FFFFFF !important;
+  color: var(--rr-text-inverse) !important;
 }
 
-/* Custom range slider */
+.leaflet-tooltip {
+  background: var(--rr-surface) !important;
+  color: var(--rr-text) !important;
+  border: 1px solid var(--rr-border-strong) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+/* Custom range slider (flat matte Survey Sheet style) */
 input[type='range'].nisar-range {
   -webkit-appearance: none;
   appearance: none;
@@ -246,10 +299,9 @@ input[type='range'].nisar-range::-webkit-slider-thumb {
   height: 16px;
   width: 16px;
   border-radius: 9999px;
-  background: var(--rr-accent);
-  border: 2px solid var(--rr-bg);
+  background: var(--rr-accent-solid);
+  border: 2px solid var(--rr-surface);
   margin-top: -5.5px;
-  box-shadow: 0 2px 6px rgba(37, 42, 48, 0.25);
 }
 
 input[type='range'].nisar-range:focus-visible {
@@ -257,5 +309,6 @@ input[type='range'].nisar-range:focus-visible {
 }
 
 input[type='range'].nisar-range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px var(--rr-border-strong);
+  outline: 2px solid var(--rr-border-strong);
+  outline-offset: 2px;
 }

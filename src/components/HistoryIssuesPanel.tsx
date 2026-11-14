@@ -221,7 +221,7 @@ export function HistoryIssuesPanel({
           <button
             type="button"
             onClick={() => void loadLaptopHistory(true)}
-            className="inline-flex items-center gap-1 border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+            className="inline-flex items-center gap-1 border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:text-survey-basalt-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
           >
             <RefreshCw className="h-3 w-3" aria-hidden="true" />
             <span>Retry</span>
@@ -276,9 +276,9 @@ export function HistoryIssuesPanel({
         {recurringSummary && (
           <p
             data-testid="history-recurring-summary"
-            className="border-l-2 border-[var(--rr-accent)] bg-[var(--rr-bg)] px-2.5 py-2 text-xs leading-relaxed text-[var(--rr-text)]"
+            className="border border-survey-border bg-survey-bg px-3 py-2 text-xs leading-relaxed text-survey-ink"
           >
-            <strong className="text-[var(--rr-accent)]">Recurring Pattern: </strong>
+            <strong className="text-survey-ink">Recurring Pattern: </strong>
             {recurringSummary}
           </p>
         )}
@@ -387,7 +387,7 @@ export function HistoryIssuesPanel({
             disabled={!question.trim() || isAskingAi}
             data-testid="history-ai-submit"
             aria-label="Send historical question to AI"
-            className="inline-flex items-center gap-1.5 border-l border-[var(--rr-border)] bg-[var(--rr-accent-solid)] px-3 py-2 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+            className="inline-flex items-center gap-1.5 border-s border-survey-border bg-survey-basalt px-3 py-2 text-xs font-bold text-survey-basalt-text hover:opacity-90 disabled:opacity-50 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
           >
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Ask</span>
@@ -422,8 +422,8 @@ export function HistoryIssuesPanel({
                 key={msg.id}
                 className={`border p-2.5 text-xs leading-relaxed ${
                   msg.role === 'user'
-                    ? 'ml-6 border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white'
-                    : 'mr-2 border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-text)]'
+                    ? 'ml-6 border-survey-basalt bg-survey-basalt text-survey-basalt-text'
+                    : 'mr-2 border-survey-border bg-survey-bg text-survey-ink'
                 }`}
               >
                 <p>{msg.text}</p>

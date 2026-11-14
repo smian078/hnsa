@@ -42,22 +42,23 @@ export function TelemetryPanel({
   isLoadingPower,
   powerError,
   onRetryPower,
-  isDark,
+  isDark: _isDark,
 }: TelemetryPanelProps) {
   const activeZone = selectedZone ?? region.zones[0];
   const isGunw = region.productType === 'GUNW';
   const activeDate = activeZone.passes[passIndex]?.acquisitionDate;
 
-  const gridStroke = isDark ? '#26262A' : '#D4D4D8';
-  const tickColor = isDark ? '#A1A1AA' : '#52525B';
-  const accentColor = isDark ? '#38BDF8' : '#0066FF';
-  const barFill = isDark ? 'rgba(250, 250, 250, 0.22)' : 'rgba(24, 24, 27, 0.2)';
+  const gridStroke = 'var(--rr-border)';
+  const tickColor = 'var(--rr-muted)';
+  const hhColor = 'var(--rr-hh)';
+  const hvColor = 'var(--rr-hv)';
+  const waterColor = 'var(--rr-water)';
   const tooltipStyle = {
-    backgroundColor: isDark ? '#0B0B0D' : '#EBEBE8',
-    border: isDark ? '1px solid #52525B' : '1px solid #18181B',
-    borderRadius: '0px',
+    backgroundColor: 'var(--rr-surface)',
+    border: '1px solid var(--rr-border-strong)',
+    borderRadius: '4px',
     fontSize: '12px',
-    color: isDark ? '#FAFAFA' : '#18181B',
+    color: 'var(--rr-text)',
   };
 
   const timeSeriesData = activeZone.passes.map((pass, idx) => {
@@ -124,7 +125,7 @@ export function TelemetryPanel({
           <button
             type="button"
             onClick={onRetryPower}
-            className="inline-flex items-center gap-1 border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+            className="inline-flex items-center gap-1 border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:text-survey-basalt-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
           >
             <RefreshCw className="h-3 w-3" aria-hidden="true" />
             <span>Retry</span>
@@ -155,7 +156,7 @@ export function TelemetryPanel({
                 aria-pressed={active}
                 className={`truncate px-2.5 py-1.5 text-left text-xs transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                   active
-                    ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white font-semibold'
+                    ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-survey-basalt-text font-semibold'
                     : 'border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-text)] hover:border-[var(--rr-border-strong)]'
                 }`}
                 title={z.name}
@@ -194,7 +195,7 @@ export function TelemetryPanel({
               />
               <YAxis
                 yAxisId="sar"
-                stroke={accentColor}
+                stroke={hhColor}
                 tick={{ fontSize: 11, fill: tickColor }}
                 domain={isGunw ? [-22, 8] : [-25, -5]}
               />
@@ -210,7 +211,7 @@ export function TelemetryPanel({
                 <ReferenceLine
                   yAxisId="sar"
                   x={activeDate.slice(5)}
-                  stroke={accentColor}
+                  stroke={hhColor}
                   strokeDasharray="3 3"
                 />
               )}
@@ -218,7 +219,8 @@ export function TelemetryPanel({
                 yAxisId="rain"
                 dataKey="rainfallMm"
                 name="Rain (mm/day)"
-                fill={barFill}
+                fill={waterColor}
+                fillOpacity={0.32}
                 barSize={18}
               />
               {isGunw ? (
@@ -227,9 +229,9 @@ export function TelemetryPanel({
                   type="monotone"
                   dataKey="losCm"
                   name="Ground Shift (cm)"
-                  stroke={accentColor}
+                  stroke={hhColor}
                   strokeWidth={2.5}
-                  dot={{ r: 4, fill: accentColor }}
+                  dot={{ r: 4, fill: hhColor }}
                 />
               ) : (
                 <>
@@ -237,19 +239,19 @@ export function TelemetryPanel({
                     yAxisId="sar"
                     type="monotone"
                     dataKey="hhDb"
-                    name="Water (HH dB)"
-                    stroke={accentColor}
+                    name="Water / Ground (HH dB)"
+                    stroke={hhColor}
                     strokeWidth={2.5}
-                    dot={{ r: 4, fill: accentColor }}
+                    dot={{ r: 4, fill: hhColor }}
                   />
                   <Line
                     yAxisId="sar"
                     type="monotone"
                     dataKey="hvDb"
                     name="Crops (HV dB)"
-                    stroke="#22C55E"
+                    stroke={hvColor}
                     strokeWidth={2}
-                    dot={{ r: 3.5, fill: '#22C55E' }}
+                    dot={{ r: 3.5, fill: hvColor }}
                   />
                 </>
               )}
@@ -318,12 +320,10 @@ export function TelemetryPanel({
                     key={entry.zoneId}
                     fill={
                       entry.isSelected
-                        ? accentColor
-                        : isDark
-                          ? '#E4E4E7'
-                          : '#18181B'
+                        ? waterColor
+                        : 'var(--rr-text)'
                     }
-                    stroke={isDark ? '#000000' : '#EBEBE8'}
+                    stroke="var(--rr-surface)"
                     strokeWidth={entry.isSelected ? 2 : 1}
                     className="cursor-pointer"
                   />
@@ -352,7 +352,7 @@ export function TelemetryPanel({
               <XAxis dataKey="passCode" stroke={tickColor} tick={{ fontSize: 10, fill: tickColor }} />
               <YAxis domain={[0, 100]} stroke={tickColor} tick={{ fontSize: 10, fill: tickColor }} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="soilMoisturePct" name="Soil Moisture %" fill={accentColor} />
+              <Bar dataKey="soilMoisturePct" name="Soil Moisture %" fill={waterColor} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -198,7 +198,7 @@ export function PageAwareAssistant({
         <section
           data-testid="page-aware-assistant-panel"
           aria-label="Context-aware AI guide chat"
-          className="w-[calc(100vw-2rem)] sm:w-[370px] overflow-hidden rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-text)] shadow-xl flex flex-col max-h-[500px]"
+          className="w-[calc(100vw-2rem)] sm:w-[370px] overflow-hidden rounded-2xl border border-survey-border-strong bg-survey-bg text-survey-ink flex flex-col max-h-[500px]"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-2 border-b border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 py-3 text-[var(--rr-text)]">
@@ -253,8 +253,8 @@ export function PageAwareAssistant({
                   key={m.id}
                   className={`rounded-xl p-3 text-xs leading-relaxed border ${
                     m.role === 'user'
-                      ? 'ml-6 border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white'
-                      : 'mr-4 border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-text)]'
+                      ? 'ml-6 border-survey-basalt bg-survey-basalt text-survey-basalt-text'
+                      : 'mr-4 border-survey-border bg-survey-surface text-survey-ink'
                   }`}
                 >
                   <p>{m.text}</p>
@@ -308,7 +308,7 @@ export function PageAwareAssistant({
               type="submit"
               disabled={!input.trim() || isSending}
               aria-label="Send question"
-              className="border-l border-[var(--rr-border)] bg-[var(--rr-accent-solid)] px-4 text-white hover:opacity-90 disabled:opacity-50 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="border-s border-survey-border bg-survey-basalt px-4 text-survey-basalt-text hover:opacity-90 disabled:opacity-50 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
@@ -322,7 +322,7 @@ export function PageAwareAssistant({
         data-testid="assistant-launcher-btn"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-4 py-2.5 text-[var(--rr-text-inverse)] shadow-md hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+        className="inline-flex items-center gap-2 rounded-full border border-survey-border-strong bg-survey-basalt px-4 py-2.5 text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
       >
         <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
         <span className="text-xs font-semibold whitespace-nowrap">

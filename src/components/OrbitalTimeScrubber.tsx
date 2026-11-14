@@ -54,7 +54,7 @@ export function OrbitalTimeScrubber({
             type="button"
             onClick={onTogglePlay}
             aria-label={isPlaying ? 'Pause pass animation' : 'Animate satellite passes'}
-            className="inline-flex items-center gap-1.5 border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--rr-text-inverse)] hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+            className="inline-flex items-center gap-1.5 border border-survey-border-strong bg-survey-basalt px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
           >
             {isPlaying ? (
               <>
@@ -96,13 +96,13 @@ export function OrbitalTimeScrubber({
               aria-pressed={active}
               className={`px-3 py-2.5 text-left transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                 active
-                  ? 'border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white'
+                  ? 'border-survey-basalt bg-survey-basalt text-survey-basalt-text'
                   : 'border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-text)] hover:border-[var(--rr-border-strong)]'
               }`}
             >
               <div className="flex items-center justify-between gap-1 text-[10px] font-mono font-bold">
                 <span>{pass.passCode}</span>
-                <span className={active ? 'text-white/90' : 'text-[var(--rr-muted)]'}>
+                <span className={active ? 'text-survey-basalt-text/85' : 'text-[var(--rr-muted)]'}>
                   {pass.acquisitionDate}
                 </span>
               </div>

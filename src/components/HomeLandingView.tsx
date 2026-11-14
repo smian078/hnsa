@@ -26,7 +26,7 @@ interface SleeveCardData {
   indexLabel: string;
   regionId: RegionId;
   zoneId?: string;
-  accentHex: string;
+  swatchBgClass: string;
   kicker: string;
   title: string;
   subtitle: string;
@@ -41,7 +41,7 @@ interface RosterEntry {
   isPrimaryForRegion: boolean;
   indexStr: string;
   regionCode: string;
-  accentHex: string;
+  swatchBgClass: string;
   zoneName: string;
   plainFocus: string;
   metricLabel: string;
@@ -206,7 +206,7 @@ export function HomeLandingView({
         indexLabel: 'CARD 01 / 04',
         regionId: 'maharashtra_gcov',
         zoneId: 'mh_gosikhurd',
-        accentHex: 'var(--rr-accent)',
+        swatchBgClass: 'bg-data-water',
         kicker: 'WATER & CROPS · INDIA',
         title: 'Maharashtra Spillway & Farms',
         subtitle:
@@ -220,7 +220,7 @@ export function HomeLandingView({
         indexLabel: 'CARD 02 / 04',
         regionId: 'northeast_india_gcov',
         zoneId: 'ne_kaziranga',
-        accentHex: 'var(--rr-teal)',
+        swatchBgClass: 'bg-data-hv',
         kicker: 'MONSOON FLOODS · INDIA',
         title: 'Brahmaputra & Kaziranga',
         subtitle:
@@ -234,7 +234,7 @@ export function HomeLandingView({
         indexLabel: 'CARD 03 / 04',
         regionId: 'japan_gunw',
         zoneId: 'jp_noto',
-        accentHex: 'var(--rr-warm)',
+        swatchBgClass: 'bg-data-hh',
         kicker: 'LAND SHIFT · JAPAN',
         title: 'Noto Peninsula & Toyama Bay',
         subtitle:
@@ -248,7 +248,7 @@ export function HomeLandingView({
         indexLabel: 'CARD 04 / 04',
         regionId: 'maharashtra_gcov',
         zoneId: 'mh_wardha',
-        accentHex: 'var(--rr-teal)',
+        swatchBgClass: 'bg-data-hv',
         kicker: 'SMIAN_P5 · LIVE .H5 STORAGE',
         title: `${recordsToShow.length} Verified Files · ${totalGb} GB`,
         subtitle:
@@ -270,12 +270,12 @@ export function HomeLandingView({
     let counter = 1;
     regionOrder.forEach((regionId) => {
       const ds = REGION_DATASETS[regionId];
-      const accentHex =
+      const swatchBgClass =
         regionId === 'northeast_india_gcov'
-          ? 'var(--rr-teal)'
+          ? 'bg-data-hv'
           : regionId === 'japan_gunw'
-            ? 'var(--rr-warm)'
-            : 'var(--rr-accent)';
+            ? 'bg-data-hh'
+            : 'bg-data-water';
       const regionCode =
         regionId === 'maharashtra_gcov'
           ? 'MAHARASHTRA · WATER & CROPS'
@@ -295,7 +295,7 @@ export function HomeLandingView({
           isPrimaryForRegion: zIdx === 0,
           indexStr: String(counter).padStart(2, '0'),
           regionCode,
-          accentHex,
+          swatchBgClass,
           zoneName: zone.name,
           plainFocus: `${zone.dominantCover} · ${zone.districtOrPrefecture}`,
           metricLabel,
@@ -448,25 +448,6 @@ export function HomeLandingView({
               isTransitioning={isTransitioning}
               diveRequest={diveRequest}
             />
-
-            {/* Subtle Slate-Teal Wash & Soft Vignette */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(75, 114, 133, 0.14) 0%, rgba(14, 19, 27, 0) 48%, rgba(42, 107, 110, 0.16) 100%)',
-                opacity: portalProgress * 0.2,
-              }}
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 50%, rgba(14,19,27,0) 52%, rgba(14,19,27,0.52) 100%)',
-              }}
-            />
           </div>
 
           {/* Middle Layer: Two Overlapping 50.5vw Shutters (Zero Gap at scrollY = 0) */}
@@ -478,34 +459,34 @@ export function HomeLandingView({
           >
             <div
               data-testid="portal-shutter-left"
-              className="absolute inset-y-0 left-0 w-[50.5vw] bg-[var(--rr-bg)] border-r border-[var(--rr-border)] will-change-transform transition-colors duration-300"
+              className="absolute inset-y-0 left-0 w-[50.5vw] bg-survey-bg border-r border-survey-border will-change-transform transition-colors duration-200"
               style={{
                 transform: `translate3d(-${(portalProgress * 106).toFixed(3)}%, 0, 0)`,
               }}
             />
             <div
               data-testid="portal-shutter-right"
-              className="absolute inset-y-0 right-0 w-[50.5vw] bg-[var(--rr-bg)] border-l border-[var(--rr-border)] will-change-transform transition-colors duration-300"
+              className="absolute inset-y-0 right-0 w-[50.5vw] bg-survey-bg border-l border-survey-border will-change-transform transition-colors duration-200"
               style={{
                 transform: `translate3d(${(portalProgress * 106).toFixed(3)}%, 0, 0)`,
               }}
             />
           </div>
 
-          {/* Two Soft 7px Center Accent Dots Drifting Toward Opposite Corners */}
+          {/* Two Clean 7px Center Dots Drifting Toward Opposite Corners */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
           >
             <span
-              className="absolute h-[7px] w-[7px] rounded-full bg-[var(--rr-accent)]"
+              className="absolute h-[7px] w-[7px] rounded-full bg-data-hh"
               style={{
                 transform: `translate3d(${(-portalProgress * 42).toFixed(2)}vw, ${(-portalProgress * 34).toFixed(2)}vh, 0)`,
                 opacity: Math.max(0.15, 1 - portalProgress * 0.85),
               }}
             />
             <span
-              className="absolute h-[7px] w-[7px] rounded-full bg-[var(--rr-teal)]"
+              className="absolute h-[7px] w-[7px] rounded-full bg-data-hv"
               style={{
                 transform: `translate3d(${(portalProgress * 42).toFixed(2)}vw, ${(portalProgress * 34).toFixed(2)}vh, 0)`,
                 opacity: Math.max(0.15, 1 - portalProgress * 0.85),
@@ -513,10 +494,10 @@ export function HomeLandingView({
             />
           </div>
 
-          {/* Top Layer: Comfortable Split Hero Wordmark */}
+          {/* Top Layer: Split Hero Wordmark */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-3 sm:px-4">
             <h1
-              className="font-display font-extrabold text-[var(--rr-text)] uppercase select-none flex items-center justify-center gap-2 sm:gap-4 will-change-transform"
+              className="font-display font-extrabold text-survey-ink uppercase select-none flex items-center justify-center gap-2 sm:gap-4 will-change-transform"
               style={{
                 fontSize: 'clamp(28px, 6.2vw, 96px)',
                 lineHeight: 0.94,
@@ -539,7 +520,7 @@ export function HomeLandingView({
                   transform: `translate3d(${(portalProgress * 24).toFixed(2)}vw, 0, 0)`,
                 }}
               >
-                RHYTHM<span className="text-[var(--rr-accent)]">.</span>
+                RHYTHM<span className="text-data-hh">.</span>
               </span>
             </h1>
           </div>
@@ -548,14 +529,14 @@ export function HomeLandingView({
           <div className="pointer-events-none absolute top-[68px] sm:top-[74px] left-4 right-4 sm:left-8 sm:right-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
             <span
               className={`font-micro transition-colors ${
-                shuttersClear ? 'text-[#E2DCD2]' : 'text-[var(--rr-muted)]'
+                shuttersClear ? 'text-[var(--rr-space-text)]' : 'text-survey-muted'
               }`}
             >
               01 / Cloud-Piercing Earth Radar
             </span>
             <span
               className={`font-micro sm:text-right transition-colors ${
-                shuttersClear ? 'text-[#7BA1B5]' : 'text-[var(--rr-accent)]'
+                shuttersClear ? 'text-[var(--rr-space-water)]' : 'text-survey-ink'
               }`}
             >
               Cycle 035 · {recordsToShow.length} Scans ({totalGb} GB)
@@ -564,7 +545,7 @@ export function HomeLandingView({
 
           <div
             className={`pointer-events-none absolute bottom-[68px] sm:bottom-5 left-4 sm:left-8 font-micro max-w-[65vw] transition-colors ${
-              shuttersClear ? 'text-[#E2DCD2]' : 'text-[var(--rr-muted)]'
+              shuttersClear ? 'text-[var(--rr-space-text)]' : 'text-survey-muted'
             }`}
           >
             {shuttersClear
@@ -578,7 +559,7 @@ export function HomeLandingView({
                 type="button"
                 data-testid="skip-portal-btn"
                 onClick={handleSkipPortal}
-                className="rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface)]/95 px-4 py-1.5 font-micro text-[var(--rr-text)] shadow-sm hover:border-[var(--rr-accent)] hover:bg-[var(--rr-accent-solid)] hover:text-white transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="rounded-lg border border-survey-border-strong bg-survey-surface px-4 py-1.5 font-micro text-survey-ink hover:border-survey-basalt hover:bg-survey-basalt hover:text-survey-basalt-text transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
               >
                 Open 3D Earth View
               </button>
@@ -590,24 +571,24 @@ export function HomeLandingView({
       {/* SECTION 2: Statement Fold */}
       <section
         aria-label="Mission physics statement"
-        className="min-h-[82vh] border-t border-[var(--rr-border)] bg-[var(--rr-bg)] px-4 sm:px-8 py-20 sm:py-28 flex items-center"
+        className="min-h-[82vh] border-t border-survey-border bg-survey-bg px-4 sm:px-8 py-20 sm:py-28 flex items-center"
       >
         <div className="mx-auto w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-8 space-y-6">
-            <div className="font-micro text-[var(--rr-accent)]">
+            <div className="font-micro text-survey-muted">
               01 / All-Weather Satellite Radar
             </div>
             <h2
-              className="font-display font-bold tracking-[-0.02em] leading-[1.12] text-[var(--rr-text)] max-w-[23ch]"
+              className="font-display font-bold tracking-[-0.02em] leading-[1.12] text-survey-ink max-w-[23ch]"
               style={{ fontSize: 'clamp(24px, 3.4vw, 48px)' }}
             >
               Twenty-four centimeter radar beams look right through monsoon
               clouds, flooded farmlands, and shifting ground—{' '}
-              <span className="text-[var(--rr-accent)]">
+              <span className="text-data-hv">
                 day or night, in any weather.
               </span>
             </h2>
-            <p className="text-sm sm:text-base text-[var(--rr-muted)] max-w-2xl leading-relaxed">
+            <p className="text-sm sm:text-base text-survey-muted max-w-2xl leading-relaxed">
               Every 12 days, the NASA–ISRO NISAR satellite scans India and the
               Pacific Rim to spot calm floodwater, measure soaked crop soils,
               and track centimeter-level ground movement after earthquakes.
@@ -692,19 +673,19 @@ export function HomeLandingView({
       <section
         id="catalogue"
         aria-label="Cycle 035 Radar Capture Cards"
-        className="border-t border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 sm:px-8 py-20 sm:py-24"
+        className="border-t border-survey-border bg-survey-surface px-4 sm:px-8 py-20 sm:py-24"
       >
         <div className="mx-auto max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Info & Controls */}
           <div className="lg:col-span-5 space-y-6">
             <div className="space-y-3">
-              <div className="font-micro text-[var(--rr-accent)]">
+              <div className="font-micro text-survey-muted">
                 02 / Capture Cards · SMIAN_P5
               </div>
-              <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-[-0.02em] text-[var(--rr-text)]">
+              <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-[-0.02em] text-survey-ink">
                 Cycle 035 Radar Captures
               </h2>
-              <p className="text-sm text-[var(--rr-muted)] leading-relaxed">
+              <p className="text-sm text-survey-muted leading-relaxed">
                 Swipe or flick through the capture cards to browse each NASA
                 radar scan ({totalGb} GB across {recordsToShow.length} live
                 files), or jump straight into the interactive 2D map.
@@ -712,19 +693,20 @@ export function HomeLandingView({
             </div>
 
             {/* Active Top Card Summary Strip */}
-            <div className="rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)]/80 p-4 space-y-2 shadow-sm">
+            <div className="rounded-xl border border-survey-border bg-survey-bg p-4 space-y-2">
               <div className="flex items-center justify-between gap-2 font-micro">
-                <span style={{ color: topSleeve.accentHex }}>
-                  {topSleeve.indexLabel}
+                <span className="inline-flex items-center gap-2 text-survey-ink font-semibold">
+                  <span className={`h-2 w-2 rounded-full ${topSleeve.swatchBgClass}`} aria-hidden="true" />
+                  <span>{topSleeve.indexLabel}</span>
                 </span>
-                <span className="font-mono text-[var(--rr-muted)]">
+                <span className="font-mono text-survey-muted">
                   {topSleeve.fileSizeLabel}
                 </span>
               </div>
-              <div className="font-display text-xl font-bold text-[var(--rr-text)]">
+              <div className="font-display text-xl font-bold text-survey-ink">
                 {topSleeve.title}
               </div>
-              <p className="text-xs text-[var(--rr-muted)] leading-relaxed">
+              <p className="text-xs text-survey-muted leading-relaxed">
                 {topSleeve.subtitle}
               </p>
             </div>
@@ -735,7 +717,7 @@ export function HomeLandingView({
                 onClick={() =>
                   triggerDiveIntoGlobe(topSleeve.regionId, topSleeve.zoneId)
                 }
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--rr-accent-solid)] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-92 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="inline-flex items-center gap-2 rounded-lg bg-survey-basalt px-5 py-2.5 text-xs font-semibold text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
               >
                 <Compass className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Dive Into 2D Map</span>
@@ -744,7 +726,7 @@ export function HomeLandingView({
                 type="button"
                 data-testid="cycle-next-sleeve-btn"
                 onClick={() => cycleSleeve(1)}
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-5 py-2.5 text-xs font-semibold text-[var(--rr-text)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="inline-flex items-center gap-2 rounded-lg border border-survey-border-strong bg-survey-bg px-5 py-2.5 text-xs font-semibold text-survey-ink hover:bg-survey-raised transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
               >
                 <span>Next Card</span>
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -766,7 +748,7 @@ export function HomeLandingView({
               onPointerCancel={handleDeckPointerEnd}
               onKeyDown={handleDeckKeyDown}
               style={{ touchAction: 'pan-y' }}
-              className="relative aspect-square w-full max-w-[440px] rounded-2xl select-none cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="relative aspect-square w-full max-w-[440px] rounded-xl select-none cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
               {deckOrder
                 .slice()
@@ -789,7 +771,7 @@ export function HomeLandingView({
                   const baseScale = 1 - stackPos * 0.032;
 
                   let transformStr = `translate3d(${baseTranslateX}px, ${baseTranslateY}px, 0) scale(${baseScale}) rotate(${baseRotate}deg)`;
-                  let cardOpacity = Math.max(0.58, 1 - stackPos * 0.14);
+                  let cardOpacity = Math.max(0.75, 1 - stackPos * 0.08);
 
                   if (isTop) {
                     if (flingDir !== 0) {
@@ -813,50 +795,51 @@ export function HomeLandingView({
                           isTop && isDragging
                             ? 'none'
                             : 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease',
-                        boxShadow: '0 20px 44px rgba(37, 42, 48, 0.16)',
                       }}
-                      className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)] p-6 sm:p-7"
+                      className={`absolute inset-0 flex flex-col justify-between rounded-xl border p-6 sm:p-7 ${
+                        isTop
+                          ? 'border-survey-border-strong bg-survey-bg'
+                          : 'border-survey-border bg-survey-surface'
+                      }`}
                     >
                       {/* Top Card Header */}
-                      <div className="flex items-start justify-between gap-2 border-b border-[var(--rr-border)] pb-3">
+                      <div className="flex items-start justify-between gap-2 border-b border-survey-border pb-3">
                         <div>
-                          <div
-                            className="font-micro font-semibold"
-                            style={{ color: card.accentHex }}
-                          >
-                            {card.kicker}
+                          <div className="flex items-center gap-2 font-micro font-semibold text-survey-muted">
+                            <span className={`h-2 w-2 rounded-full ${card.swatchBgClass}`} aria-hidden="true" />
+                            <span>{card.kicker}</span>
                           </div>
-                          <div className="font-mono text-[10px] text-[var(--rr-muted)] mt-1">
+                          <div className="font-mono text-[10px] text-survey-muted mt-1">
                             {card.trackLabel}
                           </div>
                         </div>
-                        <span className="rounded-full font-mono text-[10px] border border-[var(--rr-border)] bg-[var(--rr-surface)] px-2.5 py-0.5 text-[var(--rr-text)]">
+                        <span className="font-mono text-[10px] text-survey-muted">
                           {card.indexLabel}
                         </span>
                       </div>
 
                       {/* Center Card Details */}
                       <div className="my-auto flex flex-col items-start gap-4 py-3">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-1">
+                        <div className="inline-flex items-center gap-2 border border-survey-border bg-survey-surface px-3 py-1 rounded-md">
                           <span
-                            className="h-2.5 w-2.5 rounded-full"
-                            style={{ backgroundColor: card.accentHex }}
+                            aria-hidden="true"
+                            className={`h-2.5 w-2.5 rounded-full ${card.swatchBgClass}`}
                           />
-                          <span className="font-mono text-xs font-bold text-[var(--rr-text)] tracking-wide">
+                          <span className="font-mono text-xs font-bold text-survey-ink tracking-wide">
                             {card.metricBadge}
                           </span>
                         </div>
-                        <h3 className="font-display text-2xl sm:text-3xl font-extrabold tracking-[-0.02em] leading-[1.1] text-[var(--rr-text)]">
+                        <h3 className="font-display text-2xl sm:text-3xl font-extrabold tracking-[-0.02em] leading-[1.1] text-survey-ink">
                           {card.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-[var(--rr-muted)] leading-relaxed">
+                        <p className="text-xs sm:text-sm text-survey-muted leading-relaxed">
                           {card.subtitle}
                         </p>
                       </div>
 
                       {/* Bottom Card Footer */}
-                      <div className="flex items-center justify-between gap-3 border-t border-[var(--rr-border)] pt-3.5">
-                        <span className="font-mono text-[11px] font-bold text-[var(--rr-muted)]">
+                      <div className="flex items-center justify-between gap-3 border-t border-survey-border pt-3.5">
+                        <span className="font-mono text-[11px] font-bold text-survey-muted">
                           {card.fileSizeLabel}
                         </span>
                         <button
@@ -864,7 +847,7 @@ export function HomeLandingView({
                           onClick={() =>
                             triggerDiveIntoGlobe(card.regionId, card.zoneId)
                           }
-                          className="inline-flex items-center gap-1.5 rounded-full bg-[var(--rr-accent-solid)] px-3.5 py-1.5 text-[11px] font-semibold text-white hover:opacity-92 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-survey-basalt px-3.5 py-1.5 text-[11px] font-semibold text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
                         >
                           <span>Open 2D Map</span>
                           <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -893,16 +876,16 @@ export function HomeLandingView({
                           (idx + 3) % 4,
                         ]);
                       }}
-                      className={`h-2 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
+                      className={`h-2 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt ${
                         active
-                          ? 'w-7 bg-[var(--rr-accent-solid)]'
-                          : 'w-2 bg-[var(--rr-border-strong)] hover:bg-[var(--rr-accent)]'
+                          ? 'w-7 bg-survey-basalt'
+                          : 'w-2 bg-survey-border-strong hover:bg-survey-ink'
                       }`}
                     />
                   );
                 })}
               </div>
-              <span className="font-micro text-[var(--rr-subtle)]">
+              <span className="font-micro text-survey-muted">
                 Drag card sideways to flick · or press ← → keys
               </span>
             </div>
@@ -914,19 +897,19 @@ export function HomeLandingView({
       <section
         id="roster"
         aria-label="Monitored study zones roster"
-        className="border-t border-[var(--rr-border)] bg-[var(--rr-bg)] px-4 sm:px-8 py-20"
+        className="border-t border-survey-border bg-survey-bg px-4 sm:px-8 py-20"
       >
         <div className="mx-auto max-w-[1600px] space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
-              <div className="font-micro text-[var(--rr-accent)]">
+              <div className="font-micro text-survey-muted">
                 03 / Monitored Study Areas
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[var(--rr-text)]">
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-survey-ink">
                 Six Ground-Truth Locations
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-[var(--rr-muted)] max-w-md">
+            <p className="text-xs sm:text-sm text-survey-muted max-w-md">
               Choose any place below to smoothly zoom the 3D Earth into its live
               2D satellite and radar view.
             </p>
@@ -943,43 +926,40 @@ export function HomeLandingView({
                     : `roster-zone-${row.zoneId}`
                 }
                 onClick={() => triggerDiveIntoGlobe(row.regionId, row.zoneId)}
-                className="group w-full rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-surface)]/55 py-4 px-4 sm:px-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-left hover:border-[var(--rr-border-strong)] hover:bg-[var(--rr-surface)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="group w-full rounded-xl border border-survey-border bg-survey-surface py-4 px-4 sm:px-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-left hover:border-survey-border-strong hover:bg-survey-raised transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
               >
                 <div className="md:col-span-3 flex items-center gap-3">
-                  <span className="font-mono text-xs text-[var(--rr-subtle)]">
+                  <span className="font-mono text-xs text-survey-muted">
                     {row.indexStr}
                   </span>
                   <span
-                    className="h-2.5 w-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: row.accentHex }}
+                    aria-hidden="true"
+                    className={`h-2.5 w-2.5 rounded-full shrink-0 ${row.swatchBgClass}`}
                   />
-                  <span
-                    className="font-micro font-semibold"
-                    style={{ color: row.accentHex }}
-                  >
+                  <span className="font-micro font-semibold text-survey-muted">
                     {row.regionCode}
                   </span>
                 </div>
 
                 <div className="md:col-span-5 space-y-1">
-                  <div className="font-display text-lg sm:text-xl font-bold text-[var(--rr-text)] group-hover:text-[var(--rr-accent)] transition-colors">
+                  <div className="font-display text-lg sm:text-xl font-bold text-survey-ink group-hover:text-survey-basalt transition-colors">
                     {row.zoneName}
                   </div>
-                  <div className="text-xs text-[var(--rr-muted)] line-clamp-1">
+                  <div className="text-xs text-survey-muted line-clamp-1">
                     {row.plainFocus}
                   </div>
                 </div>
 
                 <div className="md:col-span-4 flex items-center justify-between md:justify-end gap-4">
                   <div className="text-left md:text-right">
-                    <div className="font-mono text-xs font-bold text-[var(--rr-text)] tabular-nums">
+                    <div className="font-mono text-xs font-bold text-survey-ink tabular-nums">
                       {row.metricLabel}
                     </div>
-                    <div className="font-mono text-[10px] text-[var(--rr-subtle)]">
+                    <div className="font-mono text-[10px] text-survey-muted">
                       {row.trackLabel}
                     </div>
                   </div>
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-text)] group-hover:border-[var(--rr-accent)] group-hover:bg-[var(--rr-accent-solid)] group-hover:text-white transition-all">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-survey-border bg-survey-bg text-survey-ink group-hover:border-survey-basalt group-hover:bg-survey-basalt group-hover:text-survey-basalt-text transition-colors">
                     <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                   </span>
                 </div>
@@ -993,32 +973,32 @@ export function HomeLandingView({
       <section
         id="passes"
         aria-label="Cycle 035 orbital passes and HDF5 granule index"
-        className="border-t border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 sm:px-8 py-20"
+        className="border-t border-survey-border bg-survey-surface px-4 sm:px-8 py-20"
       >
         <div className="mx-auto max-w-[1600px] space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
-              <div className="font-micro text-[var(--rr-teal)]">
+              <div className="font-micro text-data-hv font-semibold">
                 04 / Satellite Passes &amp; .H5 Files
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[var(--rr-text)]">
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-survey-ink">
                 Verified Cycle 035 Scans
               </h2>
             </div>
             <button
               type="button"
               onClick={onOpenAbout}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-4 py-2 font-micro text-[var(--rr-text)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)] transition-colors self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-survey-border-strong bg-survey-bg px-4 py-2 font-micro text-survey-ink hover:bg-survey-raised transition-colors self-start sm:self-auto"
             >
               <Layers className="h-3.5 w-3.5" aria-hidden="true" />
               <span>View Data Guide</span>
             </button>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)]/90 shadow-sm">
+          <div className="overflow-x-auto rounded-xl border border-survey-border bg-survey-bg">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[var(--rr-border)] bg-[var(--rr-surface-2)]/50 font-micro text-[var(--rr-muted)]">
+                <tr className="border-b border-survey-border bg-survey-surface font-micro text-survey-muted">
                   <th className="py-3.5 pl-5 pr-4 font-medium">Orbit / Frame</th>
                   <th className="py-3.5 px-4 font-medium">Study Region</th>
                   <th className="py-3.5 px-4 font-medium">Scan Time (UTC)</th>
@@ -1033,7 +1013,7 @@ export function HomeLandingView({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--rr-border)] text-xs">
+              <tbody className="divide-y divide-survey-border text-xs">
                 {recordsToShow.map((rec) => {
                   const targetRegionId: RegionId =
                     rec.regionId === 'japan'
@@ -1046,34 +1026,34 @@ export function HomeLandingView({
                     <tr
                       key={rec.fileName}
                       onClick={() => triggerDiveIntoGlobe(targetRegionId)}
-                      className="cursor-pointer hover:bg-[var(--rr-surface)]/75 transition-colors"
+                      className="cursor-pointer hover:bg-survey-surface transition-colors"
                     >
-                      <td className="py-4 pl-5 pr-4 font-display text-sm sm:text-base font-bold text-[var(--rr-text)] whitespace-nowrap">
+                      <td className="py-4 pl-5 pr-4 font-display text-sm sm:text-base font-bold text-survey-ink whitespace-nowrap">
                         Track {rec.parsedGranule.rel_orbit} · F
                         {rec.parsedGranule.frame}
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-[var(--rr-text)] font-medium">
+                        <div className="text-survey-ink font-medium">
                           {rec.regionName}
                         </div>
-                        <div className="font-mono text-[10px] text-[var(--rr-subtle)] truncate max-w-[260px] sm:max-w-[340px]">
+                        <div className="font-mono text-[10px] text-survey-muted truncate max-w-[260px] sm:max-w-[340px]">
                           {rec.fileName}
                         </div>
                       </td>
-                      <td className="py-4 px-4 font-mono text-[var(--rr-muted)] tabular-nums whitespace-nowrap">
+                      <td className="py-4 px-4 font-mono text-survey-muted tabular-nums whitespace-nowrap">
                         {rec.parsedGranule.start}
                       </td>
-                      <td className="py-4 px-4 font-mono text-[var(--rr-muted)] hidden md:table-cell whitespace-nowrap">
+                      <td className="py-4 px-4 font-mono text-survey-muted hidden md:table-cell whitespace-nowrap">
                         40+5 MHz · {rec.parsedGranule.polar}
                       </td>
-                      <td className="py-4 px-4 font-mono font-bold text-[var(--rr-accent)] text-right tabular-nums whitespace-nowrap">
+                      <td className="py-4 px-4 font-mono font-bold text-survey-ink text-right tabular-nums whitespace-nowrap">
                         {rec.fileSizeMB.toLocaleString('en-US', {
                           minimumFractionDigits: 1,
                           maximumFractionDigits: 1,
                         })}{' '}
                         MB
                       </td>
-                      <td className="py-4 pl-4 pr-5 font-mono text-[var(--rr-teal)] text-right hidden sm:table-cell whitespace-nowrap">
+                      <td className="py-4 pl-4 pr-5 font-mono text-data-hv text-right hidden sm:table-cell whitespace-nowrap">
                         {rec.headerDigest}
                       </td>
                     </tr>

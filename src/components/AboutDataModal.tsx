@@ -22,14 +22,14 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 p-4"
+      className="fixed inset-0 z-[2000] flex items-center justify-center bg-[var(--rr-space-bg)]/80 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="about-modal-title"
       onClick={onClose}
     >
       <div
-        className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] p-6 text-[var(--rr-text)] shadow-2xl"
+        className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-survey-border-strong bg-survey-bg p-6 text-survey-ink"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-[var(--rr-border)] pb-4">
@@ -169,11 +169,11 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
           </section>
         </div>
 
-        <div className="mt-5 flex justify-end border-t border-[var(--rr-border)] pt-4">
+        <div className="mt-5 flex justify-end border-t border-survey-border pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-5 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--rr-text-inverse)] hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+            className="rounded-lg border border-survey-basalt bg-survey-basalt px-5 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-survey-basalt-text hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
           >
             Back to App
           </button>

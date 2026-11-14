@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  AlertTriangle,
   CheckCircle2,
   Database,
   Moon,
@@ -113,11 +114,7 @@ export function Navbar({
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-[1050] h-[58px] w-full border-b border-[var(--rr-border)] text-[var(--rr-text)] transition-colors duration-300"
-      style={{
-        backgroundColor: 'var(--rr-header-bg)',
-        backdropFilter: 'blur(16px)',
-      }}
+      className="fixed top-0 left-0 right-0 z-[1050] h-[58px] w-full border-b border-survey-border bg-[var(--rr-header-bg)] text-survey-ink transition-colors duration-200"
     >
       <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 relative">
         {/* Left: Clean Brand Wordmark */}
@@ -125,9 +122,9 @@ export function Navbar({
           type="button"
           onClick={onNavigateHome}
           aria-label="Return to Radar Rhythm 3D Earth Portal"
-          className="font-display text-[15px] sm:text-[17px] font-bold tracking-[-0.02em] text-[var(--rr-text)] whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] rounded-lg px-1"
+          className="font-display text-[15px] sm:text-[17px] font-bold tracking-[-0.02em] text-survey-ink whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt rounded-lg px-1"
         >
-          Radar Rhythm<span className="text-[var(--rr-accent)]">.</span>
+          Radar Rhythm<span className="text-data-hh">.</span>
         </button>
 
         {/* Center/Right: Calm Navigation Links + Utility Triggers */}
@@ -165,7 +162,7 @@ export function Navbar({
                 <button
                   type="button"
                   onClick={onEnterExplorer}
-                  className="text-xs font-semibold text-[var(--rr-accent)] hover:text-[var(--rr-teal)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                  className="text-xs font-semibold text-survey-ink hover:text-data-hv transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
                 >
                   04 2D Radar Map
                 </button>
@@ -175,7 +172,7 @@ export function Navbar({
                 <button
                   type="button"
                   onClick={onNavigateHome}
-                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                  className="text-xs font-medium text-survey-muted hover:text-survey-ink transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
                 >
                   3D Earth
                 </button>
@@ -186,10 +183,10 @@ export function Navbar({
                       key={item.id}
                       type="button"
                       onClick={() => onSelectRegion(item.id)}
-                      className={`text-xs font-medium transition-colors whitespace-nowrap shrink-0 rounded-full px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
+                      className={`text-xs font-medium transition-colors whitespace-nowrap shrink-0 rounded-lg px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt ${
                         active
-                          ? 'bg-[var(--rr-accent-solid)] text-white'
-                          : 'text-[var(--rr-muted)] hover:text-[var(--rr-accent)]'
+                          ? 'bg-survey-basalt text-survey-basalt-text'
+                          : 'text-survey-muted hover:text-survey-ink'
                       }`}
                     >
                       {item.label}
@@ -199,7 +196,7 @@ export function Navbar({
                 <button
                   type="button"
                   onClick={onOpenAbout}
-                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                  className="text-xs font-medium text-survey-muted hover:text-survey-ink transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
                 >
                   Data Sources
                 </button>
@@ -207,7 +204,7 @@ export function Navbar({
             )}
           </nav>
 
-          {/* Compact SMIAN_P5 DB Status Trigger + Theme Icon + Pill Action */}
+          {/* Compact SMIAN_P5 DB Status Trigger + Theme Icon + Action */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="relative">
               <button
@@ -220,19 +217,22 @@ export function Navbar({
                     ? `${connectedLabel} — click to configure database URL`
                     : 'Local database offline — using verified sample; click to configure URL'
                 }
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--rr-border)] bg-[var(--rr-surface)] px-2.5 py-1 text-[11px] font-medium text-[var(--rr-text)] hover:border-[var(--rr-border-strong)] transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-survey-border bg-survey-bg px-2.5 py-1 text-[11px] font-medium text-survey-ink hover:border-survey-border-strong transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
               >
                 <span
+                  aria-hidden="true"
                   className={`h-2 w-2 rounded-full shrink-0 ${
                     isLaptopConnected
-                      ? 'bg-[var(--rr-teal)]'
-                      : 'bg-[var(--rr-warm)]'
+                      ? 'bg-status-success'
+                      : 'bg-status-warning'
                   }`}
                 />
                 <span className="hidden lg:inline">
                   {isLaptopConnected ? 'SMIAN_P5 Live' : 'SMIAN_P5 Cache'}
                 </span>
-                <span className="lg:hidden">DB</span>
+                <span className="lg:hidden">
+                  {isLaptopConnected ? 'Live' : 'Cache'}
+                </span>
               </button>
 
               {isDbPopoverOpen && (
@@ -240,15 +240,15 @@ export function Navbar({
                   data-testid="laptop-db-popover"
                   role="dialog"
                   aria-label="Live Satellite Database Connection"
-                  className="fixed sm:absolute right-3 sm:right-0 top-[64px] sm:top-full sm:mt-3 w-[calc(100vw-24px)] sm:w-[390px] rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)] p-4 shadow-xl z-[1200] space-y-3 text-[var(--rr-text)]"
+                  className="fixed sm:absolute right-3 sm:right-0 top-[64px] sm:top-full sm:mt-3 w-[calc(100vw-24px)] sm:w-[390px] rounded-xl border border-survey-border-strong bg-survey-surface p-4 z-[1200] space-y-3 text-survey-ink"
                 >
-                  <div className="flex items-center justify-between gap-2 border-b border-[var(--rr-border)] pb-2.5">
+                  <div className="flex items-center justify-between gap-2 border-b border-survey-border pb-2.5">
                     <div className="flex items-center gap-2">
                       <Database
-                        className="h-4 w-4 text-[var(--rr-accent)]"
+                        className="h-4 w-4 text-survey-ink"
                         aria-hidden="true"
                       />
-                      <span className="text-xs font-semibold text-[var(--rr-text)]">
+                      <span className="text-xs font-semibold text-survey-ink">
                         SMIAN_P5 Laptop .H5 Server
                       </span>
                     </div>
@@ -256,17 +256,17 @@ export function Navbar({
                       type="button"
                       onClick={() => setIsDbPopoverOpen(false)}
                       aria-label="Close database settings"
-                      className="rounded-full p-1 text-[var(--rr-muted)] hover:bg-[var(--rr-surface)] hover:text-[var(--rr-text)] transition-colors"
+                      className="rounded-lg p-1 text-survey-muted hover:bg-survey-raised hover:text-survey-ink transition-colors"
                     >
                       <X className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   </div>
 
                   <div
-                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium ${
+                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
                       isLaptopConnected
-                        ? 'border-[var(--rr-success-border)] bg-[var(--rr-success-bg)] text-[var(--rr-success-text)]'
-                        : 'border-[var(--rr-warn-border)] bg-[var(--rr-warn-bg)] text-[var(--rr-warn-text)]'
+                        ? 'border-status-success bg-status-success-bg text-status-success-text'
+                        : 'border-status-warning bg-status-warning-bg text-status-warning-text'
                     }`}
                   >
                     {isLaptopConnected ? (
@@ -275,9 +275,12 @@ export function Navbar({
                         <span>{connectedLabel}</span>
                       </>
                     ) : (
-                      <span>
-                        Laptop tunnel offline — serving verified Cycle 035 baselines.
-                      </span>
+                      <>
+                        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span>
+                          Laptop tunnel offline — serving verified Cycle 035 baselines.
+                        </span>
+                      </>
                     )}
                   </div>
 
@@ -305,7 +308,7 @@ export function Navbar({
                       data-testid="laptop-db-connect-btn"
                       onClick={() => void runProbe(dbUrlInput, true)}
                       disabled={isProbing}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--rr-accent-solid)] px-3.5 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-survey-basalt px-3.5 py-2 text-xs font-semibold text-survey-basalt-text hover:opacity-90 disabled:opacity-60 transition-opacity"
                     >
                       <RefreshCw
                         className={`h-3 w-3 ${isProbing ? 'animate-spin' : ''}`}
@@ -316,15 +319,15 @@ export function Navbar({
                     <button
                       type="button"
                       onClick={() => void runProbe(DEFAULT_LAPTOP_DB_URL, true)}
-                      className="rounded-full border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3.5 py-2 text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-text)] transition-colors"
+                      className="rounded-lg border border-survey-border bg-survey-bg px-3.5 py-2 text-xs font-medium text-survey-muted hover:text-survey-ink hover:border-survey-border-strong transition-colors"
                     >
                       Reset
                     </button>
                   </div>
 
-                  <div className="border-t border-[var(--rr-border)] pt-2 text-[11px] text-[var(--rr-muted)]">
+                  <div className="border-t border-survey-border pt-2 text-[11px] text-survey-muted">
                     Endpoint:{' '}
-                    <code className="font-mono text-[var(--rr-text)] break-all">
+                    <code className="font-mono text-survey-ink break-all">
                       {getLaptopDbUrl()}/api/local-h5
                     </code>
                   </div>
@@ -338,7 +341,7 @@ export function Navbar({
               onClick={onToggleTheme}
               aria-pressed={isDark}
               aria-label={isDark ? 'Switch to Light theme' : 'Switch to Dark theme'}
-              className="rounded-full p-2 text-[var(--rr-muted)] hover:bg-[var(--rr-surface)] hover:text-[var(--rr-accent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="rounded-lg p-2 text-survey-muted hover:bg-survey-raised hover:text-survey-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
               {isDark ? (
                 <Sun className="h-3.5 w-3.5" aria-hidden="true" />
@@ -352,7 +355,7 @@ export function Navbar({
               onClick={onToggleDemoMode}
               aria-pressed={!demoMode}
               title="Toggle between Sample Mode and Live NASA API Feeds"
-              className="rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface)] px-3 sm:px-3.5 py-1 text-[11px] font-medium text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-all whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="rounded-lg border border-survey-border-strong bg-survey-bg px-3 sm:px-3.5 py-1 text-[11px] font-medium text-survey-ink hover:bg-survey-basalt hover:border-survey-basalt hover:text-survey-basalt-text transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
               <span className="hidden sm:inline">
                 {demoMode ? 'Sample · Live NASA' : 'Live NASA On'}

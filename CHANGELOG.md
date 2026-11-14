@@ -82,3 +82,10 @@
 ### Changed
 - **Palette & Typography (`index.html`, `src/index.css`, `src/components/Navbar.tsx`)**: Loaded `'Syne'`, `'Sora'`, and `'JetBrains Mono'`, applied the Dark Editorial color tokens (`#0A0C0E`, `#EDE7DC`, `#E8913C`, `#2E6B72`), and introduced the fixed `58px` translucent navigation bar (`01 PORTAL`, `02 CATALOGUE`, `03 ROSTER & PASSES`, `04 2D RADAR MAP`) while keeping all 2D Leaflet, `GranuleInspector`, `HistoryIssuesPanel`, `PageAwareAssistant`, and `/api/local-h5` flows intact.
 
+## [0.4.1] - 2026-11-14 — Matte Realistic Earth, Zero-Gap Opening Shutters & Soft Bedroom Palette
+### Changed
+- **Matte Realistic 3D Earth (`src/components/EarthGlobeCanvas.tsx`)**: Removed `RoomEnvironment` IBL glare and glossy ocean specular overrides, raised surface roughness (`0.94`, `metalness: 0.0`, `envMapIntensity: 0.0`), calibrated oblique solar/hemisphere lighting, and softened atmospheric haze so Earth renders realistically without plastic highlights.
+- **Zero-Gap Opening Shutters & Smooth 60/120fps Damping (`src/components/HomeLandingView.tsx`)**: Fixed the initial `scrollY = 0` shutter gap by positioning overlapping `50.5vw` left/right shutters flush at center and added high-resolution rAF interpolation over the existing scroll-driven shutter and rotation logic.
+- **Comfortable Typography, Palette & Rounded UI (`index.html`, `src/index.css`, `src/App.tsx`, `src/components/Navbar.tsx`, `src/components/HomeLandingView.tsx`, `src/components/RegionExplorerView.tsx`, `src/components/Footer.tsx`, `src/components/PageAwareAssistant.tsx`)**: Switched to `Plus Jakarta Sans`, `DM Sans`, and `JetBrains Mono`; applied the warm linen/taupe/slate-blue/verdigris-teal color profile (plus matching soft slate dark theme); unified branding around `Radar Rhythm.`; and smoothed boxy corners across cards, pills, tables, and controls.
+
+

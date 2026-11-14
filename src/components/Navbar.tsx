@@ -32,9 +32,9 @@ interface NavbarProps {
 }
 
 const REGION_LINKS: Array<{ id: RegionId; label: string }> = [
-  { id: 'maharashtra_gcov', label: 'MAHARASHTRA' },
-  { id: 'northeast_india_gcov', label: 'NE INDIA' },
-  { id: 'japan_gunw', label: 'JAPAN' },
+  { id: 'maharashtra_gcov', label: 'Maharashtra' },
+  { id: 'northeast_india_gcov', label: 'NE India' },
+  { id: 'japan_gunw', label: 'Japan' },
 ];
 
 export function Navbar({
@@ -113,55 +113,61 @@ export function Navbar({
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-[1050] h-[58px] w-full border-b border-[rgba(237,231,220,0.13)] bg-[rgba(10,12,14,0.78)] text-[#EDE7DC]"
-      style={{ backdropFilter: 'blur(14px)' }}
+      className="fixed top-0 left-0 right-0 z-[1050] h-[58px] w-full border-b border-[var(--rr-border)] text-[var(--rr-text)] transition-colors duration-300"
+      style={{
+        backgroundColor: 'var(--rr-header-bg)',
+        backdropFilter: 'blur(16px)',
+      }}
     >
       <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 relative">
-        {/* Left: Syne Display Wordmark */}
+        {/* Left: Clean Brand Wordmark */}
         <button
           type="button"
           onClick={onNavigateHome}
-          aria-label="Return to NISAR Pulse 3D Earth Portal"
-          className="font-display text-[13px] sm:text-[15px] font-extrabold tracking-[-0.025em] text-[#EDE7DC] whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+          aria-label="Return to Radar Rhythm 3D Earth Portal"
+          className="font-display text-[15px] sm:text-[17px] font-bold tracking-[-0.02em] text-[var(--rr-text)] whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] rounded-lg px-1"
         >
-          NISAR PULSE<span className="text-[#E8913C]">.</span>
+          Radar Rhythm<span className="text-[var(--rr-accent)]">.</span>
         </button>
 
-        {/* Center/Right: Editorial Navigation Links + Utility Triggers + Single Pill CTA */}
-        <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 min-w-0" ref={popoverRef}>
+        {/* Center/Right: Calm Navigation Links + Utility Triggers */}
+        <div
+          className="flex items-center gap-2 sm:gap-4 lg:gap-6 min-w-0"
+          ref={popoverRef}
+        >
           <nav
             aria-label="Primary portal navigation"
-            className="hidden md:flex items-center gap-5 lg:gap-6"
+            className="hidden md:flex items-center gap-4 lg:gap-6"
           >
             {pageView === 'HOME_3D_GLOBE' ? (
               <>
                 <button
                   type="button"
                   onClick={() => scrollToHomeSection('portal')}
-                  className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
-                  01 PORTAL
+                  01 Earth Portal
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollToHomeSection('catalogue')}
-                  className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
-                  02 CATALOGUE
+                  02 Captures
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollToHomeSection('roster')}
-                  className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
-                  03 ROSTER &amp; PASSES
+                  03 Regions &amp; Passes
                 </button>
                 <button
                   type="button"
                   onClick={onEnterExplorer}
-                  className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#EDE7DC] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                  className="text-xs font-semibold text-[var(--rr-accent)] hover:text-[var(--rr-teal)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
-                  04 2D RADAR MAP
+                  04 2D Radar Map
                 </button>
               </>
             ) : (
@@ -169,9 +175,9 @@ export function Navbar({
                 <button
                   type="button"
                   onClick={onNavigateHome}
-                  className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
-                  01 PORTAL
+                  3D Earth
                 </button>
                 {REGION_LINKS.map((item) => {
                   const active = activeRegionId === item.id;
@@ -180,10 +186,10 @@ export function Navbar({
                       key={item.id}
                       type="button"
                       onClick={() => onSelectRegion(item.id)}
-                      className={`text-[10.5px] font-medium uppercase tracking-[0.14em] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C] ${
+                      className={`text-xs font-medium transition-colors whitespace-nowrap shrink-0 rounded-full px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                         active
-                          ? 'text-[#E8913C] underline underline-offset-4'
-                          : 'text-[#9EA5A8] hover:text-[#E8913C]'
+                          ? 'bg-[var(--rr-accent-solid)] text-white'
+                          : 'text-[var(--rr-muted)] hover:text-[var(--rr-accent)]'
                       }`}
                     >
                       {item.label}
@@ -193,15 +199,15 @@ export function Navbar({
                 <button
                   type="button"
                   onClick={onOpenAbout}
-                  className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                  className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
-                  DATA SOURCES
+                  Data Sources
                 </button>
               </>
             )}
           </nav>
 
-          {/* Compact SMIAN_P5 DB Status Trigger + Theme Icon + Single Pill Action */}
+          {/* Compact SMIAN_P5 DB Status Trigger + Theme Icon + Pill Action */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="relative">
               <button
@@ -214,15 +220,17 @@ export function Navbar({
                     ? `${connectedLabel} — click to configure database URL`
                     : 'Local database offline — using verified sample; click to configure URL'
                 }
-                className="inline-flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#E8913C] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--rr-border)] bg-[var(--rr-surface)] px-2.5 py-1 text-[11px] font-medium text-[var(--rr-text)] hover:border-[var(--rr-border-strong)] transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
               >
                 <span
-                  className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                    isLaptopConnected ? 'bg-[#6EE7B7]' : 'bg-[#E8913C]'
+                  className={`h-2 w-2 rounded-full shrink-0 ${
+                    isLaptopConnected
+                      ? 'bg-[var(--rr-teal)]'
+                      : 'bg-[var(--rr-warm)]'
                   }`}
                 />
                 <span className="hidden lg:inline">
-                  {isLaptopConnected ? 'SMIAN_P5 LIVE' : 'SMIAN_P5 CACHE'}
+                  {isLaptopConnected ? 'SMIAN_P5 Live' : 'SMIAN_P5 Cache'}
                 </span>
                 <span className="lg:hidden">DB</span>
               </button>
@@ -232,12 +240,15 @@ export function Navbar({
                   data-testid="laptop-db-popover"
                   role="dialog"
                   aria-label="Live Satellite Database Connection"
-                  className="fixed sm:absolute right-3 sm:right-0 top-[58px] sm:top-full sm:mt-3 w-[calc(100vw-24px)] sm:w-[390px] border border-[rgba(232,145,60,0.45)] bg-[#101317] p-4 shadow-2xl z-[1200] space-y-3 text-[#EDE7DC]"
+                  className="fixed sm:absolute right-3 sm:right-0 top-[64px] sm:top-full sm:mt-3 w-[calc(100vw-24px)] sm:w-[390px] rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)] p-4 shadow-xl z-[1200] space-y-3 text-[var(--rr-text)]"
                 >
-                  <div className="flex items-center justify-between gap-2 border-b border-[rgba(237,231,220,0.13)] pb-2">
+                  <div className="flex items-center justify-between gap-2 border-b border-[var(--rr-border)] pb-2.5">
                     <div className="flex items-center gap-2">
-                      <Database className="h-4 w-4 text-[#E8913C]" aria-hidden="true" />
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em]">
+                      <Database
+                        className="h-4 w-4 text-[var(--rr-accent)]"
+                        aria-hidden="true"
+                      />
+                      <span className="text-xs font-semibold text-[var(--rr-text)]">
                         SMIAN_P5 Laptop .H5 Server
                       </span>
                     </div>
@@ -245,17 +256,17 @@ export function Navbar({
                       type="button"
                       onClick={() => setIsDbPopoverOpen(false)}
                       aria-label="Close database settings"
-                      className="p-1 text-[#9EA5A8] hover:text-[#EDE7DC]"
+                      className="rounded-full p-1 text-[var(--rr-muted)] hover:bg-[var(--rr-surface)] hover:text-[var(--rr-text)] transition-colors"
                     >
                       <X className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   </div>
 
                   <div
-                    className={`flex items-center gap-2 border px-2.5 py-2 text-[11px] font-medium ${
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium ${
                       isLaptopConnected
-                        ? 'border-[#2E6B72] bg-[#0C231D] text-[#6EE7B7]'
-                        : 'border-[#E8913C]/50 bg-[#261808] text-[#F5B873]'
+                        ? 'border-[var(--rr-success-border)] bg-[var(--rr-success-bg)] text-[var(--rr-success-text)]'
+                        : 'border-[var(--rr-warn-border)] bg-[var(--rr-warn-bg)] text-[var(--rr-warn-text)]'
                     }`}
                   >
                     {isLaptopConnected ? (
@@ -273,7 +284,7 @@ export function Navbar({
                   <div className="space-y-1.5">
                     <label
                       htmlFor="laptop-db-url-input"
-                      className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#9EA5A8]"
+                      className="block text-[11px] font-medium text-[var(--rr-muted)]"
                     >
                       Database Tunnel URL
                     </label>
@@ -284,7 +295,7 @@ export function Navbar({
                       value={dbUrlInput}
                       onChange={(e) => setDbUrlInput(e.target.value)}
                       placeholder={DEFAULT_LAPTOP_DB_URL}
-                      className="w-full border border-[rgba(237,231,220,0.13)] bg-[#0A0C0E] px-2.5 py-2 font-mono text-xs text-[#EDE7DC] focus:border-[#E8913C] focus:outline-none"
+                      className="w-full rounded-xl border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2 font-mono text-xs text-[var(--rr-text)] focus:border-[var(--rr-accent)] focus:outline-none"
                     />
                   </div>
 
@@ -294,7 +305,7 @@ export function Navbar({
                       data-testid="laptop-db-connect-btn"
                       onClick={() => void runProbe(dbUrlInput, true)}
                       disabled={isProbing}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 border border-[#E8913C] bg-[#0A0C0E] px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#E8913C] hover:bg-[#9A4A0B] hover:text-white disabled:opacity-60 transition-colors"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--rr-accent-solid)] px-3.5 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
                     >
                       <RefreshCw
                         className={`h-3 w-3 ${isProbing ? 'animate-spin' : ''}`}
@@ -305,15 +316,15 @@ export function Navbar({
                     <button
                       type="button"
                       onClick={() => void runProbe(DEFAULT_LAPTOP_DB_URL, true)}
-                      className="border border-[rgba(237,231,220,0.13)] bg-[#0A0C0E] px-2.5 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#9EA5A8] hover:text-[#EDE7DC]"
+                      className="rounded-full border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3.5 py-2 text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-text)] transition-colors"
                     >
                       Reset
                     </button>
                   </div>
 
-                  <div className="border-t border-[rgba(237,231,220,0.13)] pt-2 text-[11px] text-[#9EA5A8]">
+                  <div className="border-t border-[var(--rr-border)] pt-2 text-[11px] text-[var(--rr-muted)]">
                     Endpoint:{' '}
-                    <code className="font-mono text-[#EDE7DC] break-all">
+                    <code className="font-mono text-[var(--rr-text)] break-all">
                       {getLaptopDbUrl()}/api/local-h5
                     </code>
                   </div>
@@ -327,7 +338,7 @@ export function Navbar({
               onClick={onToggleTheme}
               aria-pressed={isDark}
               aria-label={isDark ? 'Switch to Light theme' : 'Switch to Dark theme'}
-              className="p-1.5 text-[#9EA5A8] hover:text-[#E8913C] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+              className="rounded-full p-2 text-[var(--rr-muted)] hover:bg-[var(--rr-surface)] hover:text-[var(--rr-accent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
             >
               {isDark ? (
                 <Sun className="h-3.5 w-3.5" aria-hidden="true" />
@@ -336,19 +347,18 @@ export function Navbar({
               )}
             </button>
 
-            {/* Single Pill Action Button */}
             <button
               type="button"
               onClick={onToggleDemoMode}
               aria-pressed={!demoMode}
               title="Toggle between Sample Mode and Live NASA API Feeds"
-              className="rounded-full border border-[rgba(237,231,220,0.22)] px-2.5 sm:px-3.5 py-1 text-[9.5px] sm:text-[10.5px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.14em] text-[#EDE7DC] hover:border-[#E8913C] hover:text-[#E8913C] transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+              className="rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface)] px-3 sm:px-3.5 py-1 text-[11px] font-medium text-[var(--rr-text)] hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-all whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
             >
               <span className="hidden sm:inline">
-                {demoMode ? 'SAMPLE · LIVE NASA' : 'LIVE NASA ON'}
+                {demoMode ? 'Sample · Live NASA' : 'Live NASA On'}
               </span>
               <span className="sm:hidden">
-                {demoMode ? 'SAMPLE' : 'LIVE NASA'}
+                {demoMode ? 'Sample' : 'Live'}
               </span>
             </button>
           </div>

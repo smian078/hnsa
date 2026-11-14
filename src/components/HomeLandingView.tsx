@@ -65,6 +65,11 @@ export function HomeLandingView({
   );
   const [diveRequest, setDiveRequest] = useState<DiveRequest | null>(null);
 
+  const targetProgressRef = useRef<number>(0);
+  const currentProgressRef = useRef<number>(0);
+  const targetDegRef = useRef<number>(0);
+  const currentDegRef = useRef<number>(0);
+
   // Throwable Card Deck state
   const [deckOrder, setDeckOrder] = useState<number[]>([0, 1, 2, 3]);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({
@@ -99,37 +104,70 @@ export function HomeLandingView({
     };
   }, []);
 
-  // Scroll-bound portal & statement rotation driven via rAF
+  // Scroll-bound portal & statement rotation with smooth high-resolution rAF damping
   useEffect(() => {
-    let ticking = false;
-    const updateScrollMetrics = () => {
-      ticking = false;
-      const y = window.scrollY || 0;
-      setGlobalScrollDeg((y * 0.14) % 360);
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      const portalEl = portalRef.current;
-      if (!portalEl) return;
-      const rect = portalEl.getBoundingClientRect();
-      // Shutter opens rapidly across first ~680px so shutters clear well past 350px within 700px scroll
-      const travelDist = Math.max(460, Math.min(rect.height - window.innerHeight, 680));
-      const scrolledPastTop = Math.max(0, -rect.top);
-      const nextProgress = Math.max(0, Math.min(1, scrolledPastTop / travelDist));
-      setPortalProgress(nextProgress);
+    let rafId: number | null = null;
+
+    const stepSmooth = () => {
+      rafId = null;
+      const dp = targetProgressRef.current - currentProgressRef.current;
+      const dd = targetDegRef.current - currentDegRef.current;
+
+      if (prefersReduced || (Math.abs(dp) < 0.0004 && Math.abs(dd) < 0.05)) {
+        currentProgressRef.current = targetProgressRef.current;
+        currentDegRef.current = targetDegRef.current;
+        setPortalProgress(currentProgressRef.current);
+        setGlobalScrollDeg(currentDegRef.current % 360);
+        return;
+      }
+
+      currentProgressRef.current += dp * 0.28;
+      currentDegRef.current += dd * 0.28;
+      setPortalProgress(currentProgressRef.current);
+      setGlobalScrollDeg(currentDegRef.current % 360);
+      rafId = window.requestAnimationFrame(stepSmooth);
     };
 
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(updateScrollMetrics);
+    const readScrollTargets = () => {
+      const y = window.scrollY || 0;
+      targetDegRef.current = y * 0.14;
+
+      const portalEl = portalRef.current;
+      if (portalEl) {
+        const rect = portalEl.getBoundingClientRect();
+        // Shutter opens smoothly across first ~680px so shutters clear >350px within 700px scroll
+        const travelDist = Math.max(460, Math.min(rect.height - window.innerHeight, 680));
+        const scrolledPastTop = Math.max(0, -rect.top);
+        targetProgressRef.current = Math.max(0, Math.min(1, scrolledPastTop / travelDist));
+      }
+
+      if (prefersReduced) {
+        currentProgressRef.current = targetProgressRef.current;
+        currentDegRef.current = targetDegRef.current;
+        setPortalProgress(currentProgressRef.current);
+        setGlobalScrollDeg(currentDegRef.current % 360);
+        return;
+      }
+
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(stepSmooth);
       }
     };
 
-    updateScrollMetrics();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    readScrollTargets();
+    window.addEventListener('scroll', readScrollTargets, { passive: true });
+    window.addEventListener('resize', readScrollTargets, { passive: true });
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('scroll', readScrollTargets);
+      window.removeEventListener('resize', readScrollTargets);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+        rafId = null;
+      }
       if (flingTimerRef.current) window.clearTimeout(flingTimerRef.current);
       if (scrollDiveTimerRef.current) window.clearTimeout(scrollDiveTimerRef.current);
     };
@@ -165,58 +203,58 @@ export function HomeLandingView({
     return [
       {
         key: 'sleeve-mh',
-        indexLabel: 'SLEEVE 01 / 04',
+        indexLabel: 'CARD 01 / 04',
         regionId: 'maharashtra_gcov',
         zoneId: 'mh_gosikhurd',
-        accentHex: '#E8913C',
-        kicker: 'GCOV · WATER & CROPS · INDIA',
-        title: 'Maharashtra Spillway & Cotton Belt',
+        accentHex: 'var(--rr-accent)',
+        kicker: 'WATER & CROPS · INDIA',
+        title: 'Maharashtra Spillway & Farms',
         subtitle:
-          'Spots calm standing floodwater near Gosikhurd Dam and measures soaked black-cotton topsoil in Wardha.',
+          'Spots calm standing floodwater near Gosikhurd Dam and checks wet cotton soils in Wardha.',
         metricBadge: `${(mh?.hhFloodMinDb ?? -21.4).toFixed(1)} dB HH · ${Math.round((mh?.soilMoistureIndex ?? 0.78) * 100)}% MOIST`,
         trackLabel: `TRACK ${mh?.parsedGranule.rel_orbit ?? '084'} · FRAME ${mh?.parsedGranule.frame ?? '013'}`,
         fileSizeLabel: `${((mh?.fileSizeMB ?? 6388) / 1000).toFixed(2)} GB .H5`,
       },
       {
         key: 'sleeve-ne',
-        indexLabel: 'SLEEVE 02 / 04',
+        indexLabel: 'CARD 02 / 04',
         regionId: 'northeast_india_gcov',
         zoneId: 'ne_kaziranga',
-        accentHex: '#4DB8C4',
-        kicker: 'GCOV · MONSOON FLOODS · INDIA',
-        title: 'Brahmaputra & Kaziranga Wetlands',
+        accentHex: 'var(--rr-teal)',
+        kicker: 'MONSOON FLOODS · INDIA',
+        title: 'Brahmaputra & Kaziranga',
         subtitle:
-          'Pierces 95%+ monsoon storm clouds to track flooded riverbanks and inundated rhino sanctuary grasslands.',
+          'Looks straight through heavy monsoon storm clouds to map flooded riverbanks and wildlife wetlands.',
         metricBadge: `${(ne?.hhFloodMinDb ?? -23.0).toFixed(1)} dB HH · ${Math.round((ne?.soilMoistureIndex ?? 0.82) * 100)}% WET`,
         trackLabel: `TRACK ${ne?.parsedGranule.rel_orbit ?? '098'} · FRAME ${ne?.parsedGranule.frame ?? '013'}`,
         fileSizeLabel: `${((ne?.fileSizeMB ?? 6520) / 1000).toFixed(2)} GB .H5`,
       },
       {
         key: 'sleeve-jp',
-        indexLabel: 'SLEEVE 03 / 04',
+        indexLabel: 'CARD 03 / 04',
         regionId: 'japan_gunw',
         zoneId: 'jp_noto',
-        accentHex: '#E8913C',
-        kicker: 'GUNW · CRUSTAL MOTION · JAPAN',
-        title: 'Noto Peninsula & Toyama Bay Faults',
+        accentHex: 'var(--rr-warm)',
+        kicker: 'LAND SHIFT · JAPAN',
+        title: 'Noto Peninsula & Toyama Bay',
         subtitle:
-          'Measures centimeter-scale ground uplift and coastal sinking after earthquakes with 81% phase coherence.',
+          'Measures how many centimeters the coastline rose or sank after earthquakes with 81% signal clarity.',
         metricBadge: `${(jp?.losDisplacementCm ?? -18.6).toFixed(1)} cm LOS · γ ${(jp?.coherenceMean ?? 0.81).toFixed(2)}`,
         trackLabel: `TRACK ${jp?.parsedGranule.rel_orbit ?? '009'} · FRAME ${jp?.parsedGranule.frame ?? '024'}`,
         fileSizeLabel: `${((jp?.fileSizeMB ?? 5132) / 1000).toFixed(2)} GB .H5`,
       },
       {
         key: 'sleeve-archive',
-        indexLabel: 'SLEEVE 04 / 04',
+        indexLabel: 'CARD 04 / 04',
         regionId: 'maharashtra_gcov',
         zoneId: 'mh_wardha',
-        accentHex: '#4DB8C4',
-        kicker: 'SMIAN_P5 · LIVE .H5 ARCHIVE',
-        title: `${recordsToShow.length} Verified Granules · ${totalGb} GB`,
+        accentHex: 'var(--rr-teal)',
+        kicker: 'SMIAN_P5 · LIVE .H5 STORAGE',
+        title: `${recordsToShow.length} Verified Files · ${totalGb} GB`,
         subtitle:
-          'Direct HDF5 magic-byte headers & live disk slices served straight from local storage with instant offline fallback.',
-        metricBadge: '100% HDF5 MAGIC · SHA-256',
-        trackLabel: 'CYCLE 035 · 40+5 MHz DHDH',
+          'Real NASA radar files and live disk reads served straight from local storage with instant offline fallback.',
+        metricBadge: '100% VERIFIED · SHA-256',
+        trackLabel: 'CYCLE 035 · L-BAND 24 CM',
         fileSizeLabel: `${totalGb} GB TOTAL`,
       },
     ];
@@ -233,13 +271,17 @@ export function HomeLandingView({
     regionOrder.forEach((regionId) => {
       const ds = REGION_DATASETS[regionId];
       const accentHex =
-        regionId === 'northeast_india_gcov' ? '#4DB8C4' : '#E8913C';
+        regionId === 'northeast_india_gcov'
+          ? 'var(--rr-teal)'
+          : regionId === 'japan_gunw'
+            ? 'var(--rr-warm)'
+            : 'var(--rr-accent)';
       const regionCode =
         regionId === 'maharashtra_gcov'
-          ? 'MAHARASHTRA · GCOV'
+          ? 'MAHARASHTRA · WATER & CROPS'
           : regionId === 'northeast_india_gcov'
-            ? 'NE INDIA · GCOV'
-            : 'JAPAN · GUNW';
+            ? 'NE INDIA · MONSOON FLOODS'
+            : 'JAPAN · LAND SHIFT';
 
       ds.zones.forEach((zone, zIdx) => {
         const latestPass = zone.passes[zone.passes.length - 1];
@@ -316,7 +358,7 @@ export function HomeLandingView({
         });
         setFlingDir(0);
         setDragOffset({ x: 0, y: 0 });
-      }, 240);
+      }, 260);
     },
     []
   );
@@ -380,20 +422,20 @@ export function HomeLandingView({
   const shuttersClear = portalProgress > 0.72;
 
   return (
-    <div className="bg-[#0A0C0E] text-[#EDE7DC] overflow-x-clip">
+    <div className="bg-[var(--rr-bg)] text-[var(--rr-text)] overflow-x-clip transition-colors duration-300">
       {/* SECTION 1: Scroll-Bound 240vh Portal Hero */}
       <section
         id="portal"
         ref={portalRef}
         aria-label="Orbital Portal Earth Hero"
-        className="relative h-[240vh] bg-[#0A0C0E]"
+        className="relative h-[240vh] bg-[var(--rr-bg)]"
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden isolate">
-          {/* Back Layer: Interactive Google-Earth 3D Globe */}
+          {/* Back Layer: Interactive 3D Satellite Earth */}
           <div
             className="absolute inset-0 will-change-transform"
             style={{
-              transform: `scale(${(1.12 - portalProgress * 0.12).toFixed(4)})`,
+              transform: `scale(${(1.1 - portalProgress * 0.1).toFixed(4)})`,
               transformOrigin: 'center center',
             }}
           >
@@ -407,14 +449,14 @@ export function HomeLandingView({
               diveRequest={diveRequest}
             />
 
-            {/* Subtle Duotone Atmospheric Wash + Radial Vignette */}
+            {/* Subtle Slate-Teal Wash & Soft Vignette */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(232, 145, 60, 0.22) 0%, rgba(10, 12, 14, 0) 48%, rgba(46, 107, 114, 0.24) 100%)',
-                opacity: portalProgress * 0.18,
+                  'linear-gradient(135deg, rgba(75, 114, 133, 0.14) 0%, rgba(14, 19, 27, 0) 48%, rgba(42, 107, 110, 0.16) 100%)',
+                opacity: portalProgress * 0.2,
               }}
             />
             <div
@@ -422,65 +464,65 @@ export function HomeLandingView({
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(circle at 50% 50%, rgba(10,12,14,0) 44%, rgba(10,12,14,0.72) 100%)',
+                  'radial-gradient(circle at 50% 50%, rgba(14,19,27,0) 52%, rgba(14,19,27,0.52) 100%)',
               }}
             />
           </div>
 
-          {/* Middle Layer: Two 51vw Shutters with 1px Hairline Seam */}
+          {/* Middle Layer: Two Overlapping 50.5vw Shutters (Zero Gap at scrollY = 0) */}
           <div
             aria-hidden="true"
-            className={`absolute inset-0 flex justify-between ${
+            className={`absolute inset-0 ${
               shuttersClear ? 'pointer-events-none' : 'pointer-events-auto'
             }`}
           >
             <div
               data-testid="portal-shutter-left"
-              className="h-full w-[51vw] bg-[#0A0C0E] border-r border-[rgba(237,231,220,0.13)] will-change-transform"
+              className="absolute inset-y-0 left-0 w-[50.5vw] bg-[var(--rr-bg)] border-r border-[var(--rr-border)] will-change-transform transition-colors duration-300"
               style={{
-                transform: `translate3d(calc(-4vw - ${(portalProgress * 105).toFixed(2)}%), 0, 0)`,
+                transform: `translate3d(-${(portalProgress * 106).toFixed(3)}%, 0, 0)`,
               }}
             />
             <div
               data-testid="portal-shutter-right"
-              className="h-full w-[51vw] bg-[#0A0C0E] border-l border-[rgba(237,231,220,0.13)] will-change-transform"
+              className="absolute inset-y-0 right-0 w-[50.5vw] bg-[var(--rr-bg)] border-l border-[var(--rr-border)] will-change-transform transition-colors duration-300"
               style={{
-                transform: `translate3d(calc(4vw + ${(portalProgress * 105).toFixed(2)}%), 0, 0)`,
+                transform: `translate3d(${(portalProgress * 106).toFixed(3)}%, 0, 0)`,
               }}
             />
           </div>
 
-          {/* Two 6px Center Accent Dots Drifting Toward Opposite Corners */}
+          {/* Two Soft 7px Center Accent Dots Drifting Toward Opposite Corners */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
           >
             <span
-              className="absolute h-[6px] w-[6px] rounded-full bg-[#E8913C]"
+              className="absolute h-[7px] w-[7px] rounded-full bg-[var(--rr-accent)]"
               style={{
-                transform: `translate3d(${(-portalProgress * 42).toFixed(1)}vw, ${(-portalProgress * 34).toFixed(1)}vh, 0)`,
+                transform: `translate3d(${(-portalProgress * 42).toFixed(2)}vw, ${(-portalProgress * 34).toFixed(2)}vh, 0)`,
                 opacity: Math.max(0.15, 1 - portalProgress * 0.85),
               }}
             />
             <span
-              className="absolute h-[6px] w-[6px] rounded-full bg-[#2E6B72]"
+              className="absolute h-[7px] w-[7px] rounded-full bg-[var(--rr-teal)]"
               style={{
-                transform: `translate3d(${(portalProgress * 42).toFixed(1)}vw, ${(portalProgress * 34).toFixed(1)}vh, 0)`,
+                transform: `translate3d(${(portalProgress * 42).toFixed(2)}vw, ${(portalProgress * 34).toFixed(2)}vh, 0)`,
                 opacity: Math.max(0.15, 1 - portalProgress * 0.85),
               }}
             />
           </div>
 
-          {/* Top Layer: Split Syne 800 Title */}
+          {/* Top Layer: Comfortable Split Hero Wordmark */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-3 sm:px-4">
             <h1
-              className="font-display font-extrabold text-[#EDE7DC] uppercase select-none flex items-center justify-center gap-2 sm:gap-5 will-change-transform"
+              className="font-display font-extrabold text-[var(--rr-text)] uppercase select-none flex items-center justify-center gap-2 sm:gap-4 will-change-transform"
               style={{
-                fontSize: 'clamp(26px, 6.6vw, 106px)',
-                lineHeight: 0.9,
-                letterSpacing: `${(0.04 - portalProgress * 0.07).toFixed(4)}em`,
-                transform: `scale(${(1 + portalProgress * 0.16).toFixed(4)})`,
-                opacity: Math.max(0.08, 1 - portalProgress * 0.92),
+                fontSize: 'clamp(28px, 6.2vw, 96px)',
+                lineHeight: 0.94,
+                letterSpacing: `${(0.02 - portalProgress * 0.04).toFixed(4)}em`,
+                transform: `scale(${(1 + portalProgress * 0.14).toFixed(4)})`,
+                opacity: Math.max(0, 1 - portalProgress * 1.18),
               }}
             >
               <span
@@ -489,7 +531,7 @@ export function HomeLandingView({
                   transform: `translate3d(${(-portalProgress * 24).toFixed(2)}vw, 0, 0)`,
                 }}
               >
-                NISAR
+                RADAR
               </span>
               <span
                 className="inline-block will-change-transform"
@@ -497,25 +539,37 @@ export function HomeLandingView({
                   transform: `translate3d(${(portalProgress * 24).toFixed(2)}vw, 0, 0)`,
                 }}
               >
-                PULSE<span className="text-[#E8913C]">.</span>
+                RHYTHM<span className="text-[var(--rr-accent)]">.</span>
               </span>
             </h1>
           </div>
 
-          {/* Corner Metadata Pinned Cleanly to Frame Edges (Clears 58px Fixed Navbar & Mobile Stack) */}
+          {/* Corner Metadata Pinned Cleanly to Frame Edges */}
           <div className="pointer-events-none absolute top-[68px] sm:top-[74px] left-4 right-4 sm:left-8 sm:right-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-            <span className="font-micro text-[#9EA5A8]">
-              01 / L-BAND 24 CM INTERFEROMETRY
+            <span
+              className={`font-micro transition-colors ${
+                shuttersClear ? 'text-[#E2DCD2]' : 'text-[var(--rr-muted)]'
+              }`}
+            >
+              01 / Cloud-Piercing Earth Radar
             </span>
-            <span className="font-micro text-[#E8913C] sm:text-right">
-              CYCLE 035 · {recordsToShow.length} .H5 ({totalGb} GB)
+            <span
+              className={`font-micro sm:text-right transition-colors ${
+                shuttersClear ? 'text-[#7BA1B5]' : 'text-[var(--rr-accent)]'
+              }`}
+            >
+              Cycle 035 · {recordsToShow.length} Scans ({totalGb} GB)
             </span>
           </div>
 
-          <div className="pointer-events-none absolute bottom-[68px] sm:bottom-5 left-4 sm:left-8 font-micro text-[#9EA5A8] max-w-[65vw]">
+          <div
+            className={`pointer-events-none absolute bottom-[68px] sm:bottom-5 left-4 sm:left-8 font-micro max-w-[65vw] transition-colors ${
+              shuttersClear ? 'text-[#E2DCD2]' : 'text-[var(--rr-muted)]'
+            }`}
+          >
             {shuttersClear
-              ? 'ORBITAL PORTAL OPEN · CLICK TARGET RING'
-              : 'SCROLL TO PART ORBITAL SHUTTERS'}
+              ? 'Earth View Open · Click Any Highlighted Ring'
+              : 'Scroll Smoothly to Reveal Earth View'}
           </div>
 
           {!shuttersClear && (
@@ -524,9 +578,9 @@ export function HomeLandingView({
                 type="button"
                 data-testid="skip-portal-btn"
                 onClick={handleSkipPortal}
-                className="rounded-full border border-[rgba(237,231,220,0.32)] bg-[#0A0C0E]/92 px-3.5 sm:px-4 py-1.5 font-micro text-[#EDE7DC] hover:border-[#E8913C] hover:text-[#E8913C] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                className="rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface)]/95 px-4 py-1.5 font-micro text-[var(--rr-text)] shadow-sm hover:border-[var(--rr-accent)] hover:bg-[var(--rr-accent-solid)] hover:text-white transition-all duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
               >
-                SKIP PORTAL / INTERACT WITH GLOBE
+                Open 3D Earth View
               </button>
             </div>
           )}
@@ -536,25 +590,27 @@ export function HomeLandingView({
       {/* SECTION 2: Statement Fold */}
       <section
         aria-label="Mission physics statement"
-        className="min-h-[85vh] border-t border-[rgba(237,231,220,0.13)] bg-[#0A0C0E] px-4 sm:px-8 py-20 sm:py-28 flex items-center"
+        className="min-h-[82vh] border-t border-[var(--rr-border)] bg-[var(--rr-bg)] px-4 sm:px-8 py-20 sm:py-28 flex items-center"
       >
         <div className="mx-auto w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-8 space-y-6">
-            <div className="font-micro text-[#E8913C]">
-              01 / ACTIVE MICROWAVE INTERFEROMETRY
+            <div className="font-micro text-[var(--rr-accent)]">
+              01 / All-Weather Satellite Radar
             </div>
             <h2
-              className="font-display font-bold tracking-[-0.025em] leading-[1.06] text-[#EDE7DC] max-w-[22ch]"
-              style={{ fontSize: 'clamp(24px, 3.6vw, 52px)' }}
+              className="font-display font-bold tracking-[-0.02em] leading-[1.12] text-[var(--rr-text)] max-w-[23ch]"
+              style={{ fontSize: 'clamp(24px, 3.4vw, 48px)' }}
             >
-              Twenty-four centimeter radar echoes see straight through monsoon
-              storms, flooded paddy deltas, and shifting coastal fault lines—{' '}
-              <span className="text-[#E8913C]">day or night, zero clouds.</span>
+              Twenty-four centimeter radar beams look right through monsoon
+              clouds, flooded farmlands, and shifting ground—{' '}
+              <span className="text-[var(--rr-accent)]">
+                day or night, in any weather.
+              </span>
             </h2>
-            <p className="text-sm sm:text-base text-[#9EA5A8] max-w-2xl leading-relaxed">
-              Every 12 days, NASA-ISRO NISAR sweeps India and the Pacific Rim in
-              dual polarization (HH + HV) to detect mirror-flat floodwater,
-              soaked crop soils, and centimeter-level earthquake ground shift.
+            <p className="text-sm sm:text-base text-[var(--rr-muted)] max-w-2xl leading-relaxed">
+              Every 12 days, the NASA–ISRO NISAR satellite scans India and the
+              Pacific Rim to spot calm floodwater, measure soaked crop soils,
+              and track centimeter-level ground movement after earthquakes.
             </p>
           </div>
 
@@ -568,10 +624,10 @@ export function HomeLandingView({
             </div>
 
             {/* Scroll-Rotating Circular Radar Interferogram Badge */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-surface)]/75 px-4 py-3">
               <div
                 aria-hidden="true"
-                className="h-24 w-24 sm:h-28 sm:w-28 will-change-transform"
+                className="h-20 w-20 sm:h-24 sm:w-24 will-change-transform"
                 style={{ transform: `rotate(${globalScrollDeg.toFixed(1)}deg)` }}
               >
                 <svg viewBox="0 0 120 120" className="h-full w-full">
@@ -580,7 +636,7 @@ export function HomeLandingView({
                     cy="60"
                     r="54"
                     fill="none"
-                    stroke="rgba(237,231,220,0.22)"
+                    stroke="var(--rr-border-strong)"
                     strokeWidth="1"
                     strokeDasharray="4 4"
                   />
@@ -589,15 +645,15 @@ export function HomeLandingView({
                     cy="60"
                     r="38"
                     fill="none"
-                    stroke="#E8913C"
-                    strokeWidth="1.2"
+                    stroke="var(--rr-accent)"
+                    strokeWidth="1.4"
                   />
                   <circle
                     cx="60"
                     cy="60"
                     r="22"
                     fill="none"
-                    stroke="#2E6B72"
+                    stroke="var(--rr-teal)"
                     strokeWidth="1.4"
                   />
                   <line
@@ -605,7 +661,7 @@ export function HomeLandingView({
                     y1="6"
                     x2="60"
                     y2="114"
-                    stroke="rgba(237,231,220,0.16)"
+                    stroke="var(--rr-border)"
                     strokeWidth="1"
                   />
                   <line
@@ -613,61 +669,62 @@ export function HomeLandingView({
                     y1="60"
                     x2="114"
                     y2="60"
-                    stroke="rgba(237,231,220,0.16)"
+                    stroke="var(--rr-border)"
                     strokeWidth="1"
                   />
-                  <circle cx="60" cy="6" r="3" fill="#E8913C" />
-                  <circle cx="98" cy="60" r="2.5" fill="#4DB8C4" />
+                  <circle cx="60" cy="6" r="3.5" fill="var(--rr-accent)" />
+                  <circle cx="98" cy="60" r="3" fill="var(--rr-teal)" />
                 </svg>
               </div>
-              <div className="font-micro text-[#9EA5A8] space-y-1">
-                <div className="text-[#EDE7DC]">CYCLE 035 SEAL</div>
-                <div>2π = 12.0 CM LOS</div>
-                <div>DHDH POLARIMETRY</div>
+              <div className="font-micro text-[var(--rr-muted)] space-y-1">
+                <div className="text-[var(--rr-text)] font-semibold">
+                  Cycle 035 Seal
+                </div>
+                <div>2π = 12.0 cm Shift</div>
+                <div>Dual-Band Radar</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: Releases & Physical Throwable Card Deck */}
+      {/* SECTION 3: Releases & Interactive Sleeve Card Deck */}
       <section
         id="catalogue"
-        aria-label="Cycle 035 Orbital Sleeves"
-        className="border-t border-[rgba(237,231,220,0.13)] bg-[#101317] px-4 sm:px-8 py-20 sm:py-24"
+        aria-label="Cycle 035 Radar Capture Cards"
+        className="border-t border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 sm:px-8 py-20 sm:py-24"
       >
         <div className="mx-auto max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Editorial Info & Controls */}
+          {/* Left Column: Info & Controls */}
           <div className="lg:col-span-5 space-y-6">
             <div className="space-y-3">
-              <div className="font-micro text-[#E8913C]">
-                02 / RELEASE CATALOGUE · SMIAN_P5
+              <div className="font-micro text-[var(--rr-accent)]">
+                02 / Capture Cards · SMIAN_P5
               </div>
-              <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-[-0.025em] text-[#EDE7DC]">
-                Cycle 035 Orbital Sleeves
+              <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-[-0.02em] text-[var(--rr-text)]">
+                Cycle 035 Radar Captures
               </h2>
-              <p className="text-sm text-[#9EA5A8] leading-relaxed">
-                Throw through the physical orbital sleeves to inspect each
-                verified NASA HDF5 capture ({totalGb} GB across{' '}
-                {recordsToShow.length} live granules) or dive directly into the
-                2D Leaflet radar map.
+              <p className="text-sm text-[var(--rr-muted)] leading-relaxed">
+                Swipe or flick through the capture cards to browse each NASA
+                radar scan ({totalGb} GB across {recordsToShow.length} live
+                files), or jump straight into the interactive 2D map.
               </p>
             </div>
 
-            {/* Active Top Sleeve Summary Strip */}
-            <div className="border-y border-[rgba(237,231,220,0.13)] py-4 space-y-2">
+            {/* Active Top Card Summary Strip */}
+            <div className="rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)]/80 p-4 space-y-2 shadow-sm">
               <div className="flex items-center justify-between gap-2 font-micro">
                 <span style={{ color: topSleeve.accentHex }}>
                   {topSleeve.indexLabel}
                 </span>
-                <span className="font-mono text-[#9EA5A8]">
+                <span className="font-mono text-[var(--rr-muted)]">
                   {topSleeve.fileSizeLabel}
                 </span>
               </div>
-              <div className="font-display text-xl font-bold text-[#EDE7DC]">
+              <div className="font-display text-xl font-bold text-[var(--rr-text)]">
                 {topSleeve.title}
               </div>
-              <p className="text-xs text-[#9EA5A8] leading-relaxed">
+              <p className="text-xs text-[var(--rr-muted)] leading-relaxed">
                 {topSleeve.subtitle}
               </p>
             </div>
@@ -678,7 +735,7 @@ export function HomeLandingView({
                 onClick={() =>
                   triggerDiveIntoGlobe(topSleeve.regionId, topSleeve.zoneId)
                 }
-                className="inline-flex items-center gap-2 border border-[#E8913C] px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#E8913C] hover:bg-[#9A4A0B] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--rr-accent-solid)] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-92 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
               >
                 <Compass className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Dive Into 2D Map</span>
@@ -687,9 +744,9 @@ export function HomeLandingView({
                 type="button"
                 data-testid="cycle-next-sleeve-btn"
                 onClick={() => cycleSleeve(1)}
-                className="inline-flex items-center gap-2 border border-[rgba(237,231,220,0.2)] px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#EDE7DC] hover:border-[#2E6B72] hover:text-[#4DB8C4] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-5 py-2.5 text-xs font-semibold text-[var(--rr-text)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
               >
-                <span>Cycle Next Sleeve</span>
+                <span>Next Card</span>
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
@@ -702,14 +759,14 @@ export function HomeLandingView({
               data-testid="sleeve-deck"
               tabIndex={0}
               role="region"
-              aria-label="Interactive Cycle 035 Orbital Sleeve Deck. Drag sideways or press Left and Right arrow keys."
+              aria-label="Interactive Cycle 035 Capture Card Deck. Drag sideways or press Left and Right arrow keys."
               onPointerDown={handleDeckPointerDown}
               onPointerMove={handleDeckPointerMove}
               onPointerUp={handleDeckPointerEnd}
               onPointerCancel={handleDeckPointerEnd}
               onKeyDown={handleDeckKeyDown}
               style={{ touchAction: 'pan-y' }}
-              className="relative aspect-square w-full max-w-[440px] select-none cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+              className="relative aspect-square w-full max-w-[440px] rounded-2xl select-none cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
             >
               {deckOrder
                 .slice()
@@ -723,20 +780,20 @@ export function HomeLandingView({
                     stackPos === 0
                       ? 0
                       : stackPos === 1
-                        ? 3.2
+                        ? 2.8
                         : stackPos === 2
-                          ? -2.8
-                          : 5.0;
+                          ? -2.4
+                          : 4.4;
                   const baseTranslateX = stackPos * 7;
                   const baseTranslateY = stackPos * 7;
                   const baseScale = 1 - stackPos * 0.032;
 
                   let transformStr = `translate3d(${baseTranslateX}px, ${baseTranslateY}px, 0) scale(${baseScale}) rotate(${baseRotate}deg)`;
-                  let cardOpacity = Math.max(0.55, 1 - stackPos * 0.14);
+                  let cardOpacity = Math.max(0.58, 1 - stackPos * 0.14);
 
                   if (isTop) {
                     if (flingDir !== 0) {
-                      transformStr = `translate3d(${flingDir * 460}px, -28px, 0) scale(0.95) rotate(${flingDir * 16}deg)`;
+                      transformStr = `translate3d(${flingDir * 460}px, -24px, 0) scale(0.95) rotate(${flingDir * 14}deg)`;
                       cardOpacity = 0;
                     } else {
                       const rot = dragOffset.x * 0.045;
@@ -755,13 +812,13 @@ export function HomeLandingView({
                         transition:
                           isTop && isDragging
                             ? 'none'
-                            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease',
-                        boxShadow: '0 24px 52px rgba(0, 0, 0, 0.56)',
+                            : 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease',
+                        boxShadow: '0 20px 44px rgba(37, 42, 48, 0.16)',
                       }}
-                      className="absolute inset-0 flex flex-col justify-between border border-[rgba(237,231,220,0.2)] bg-[#14181D] p-6 sm:p-7"
+                      className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)] p-6 sm:p-7"
                     >
-                      {/* Top Record Sleeve Header */}
-                      <div className="flex items-start justify-between gap-2 border-b border-[rgba(237,231,220,0.13)] pb-3">
+                      {/* Top Card Header */}
+                      <div className="flex items-start justify-between gap-2 border-b border-[var(--rr-border)] pb-3">
                         <div>
                           <div
                             className="font-micro font-semibold"
@@ -769,37 +826,37 @@ export function HomeLandingView({
                           >
                             {card.kicker}
                           </div>
-                          <div className="font-mono text-[10px] text-[#9EA5A8] mt-1">
+                          <div className="font-mono text-[10px] text-[var(--rr-muted)] mt-1">
                             {card.trackLabel}
                           </div>
                         </div>
-                        <span className="font-mono text-[10px] border border-[rgba(237,231,220,0.16)] px-2 py-0.5 text-[#EDE7DC]">
+                        <span className="rounded-full font-mono text-[10px] border border-[var(--rr-border)] bg-[var(--rr-surface)] px-2.5 py-0.5 text-[var(--rr-text)]">
                           {card.indexLabel}
                         </span>
                       </div>
 
-                      {/* Center Radar Disc Graphic */}
+                      {/* Center Card Details */}
                       <div className="my-auto flex flex-col items-start gap-4 py-3">
-                        <div className="flex items-center gap-3">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-1">
                           <span
-                            className="h-3 w-3 rounded-full"
+                            className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: card.accentHex }}
                           />
-                          <span className="font-mono text-xs font-bold text-[#EDE7DC] tracking-wider">
+                          <span className="font-mono text-xs font-bold text-[var(--rr-text)] tracking-wide">
                             {card.metricBadge}
                           </span>
                         </div>
-                        <h3 className="font-display text-2xl sm:text-3xl font-extrabold tracking-[-0.025em] leading-[1.08] text-[#EDE7DC]">
+                        <h3 className="font-display text-2xl sm:text-3xl font-extrabold tracking-[-0.02em] leading-[1.1] text-[var(--rr-text)]">
                           {card.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-[#9EA5A8] leading-relaxed">
+                        <p className="text-xs sm:text-sm text-[var(--rr-muted)] leading-relaxed">
                           {card.subtitle}
                         </p>
                       </div>
 
-                      {/* Bottom Sleeve Footer */}
-                      <div className="flex items-center justify-between gap-3 border-t border-[rgba(237,231,220,0.13)] pt-3.5">
-                        <span className="font-mono text-[11px] font-bold text-[#9EA5A8]">
+                      {/* Bottom Card Footer */}
+                      <div className="flex items-center justify-between gap-3 border-t border-[var(--rr-border)] pt-3.5">
+                        <span className="font-mono text-[11px] font-bold text-[var(--rr-muted)]">
                           {card.fileSizeLabel}
                         </span>
                         <button
@@ -807,9 +864,9 @@ export function HomeLandingView({
                           onClick={() =>
                             triggerDiveIntoGlobe(card.regionId, card.zoneId)
                           }
-                          className="inline-flex items-center gap-1.5 border border-[#E8913C] px-3 py-1.5 font-micro text-[#E8913C] hover:bg-[#9A4A0B] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[var(--rr-accent-solid)] px-3.5 py-1.5 text-[11px] font-semibold text-white hover:opacity-92 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                         >
-                          <span>DIVE INTO 2D MAP</span>
+                          <span>Open 2D Map</span>
                           <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                         </button>
                       </div>
@@ -836,46 +893,46 @@ export function HomeLandingView({
                           (idx + 3) % 4,
                         ]);
                       }}
-                      className={`h-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C] ${
+                      className={`h-2 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
                         active
-                          ? 'w-6 bg-[#E8913C]'
-                          : 'w-2 bg-[rgba(237,231,220,0.22)] hover:bg-[#9EA5A8]'
+                          ? 'w-7 bg-[var(--rr-accent-solid)]'
+                          : 'w-2 bg-[var(--rr-border-strong)] hover:bg-[var(--rr-accent)]'
                       }`}
                     />
                   );
                 })}
               </div>
-              <span className="font-micro text-[#6C7378]">
-                DRAG SLEEVE TO THROW · OR PRESS ← → ARROWS
+              <span className="font-micro text-[var(--rr-subtle)]">
+                Drag card sideways to flick · or press ← → keys
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 4: Hairline Roster Across All Study Zones */}
+      {/* SECTION 4: Monitored Study Zones List */}
       <section
         id="roster"
         aria-label="Monitored study zones roster"
-        className="border-t border-[rgba(237,231,220,0.13)] bg-[#0A0C0E] px-4 sm:px-8 py-20"
+        className="border-t border-[var(--rr-border)] bg-[var(--rr-bg)] px-4 sm:px-8 py-20"
       >
         <div className="mx-auto max-w-[1600px] space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
-              <div className="font-micro text-[#E8913C]">
-                03 / ACTIVE STUDY ROSTER
+              <div className="font-micro text-[var(--rr-accent)]">
+                03 / Monitored Study Areas
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#EDE7DC]">
-                Six Ground-Truth Monitoring Zones
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[var(--rr-text)]">
+                Six Ground-Truth Locations
               </h2>
             </div>
-            <p className="text-xs text-[#9EA5A8] max-w-md">
-              Select any study zone below to dive the 3D Earth into that
-              basin’s live 2D radar and satellite split view.
+            <p className="text-xs sm:text-sm text-[var(--rr-muted)] max-w-md">
+              Choose any place below to smoothly zoom the 3D Earth into its live
+              2D satellite and radar view.
             </p>
           </div>
 
-          <div className="border-t border-[rgba(237,231,220,0.13)]">
+          <div className="space-y-2.5">
             {rosterRows.map((row) => (
               <button
                 key={row.zoneId}
@@ -886,14 +943,14 @@ export function HomeLandingView({
                     : `roster-zone-${row.zoneId}`
                 }
                 onClick={() => triggerDiveIntoGlobe(row.regionId, row.zoneId)}
-                className="group w-full border-b border-[rgba(237,231,220,0.13)] py-5 px-2 sm:px-3 grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-left hover:bg-[#101317] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                className="group w-full rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-surface)]/55 py-4 px-4 sm:px-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-left hover:border-[var(--rr-border-strong)] hover:bg-[var(--rr-surface)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
               >
                 <div className="md:col-span-3 flex items-center gap-3">
-                  <span className="font-mono text-xs text-[#6C7378]">
+                  <span className="font-mono text-xs text-[var(--rr-subtle)]">
                     {row.indexStr}
                   </span>
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
+                    className="h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: row.accentHex }}
                   />
                   <span
@@ -905,24 +962,24 @@ export function HomeLandingView({
                 </div>
 
                 <div className="md:col-span-5 space-y-1">
-                  <div className="font-display text-lg sm:text-xl font-bold text-[#EDE7DC] group-hover:text-[#E8913C] transition-colors">
+                  <div className="font-display text-lg sm:text-xl font-bold text-[var(--rr-text)] group-hover:text-[var(--rr-accent)] transition-colors">
                     {row.zoneName}
                   </div>
-                  <div className="text-xs text-[#9EA5A8] line-clamp-1">
+                  <div className="text-xs text-[var(--rr-muted)] line-clamp-1">
                     {row.plainFocus}
                   </div>
                 </div>
 
                 <div className="md:col-span-4 flex items-center justify-between md:justify-end gap-4">
                   <div className="text-left md:text-right">
-                    <div className="font-mono text-xs font-bold text-[#EDE7DC] tabular-nums">
+                    <div className="font-mono text-xs font-bold text-[var(--rr-text)] tabular-nums">
                       {row.metricLabel}
                     </div>
-                    <div className="font-mono text-[10px] text-[#6C7378]">
+                    <div className="font-mono text-[10px] text-[var(--rr-subtle)]">
                       {row.trackLabel}
                     </div>
                   </div>
-                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center border border-[rgba(237,231,220,0.16)] text-[#EDE7DC] group-hover:border-[#E8913C] group-hover:text-[#E8913C] transition-colors">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-text)] group-hover:border-[var(--rr-accent)] group-hover:bg-[var(--rr-accent-solid)] group-hover:text-white transition-all">
                     <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                   </span>
                 </div>
@@ -936,47 +993,47 @@ export function HomeLandingView({
       <section
         id="passes"
         aria-label="Cycle 035 orbital passes and HDF5 granule index"
-        className="border-t border-[rgba(237,231,220,0.13)] bg-[#101317] px-4 sm:px-8 py-20"
+        className="border-t border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 sm:px-8 py-20"
       >
         <div className="mx-auto max-w-[1600px] space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
-              <div className="font-micro text-[#4DB8C4]">
-                04 / ORBITAL PASS &amp; .H5 GRANULE DATES
+              <div className="font-micro text-[var(--rr-teal)]">
+                04 / Satellite Passes &amp; .H5 Files
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#EDE7DC]">
-                Verified Cycle 035 Acquisitions
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[var(--rr-text)]">
+                Verified Cycle 035 Scans
               </h2>
             </div>
             <button
               type="button"
               onClick={onOpenAbout}
-              className="inline-flex items-center gap-1.5 border border-[rgba(237,231,220,0.2)] px-3.5 py-2 font-micro text-[#EDE7DC] hover:border-[#E8913C] hover:text-[#E8913C] transition-colors self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] px-4 py-2 font-micro text-[var(--rr-text)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)] transition-colors self-start sm:self-auto"
             >
               <Layers className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>VIEW HDF5 SCHEMA SPEC</span>
+              <span>View Data Guide</span>
             </button>
           </div>
 
-          <div className="overflow-x-auto border-y border-[rgba(237,231,220,0.13)]">
+          <div className="overflow-x-auto rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)]/90 shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[rgba(237,231,220,0.13)] font-micro text-[#9EA5A8]">
-                  <th className="py-3.5 pr-4 font-medium">ORBIT / FRAME</th>
-                  <th className="py-3.5 px-4 font-medium">STUDY BASIN</th>
-                  <th className="py-3.5 px-4 font-medium">ACQUISITION UTC</th>
+                <tr className="border-b border-[var(--rr-border)] bg-[var(--rr-surface-2)]/50 font-micro text-[var(--rr-muted)]">
+                  <th className="py-3.5 pl-5 pr-4 font-medium">Orbit / Frame</th>
+                  <th className="py-3.5 px-4 font-medium">Study Region</th>
+                  <th className="py-3.5 px-4 font-medium">Scan Time (UTC)</th>
                   <th className="py-3.5 px-4 font-medium hidden md:table-cell">
-                    BAND / POL
+                    Radar Mode
                   </th>
                   <th className="py-3.5 px-4 font-medium text-right">
-                    FILE SIZE
+                    File Size
                   </th>
-                  <th className="py-3.5 pl-4 font-medium text-right hidden sm:table-cell">
-                    HEADER DIGEST
+                  <th className="py-3.5 pl-4 pr-5 font-medium text-right hidden sm:table-cell">
+                    File Digest
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[rgba(237,231,220,0.1)] text-xs">
+              <tbody className="divide-y divide-[var(--rr-border)] text-xs">
                 {recordsToShow.map((rec) => {
                   const targetRegionId: RegionId =
                     rec.regionId === 'japan'
@@ -989,34 +1046,34 @@ export function HomeLandingView({
                     <tr
                       key={rec.fileName}
                       onClick={() => triggerDiveIntoGlobe(targetRegionId)}
-                      className="cursor-pointer hover:bg-[#14181D] transition-colors"
+                      className="cursor-pointer hover:bg-[var(--rr-surface)]/75 transition-colors"
                     >
-                      <td className="py-4 pr-4 font-display text-sm sm:text-base font-bold text-[#EDE7DC] whitespace-nowrap">
+                      <td className="py-4 pl-5 pr-4 font-display text-sm sm:text-base font-bold text-[var(--rr-text)] whitespace-nowrap">
                         Track {rec.parsedGranule.rel_orbit} · F
                         {rec.parsedGranule.frame}
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-[#EDE7DC] font-medium">
+                        <div className="text-[var(--rr-text)] font-medium">
                           {rec.regionName}
                         </div>
-                        <div className="font-mono text-[10px] text-[#6C7378] truncate max-w-[260px] sm:max-w-[340px]">
+                        <div className="font-mono text-[10px] text-[var(--rr-subtle)] truncate max-w-[260px] sm:max-w-[340px]">
                           {rec.fileName}
                         </div>
                       </td>
-                      <td className="py-4 px-4 font-mono text-[#9EA5A8] tabular-nums whitespace-nowrap">
+                      <td className="py-4 px-4 font-mono text-[var(--rr-muted)] tabular-nums whitespace-nowrap">
                         {rec.parsedGranule.start}
                       </td>
-                      <td className="py-4 px-4 font-mono text-[#9EA5A8] hidden md:table-cell whitespace-nowrap">
+                      <td className="py-4 px-4 font-mono text-[var(--rr-muted)] hidden md:table-cell whitespace-nowrap">
                         40+5 MHz · {rec.parsedGranule.polar}
                       </td>
-                      <td className="py-4 px-4 font-mono font-bold text-[#E8913C] text-right tabular-nums whitespace-nowrap">
+                      <td className="py-4 px-4 font-mono font-bold text-[var(--rr-accent)] text-right tabular-nums whitespace-nowrap">
                         {rec.fileSizeMB.toLocaleString('en-US', {
                           minimumFractionDigits: 1,
                           maximumFractionDigits: 1,
                         })}{' '}
                         MB
                       </td>
-                      <td className="py-4 pl-4 font-mono text-[#4DB8C4] text-right hidden sm:table-cell whitespace-nowrap">
+                      <td className="py-4 pl-4 pr-5 font-mono text-[var(--rr-teal)] text-right hidden sm:table-cell whitespace-nowrap">
                         {rec.headerDigest}
                       </td>
                     </tr>

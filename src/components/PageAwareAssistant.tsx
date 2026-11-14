@@ -198,14 +198,14 @@ export function PageAwareAssistant({
         <section
           data-testid="page-aware-assistant-panel"
           aria-label="Context-aware AI guide chat"
-          className="w-[calc(100vw-2rem)] sm:w-[370px] border border-[var(--rr-border-strong)] bg-[var(--rr-bg)] text-[var(--rr-text)] shadow-2xl flex flex-col max-h-[500px]"
+          className="w-[calc(100vw-2rem)] sm:w-[370px] overflow-hidden rounded-2xl border border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-text)] shadow-xl flex flex-col max-h-[500px]"
         >
           {/* Header */}
-          <div className="flex items-start justify-between gap-2 border-b border-[var(--rr-border)] bg-[var(--rr-surface)] px-3.5 py-3 text-[var(--rr-text)]">
+          <div className="flex items-start justify-between gap-2 border-b border-[var(--rr-border)] bg-[var(--rr-surface)] px-4 py-3 text-[var(--rr-text)]">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <Bot className="h-4 w-4 text-[var(--rr-accent)] shrink-0" aria-hidden="true" />
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
+                <span className="text-xs font-semibold text-[var(--rr-text)]">
                   Radar Rhythm AI Guide
                 </span>
               </div>
@@ -238,9 +238,9 @@ export function PageAwareAssistant({
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5 min-h-[160px] max-h-[250px]">
             {messages.length === 0 ? (
-              <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-3 text-xs text-[var(--rr-muted)] leading-relaxed">
-                <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-accent)] mb-1">
-                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+              <div className="rounded-xl border border-[var(--rr-border)] bg-[var(--rr-surface)] p-3 text-xs text-[var(--rr-muted)] leading-relaxed">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--rr-accent)] mb-1">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>Ready to Help</span>
                 </div>
                 {pageView === 'HOME_3D_GLOBE'
@@ -251,7 +251,7 @@ export function PageAwareAssistant({
               messages.map((m) => (
                 <div
                   key={m.id}
-                  className={`p-2.5 text-xs leading-relaxed border ${
+                  className={`rounded-xl p-3 text-xs leading-relaxed border ${
                     m.role === 'user'
                       ? 'ml-6 border-[var(--rr-accent-solid)] bg-[var(--rr-accent-solid)] text-white'
                       : 'mr-4 border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-text)]'
@@ -259,7 +259,7 @@ export function PageAwareAssistant({
                 >
                   <p>{m.text}</p>
                   {m.source && (
-                    <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
+                    <div className="mt-1 font-mono text-[10px] opacity-75">
                       {m.source === 'GEMINI_4_HYDROGEN'
                         ? 'AI Answer'
                         : 'Built-In Guide'}
@@ -269,18 +269,18 @@ export function PageAwareAssistant({
               ))
             )}
             {isSending && (
-              <div className="h-12 skeleton-shimmer border border-[var(--rr-border)]" aria-busy="true" />
+              <div className="h-12 rounded-xl skeleton-shimmer border border-[var(--rr-border)]" aria-busy="true" />
             )}
           </div>
 
           {/* Quick Suggested Questions */}
-          <div className="border-t border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2 flex flex-wrap gap-1.5">
+          <div className="border-t border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2.5 flex flex-wrap gap-1.5">
             {activeSuggestions.map((prompt) => (
               <button
                 key={prompt}
                 type="button"
                 onClick={() => void submitQuestion(prompt)}
-                className="border border-[var(--rr-border)] bg-[var(--rr-bg)] px-2 py-1 text-[10px] font-semibold text-[var(--rr-text)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)] transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                className="rounded-full border border-[var(--rr-border)] bg-[var(--rr-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--rr-text)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)] transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
               >
                 {prompt}
               </button>
@@ -302,13 +302,13 @@ export function PageAwareAssistant({
                   : `Ask about ${regionShort}...`
               }
               aria-label="Ask Radar Rhythm AI Guide"
-              className="flex-1 bg-transparent px-3 py-2.5 text-xs text-[var(--rr-text)] placeholder:text-[var(--rr-muted)] focus:outline-none"
+              className="flex-1 bg-transparent px-3.5 py-2.5 text-xs text-[var(--rr-text)] placeholder:text-[var(--rr-muted)] focus:outline-none"
             />
             <button
               type="submit"
               disabled={!input.trim() || isSending}
               aria-label="Send question"
-              className="border-l border-[var(--rr-border)] bg-[var(--rr-accent-solid)] px-3.5 text-white hover:opacity-90 disabled:opacity-50 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+              className="border-l border-[var(--rr-border)] bg-[var(--rr-accent-solid)] px-4 text-white hover:opacity-90 disabled:opacity-50 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
@@ -322,10 +322,10 @@ export function PageAwareAssistant({
         data-testid="assistant-launcher-btn"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
-        className="inline-flex items-center gap-2 border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-4 py-2.5 text-[var(--rr-text-inverse)] shadow-lg hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+        className="inline-flex items-center gap-2 rounded-full border border-[var(--rr-border-strong)] bg-[var(--rr-surface-inverse)] px-4 py-2.5 text-[var(--rr-text-inverse)] shadow-md hover:bg-[var(--rr-accent-solid)] hover:border-[var(--rr-accent-solid)] hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
       >
         <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em]">
+        <span className="text-xs font-semibold whitespace-nowrap">
           {isOpen
             ? 'Close Guide'
             : pageView === 'HOME_3D_GLOBE'

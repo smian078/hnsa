@@ -32,7 +32,7 @@ import {
 } from './utils/globeMath.ts';
 import { computePassDelta, formatSigned } from './utils/sarPhysics.ts';
 
-const THEME_STORAGE_KEY = 'radar_rhythm_theme_v1';
+const THEME_STORAGE_KEY = 'radar_rhythm_theme_v2';
 
 const AboutDataModal = lazy(() =>
   import('./components/AboutDataModal.tsx').then((m) => ({
@@ -51,7 +51,7 @@ function readInitialTheme(): ThemeMode {
   } catch {
     // Ignore storage read errors
   }
-  return 'dark';
+  return 'light';
 }
 
 export default function App() {
@@ -448,7 +448,7 @@ export default function App() {
           className="dive-crossfade-overlay pointer-events-none fixed inset-0 z-[1400]"
           style={{
             background:
-              'radial-gradient(circle at 50% 50%, rgba(46, 107, 114, 0.25) 0%, rgba(10, 12, 14, 0.88) 55%, #0A0C0E 100%)',
+              'radial-gradient(circle at 50% 50%, rgba(75, 114, 133, 0.24) 0%, var(--rr-bg) 68%)',
           }}
         />
       )}

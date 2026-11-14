@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RotateCcw } from 'lucide-react';
 import {
   REGION_DATASETS,
@@ -265,13 +264,13 @@ function createSatelliteEarthTextures(
       ctx.fill();
     }
 
-    // Sea-level neutral bump & specular ocean roughness (darker = glossier ocean)
+    // Realistic matte ocean & continent roughness (eliminates shiny plastic ball highlight)
     const auxW = bumpCanvas.width;
     const auxH = bumpCanvas.height;
     bCtx.fillStyle = '#181818';
     bCtx.fillRect(0, 0, auxW, auxH);
 
-    rCtx.fillStyle = '#333333';
+    rCtx.fillStyle = '#C8C8C8';
     rCtx.fillRect(0, 0, auxW, auxH);
 
     // 2. Shallow turquoise continental shelves along coastlines
@@ -286,10 +285,10 @@ function createSatelliteEarthTextures(
         else ctx.lineTo(px, py);
       });
       ctx.closePath();
-      ctx.strokeStyle = 'rgba(34, 142, 180, 0.36)';
+      ctx.strokeStyle = 'rgba(34, 142, 180, 0.34)';
       ctx.lineWidth = isSoftwareGl ? 14 : 28;
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(64, 184, 210, 0.24)';
+      ctx.strokeStyle = 'rgba(64, 184, 210, 0.22)';
       ctx.lineWidth = isSoftwareGl ? 5 : 10;
       ctx.stroke();
     }
@@ -325,18 +324,18 @@ function createSatelliteEarthTextures(
       if (poly.biome === 'ice') {
         ctx.fillStyle = '#DCE5EE';
       } else if (poly.biome === 'forest') {
-        ctx.fillStyle = '#254C30';
+        ctx.fillStyle = '#2A5035';
       } else if (poly.biome === 'desert') {
-        ctx.fillStyle = '#89744E';
+        ctx.fillStyle = '#917C58';
       } else {
-        ctx.fillStyle = '#2E5436';
+        ctx.fillStyle = '#345A3B';
       }
       ctx.fill();
 
       bCtx.fillStyle = poly.biome === 'ice' ? '#929292' : '#5C5C5C';
       bCtx.fill();
 
-      rCtx.fillStyle = '#E0E0E0';
+      rCtx.fillStyle = '#F5F5F5';
       rCtx.fill();
 
       ctx.save();
@@ -555,21 +554,21 @@ const HUD_BADGES: HudBadgeMeta[] = [
     regionId: 'maharashtra_gcov',
     code: '01',
     label: 'MAHARASHTRA',
-    accentColor: '#E8913C',
+    accentColor: '#7BA1B5',
     fallbackMetric: '-21.4 dB HH',
   },
   {
     regionId: 'northeast_india_gcov',
     code: '02',
     label: 'NE INDIA',
-    accentColor: '#4DB8C4',
+    accentColor: '#4E9699',
     fallbackMetric: '-23.0 dB HH',
   },
   {
     regionId: 'japan_gunw',
     code: '03',
     label: 'JAPAN',
-    accentColor: '#E8913C',
+    accentColor: '#D49E96',
     fallbackMetric: '-18.6 cm LOS',
   },
 ];
@@ -680,7 +679,7 @@ export function EarthGlobeCanvas({
     renderer.setSize(width, height);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.14;
+    renderer.toneMappingExposure = 0.96;
     renderer.domElement.style.display = 'block';
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
@@ -693,14 +692,6 @@ export function EarthGlobeCanvas({
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-
-    // Physical environment reflections (for ocean sheen & NISAR gold-foil reflector)
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envScene = new RoomEnvironment();
-    const envRenderTarget = pmremGenerator.fromScene(envScene, 0.04);
-    scene.environment = envRenderTarget.texture;
-    envScene.dispose();
-    pmremGenerator.dispose();
 
     const camera = new THREE.PerspectiveCamera(BASE_FOV, width / height, 0.08, 100);
     const initCam = computeCameraPositionForLatLon(
@@ -720,16 +711,19 @@ export function EarthGlobeCanvas({
     controls.maxDistance = 6.8;
     controls.autoRotate = false;
 
-    // Cinematic sun + atmospheric rim lighting
-    const ambientLight = new THREE.AmbientLight(0xcddae8, 0.82);
+    // Realistic oblique sunlight & natural orbital earthshine (no studio IBL glare)
+    const ambientLight = new THREE.AmbientLight(0xdce6f0, 0.52);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff5e4, 2.55);
-    sunLight.position.set(5.8, 2.9, 5.4);
+    const hemiLight = new THREE.HemisphereLight(0xe8f1f8, 0x263242, 0.34);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfffdf7, 1.48);
+    sunLight.position.set(6.8, 2.2, 4.2);
     scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0x4db8c4, 1.05);
-    rimLight.position.set(-5.2, -1.6, -4.8);
+    const rimLight = new THREE.DirectionalLight(0x7da7bd, 0.42);
+    rimLight.position.set(-5.2, -1.6, -4.6);
     scene.add(rimLight);
 
     // Subtle deep-space starfield
@@ -745,10 +739,10 @@ export function EarthGlobeCanvas({
     const starGeo = new THREE.BufferGeometry();
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
     const starMat = new THREE.PointsMaterial({
-      color: 0xede7dc,
-      size: 0.04,
+      color: 0xf2efe9,
+      size: 0.036,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.38,
     });
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
@@ -765,11 +759,11 @@ export function EarthGlobeCanvas({
     const earthMat = new THREE.MeshStandardMaterial({
       map: colorMap,
       bumpMap,
-      bumpScale: 0.036,
+      bumpScale: 0.032,
       roughnessMap,
-      roughness: 0.72,
-      metalness: 0.08,
-      envMapIntensity: 0.55,
+      roughness: 0.94,
+      metalness: 0.0,
+      envMapIntensity: 0.0,
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     earthGroup.add(earthMesh);
@@ -818,31 +812,25 @@ export function EarthGlobeCanvas({
       false,
       (tex) => {
         earthMat.bumpMap = tex;
-        earthMat.bumpScale = 0.038;
-      }
-    );
-    loadOptionalTexture(
-      'https://unpkg.com/three-globe@2.31.1/example/img/earth-water.png',
-      false,
-      (tex) => {
-        earthMat.roughnessMap = tex;
+        earthMat.bumpScale = 0.034;
       }
     );
 
     // Subtle drifting cloud deck
-    const cloudGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.012, 56, 40);
+    const cloudGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.01, 56, 40);
     const cloudMat = new THREE.MeshStandardMaterial({
       map: cloudMap,
       transparent: true,
-      opacity: 0.64,
+      opacity: 0.38,
       depthWrite: false,
-      roughness: 0.96,
+      roughness: 0.98,
+      metalness: 0.0,
     });
     const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
     earthGroup.add(cloudMesh);
 
-    // Dual-layer Rayleigh/Fresnel atmospheric scatter halo
-    const innerAtmoGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.045, 56, 40);
+    // Thin crisp Rayleigh atmospheric horizon (subtle natural airglow)
+    const innerAtmoGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.036, 56, 40);
     const innerAtmoMat = new THREE.ShaderMaterial({
       vertexShader: `
         varying vec3 vNormal;
@@ -854,8 +842,8 @@ export function EarthGlobeCanvas({
       fragmentShader: `
         varying vec3 vNormal;
         void main() {
-          float fresnel = pow(0.66 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-          gl_FragColor = vec4(0.28, 0.66, 0.84, 0.72) * fresnel;
+          float fresnel = pow(0.62 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.2);
+          gl_FragColor = vec4(0.36, 0.62, 0.84, 0.42) * fresnel;
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -865,7 +853,7 @@ export function EarthGlobeCanvas({
     });
     earthGroup.add(new THREE.Mesh(innerAtmoGeo, innerAtmoMat));
 
-    const outerAtmoGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.095, 56, 40);
+    const outerAtmoGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.072, 56, 40);
     const outerAtmoMat = new THREE.ShaderMaterial({
       vertexShader: `
         varying vec3 vNormal;
@@ -877,8 +865,8 @@ export function EarthGlobeCanvas({
       fragmentShader: `
         varying vec3 vNormal;
         void main() {
-          float rim = pow(0.58 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.0);
-          gl_FragColor = vec4(0.18, 0.42, 0.45, 0.45) * rim;
+          float rim = pow(0.56 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.6);
+          gl_FragColor = vec4(0.28, 0.52, 0.68, 0.24) * rim;
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -1005,7 +993,11 @@ export function EarthGlobeCanvas({
       group.quaternion.setFromUnitVectors(_upAxis, normal);
 
       const accentHex =
-        regionId === 'northeast_india_gcov' ? 0x4db8c4 : 0xe8913c;
+        regionId === 'northeast_india_gcov'
+          ? 0x4e9699
+          : regionId === 'japan_gunw'
+            ? 0xd49e96
+            : 0x7ba1b5;
 
       const coreMat = new THREE.MeshBasicMaterial({
         color: accentHex,
@@ -1384,7 +1376,6 @@ export function EarthGlobeCanvas({
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
 
-      envRenderTarget.dispose();
       starGeo.dispose();
       starMat.dispose();
       earthGeo.dispose();
@@ -1434,8 +1425,8 @@ export function EarthGlobeCanvas({
     <div
       className={
         fullBleed
-          ? 'relative h-full w-full overflow-hidden bg-[#0A0C0E]'
-          : 'relative border border-[var(--rr-border)] bg-[#0A0C0E]'
+          ? 'relative h-full w-full overflow-hidden bg-[#0E131B]'
+          : 'relative rounded-2xl border border-[var(--rr-border)] bg-[#0E131B] overflow-hidden'
       }
     >
       {/* Full-Bleed 3D Satellite Earth Viewport */}
@@ -1447,11 +1438,11 @@ export function EarthGlobeCanvas({
         }
         style={{
           background:
-            'radial-gradient(circle at 50% 48%, #101A26 0%, #0A0C0E 66%, #050708 100%)',
+            'radial-gradient(circle at 50% 48%, #182230 0%, #0E131B 64%, #090C11 100%)',
         }}
       >
         {webglError ? (
-          <div className="flex h-full items-center justify-center p-6 text-center text-xs text-[#EDE7DC] font-mono">
+          <div className="flex h-full items-center justify-center p-6 text-center text-xs text-[#F0EDE7] font-mono">
             {webglError}
           </div>
         ) : (
@@ -1485,10 +1476,10 @@ export function EarthGlobeCanvas({
                 onClick={() => flyTriggerRef.current?.(badge.regionId)}
                 aria-label={`Dive into ${badge.label} (${metric}) 2D Radar Map`}
                 style={{ opacity: 0 }}
-                className="group absolute left-0 top-0 -translate-x-1.5 -translate-y-1/2 flex items-center gap-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+                className="group absolute left-0 top-0 -translate-x-1.5 -translate-y-1/2 flex items-center gap-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7BA1B5]"
               >
                 <span
-                  className="h-2.5 w-2.5 rounded-full border border-[#0A0C0E] transition-transform group-hover:scale-125"
+                  className="h-2.5 w-2.5 rounded-full border border-[#0E131B] shadow-sm transition-transform group-hover:scale-125"
                   style={{ backgroundColor: badge.accentColor }}
                 />
                 <span
@@ -1496,17 +1487,17 @@ export function EarthGlobeCanvas({
                   style={{ backgroundColor: badge.accentColor }}
                 />
                 <span
-                  className={`flex items-center gap-2 border px-2 py-1 text-left transition-colors ${
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1 text-left shadow-md backdrop-blur-md transition-colors ${
                     isActive
-                      ? 'border-[#E8913C] bg-[#0A0C0E]/92 text-[#EDE7DC]'
-                      : 'border-[rgba(237,231,220,0.22)] bg-[#0A0C0E]/82 text-[#EDE7DC] group-hover:border-[#E8913C]'
+                      ? 'border-[#7BA1B5] bg-[#191C21]/92 text-[#F5F2ED]'
+                      : 'border-[rgba(245,242,237,0.22)] bg-[#191C21]/82 text-[#F5F2ED] group-hover:border-[#7BA1B5]'
                   }`}
                 >
-                  <span className="font-mono text-[9.5px] font-bold tracking-[0.12em] uppercase whitespace-nowrap">
+                  <span className="text-[10px] font-semibold tracking-wide uppercase whitespace-nowrap">
                     {badge.code} · {badge.label}
                   </span>
                   <span
-                    className="font-mono text-[9.5px] font-semibold tabular-nums whitespace-nowrap"
+                    className="font-mono text-[10px] font-semibold tabular-nums whitespace-nowrap"
                     style={{ color: badge.accentColor }}
                   >
                     {metric}
@@ -1519,21 +1510,21 @@ export function EarthGlobeCanvas({
 
         {/* Minimal Corner Controls When Interactive */}
         <div className="pointer-events-none absolute bottom-12 sm:bottom-14 left-4 sm:left-8 flex items-center gap-2">
-          <div className="bg-[#0A0C0E]/80 border border-[rgba(237,231,220,0.13)] px-2.5 py-1 font-micro text-[#9EA5A8]">
+          <div className="rounded-full bg-[#191C21]/82 border border-[rgba(245,242,237,0.16)] px-3.5 py-1.5 text-[11px] font-medium text-[#E2DCD2] backdrop-blur-sm">
             {activeHoverMeta
-              ? `${activeHoverMeta.shortName} · CLICK TO DIVE INTO 2D MAP`
+              ? `${activeHoverMeta.shortName} · Click to view 2D map`
               : isTransitioning
-                ? 'ENTERING ORBITAL 2D PASS...'
-                : 'DRAG TO ORBIT · CLICK TARGET RING TO DIVE'}
+                ? 'Opening 2D radar view...'
+                : 'Drag to rotate Earth · Click a ring to explore'}
           </div>
           <button
             type="button"
             onClick={() => resetViewRef.current?.()}
             aria-label="Reset 3D Earth camera view"
-            className="pointer-events-auto inline-flex items-center gap-1.5 bg-[#0A0C0E]/85 border border-[rgba(237,231,220,0.18)] px-2.5 py-1 font-micro text-[#EDE7DC] hover:border-[#E8913C] hover:text-[#E8913C] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8913C]"
+            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-[#191C21]/85 border border-[rgba(245,242,237,0.2)] px-3 py-1.5 text-[11px] font-medium text-[#F5F2ED] hover:border-[#7BA1B5] hover:text-[#7BA1B5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7BA1B5]"
           >
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
-            <span>RESET</span>
+            <span>Reset</span>
           </button>
         </div>
       </div>

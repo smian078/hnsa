@@ -1,4 +1,19 @@
-import { AlertTriangle, CheckCircle2, Cpu, RefreshCw, Waves } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  AlertTriangle,
+  Check,
+  CheckCircle2,
+  Cpu,
+  Key,
+  RefreshCw,
+  Sparkles,
+  Waves,
+} from 'lucide-react';
+import {
+  getNvidiaApiKey,
+  setNvidiaApiKey,
+  NVIDIA_KEY_EVENT_NAME,
+} from '../services/nisarApi.ts';
 import type {
   PhysicalDriverSynthesis,
   RegionDataset,
@@ -229,8 +244,92 @@ export function PhysicalDriverSynthesizer({
     pass.losDisplacementCm
   );
 
+  const [nvidiaKey, setNvidiaKey] = useState<string>(() => getNvidiaApiKey());
+  const [showKeyConfig, setShowKeyConfig] = useState(false);
+  const [tempKeyInput, setTempKeyInput] = useState('');
+  const [keySavedToast, setKeySavedToast] = useState(false);
+
+  useEffect(() => {
+    const onKeyChange = () => {
+      setNvidiaKey(getNvidiaApiKey());
+    };
+    window.addEventListener(NVIDIA_KEY_EVENT_NAME, onKeyChange);
+    return () => window.removeEventListener(NVIDIA_KEY_EVENT_NAME, onKeyChange);
+  }, []);
+
   return (
     <div className="space-y-4">
+      {/* NVIDIA Key & Model Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--rr-border)] bg-[var(--rr-surface-2)] px-3 py-2 text-xs">
+        <div className="flex items-center gap-1.5 font-mono text-[10px] text-[var(--rr-text)]">
+          <Sparkles className="h-3.5 w-3.5 text-[var(--rr-accent)] shrink-0" />
+          <span className="font-bold">NVIDIA Nemotron 3.5 AI</span>
+          <span className="text-[var(--rr-muted)] hidden sm:inline">
+            (nemotron-3.5-lightning-30b-a3b)
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setTempKeyInput(nvidiaKey);
+            setShowKeyConfig((prev) => !prev);
+          }}
+          className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-[var(--rr-accent)] hover:underline"
+        >
+          <Key className="h-3 w-3" />
+          <span>{nvidiaKey ? 'NVIDIA Key Configured' : 'Configure Key'}</span>
+        </button>
+      </div>
+
+      {showKeyConfig && (
+        <div className="border border-[var(--rr-border)] bg-[var(--rr-surface-2)] p-3 text-xs space-y-2 rounded-lg">
+          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--rr-text)]">
+            <span className="font-bold">NVIDIA NIM API Key</span>
+            <span className="text-[var(--rr-muted)]">nemotron-3.5-lightning-30b-a3b</span>
+          </div>
+          <div className="flex gap-1.5">
+            <input
+              type="password"
+              value={tempKeyInput}
+              onChange={(e) => setTempKeyInput(e.target.value)}
+              placeholder="nvapi-..."
+              className="flex-1 rounded border border-[var(--rr-border)] bg-[var(--rr-bg)] px-2.5 py-1 text-xs text-[var(--rr-text)] font-mono placeholder:text-[var(--rr-muted)] focus:outline-none focus:border-[var(--rr-accent)]"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setNvidiaApiKey(tempKeyInput);
+                setKeySavedToast(true);
+                setTimeout(() => setKeySavedToast(false), 2000);
+                setShowKeyConfig(false);
+              }}
+              className="rounded bg-survey-basalt px-2.5 py-1 text-xs font-semibold text-survey-basalt-text hover:opacity-90"
+            >
+              Save
+            </button>
+            {nvidiaKey && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNvidiaApiKey('');
+                  setTempKeyInput('');
+                  setShowKeyConfig(false);
+                }}
+                className="rounded border border-[var(--rr-border)] px-2 py-1 text-xs text-survey-brick hover:bg-survey-brick/10"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {keySavedToast && (
+            <div className="text-survey-moss text-[11px] font-semibold flex items-center gap-1">
+              <Check className="h-3 w-3" />
+              <span>Key saved!</span>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-3 space-y-2">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -322,10 +421,15 @@ export function PhysicalDriverSynthesizer({
             <h4 className="text-sm font-bold text-[var(--rr-text)]">
               {synthesis.headline}
             </h4>
-            <span className="font-mono text-[10px] font-bold px-2 py-0.5 border border-[var(--rr-accent)] bg-[var(--rr-accent)]/15 text-[var(--rr-accent)] shrink-0">
-              {synthesis.source === 'GEMINI_4_HYDROGEN'
-                ? 'AI Summary'
-                : 'Built-In Guide'}
+            <span
+              data-testid="synthesis-source-badge"
+              className="font-mono text-[10px] font-bold px-2 py-0.5 border border-[var(--rr-accent)] bg-[var(--rr-accent)]/15 text-[var(--rr-accent)] shrink-0"
+            >
+              {synthesis.source === 'NVIDIA_NEMOTRON_3_5'
+                ? 'NVIDIA Nemotron 3.5 Lightning'
+                : synthesis.source === 'NVIDIA_NIM_LLAMA3_3'
+                  ? 'NVIDIA NIM (LLaMA 3.3)'
+                  : 'NVIDIA Radar Physics Engine'}
             </span>
           </div>
 

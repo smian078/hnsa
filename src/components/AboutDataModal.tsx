@@ -1,5 +1,13 @@
 import { useEffect } from 'react';
-import { ExternalLink, Layers, Radio, ShieldCheck, X } from 'lucide-react';
+import {
+  Code2,
+  ExternalLink,
+  KeyRound,
+  Layers,
+  Radio,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
 
 interface AboutDataModalProps {
   isOpen: boolean;
@@ -35,16 +43,18 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
         <div className="flex items-start justify-between gap-4 border-b border-[var(--rr-border)] pb-4">
           <div>
             <div className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--rr-accent)]">
-              Data Sources &amp; How It Works
+              About &amp; Simple Guide
             </div>
             <h2
               id="about-modal-title"
               className="text-xl font-black tracking-tight text-[var(--rr-text)] mt-1"
             >
-              Radar Rhythm &amp; Open Satellite Data
+              Radar Rhythm · Dancing With the SARs
             </h2>
             <p className="mt-1 text-sm text-[var(--rr-muted)]">
-              Easy-to-read radar maps showing floodwater, crops, and earthquake ground shift through clouds.
+              Easy-to-read satellite radar maps and 7-day safety forecasts for
+              floodwater, farm crops, and earthquake ground movement—even
+              through thick clouds.
             </p>
           </div>
           <button
@@ -58,44 +68,145 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
         </div>
 
         <div className="mt-5 space-y-5 text-sm leading-relaxed text-[var(--rr-text)]">
+          {/* Open-Source GitHub Repository Banner */}
+          <section
+            data-testid="about-github-section"
+            className="border border-[var(--rr-border-strong)] bg-[var(--rr-surface)] p-4"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--rr-text)]">
+                  <Code2
+                    className="h-4 w-4 text-[var(--rr-accent)]"
+                    aria-hidden="true"
+                  />
+                  Project GitHub Repository
+                </h3>
+                <p className="mt-1 text-xs text-[var(--rr-muted)]">
+                  Explore our full source code, local <code className="font-mono">.h5</code>{' '}
+                  radar reader scripts, and documentation on GitHub:
+                </p>
+                <a
+                  href="https://github.com/humairakhan1804-create/Dancing_With_SARs"
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="about-github-repo-link"
+                  className="mt-1.5 inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[var(--rr-water)] hover:underline break-all"
+                >
+                  <span>
+                    https://github.com/humairakhan1804-create/Dancing_With_SARs
+                  </span>
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                </a>
+              </div>
+
+              <a
+                href="https://github.com/humairakhan1804-create/Dancing_With_SARs"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--rr-surface-inverse)] px-4 py-2 text-xs font-semibold text-[var(--rr-text-inverse)] hover:opacity-90 transition-opacity shrink-0"
+              >
+                <span>Open GitHub Repo</span>
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            </div>
+          </section>
+
+          {/* Simple Explanation of How Radar Sees Through Clouds */}
           <section className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-4">
             <h3 className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--rr-accent)]">
               <Radio className="h-4 w-4" aria-hidden="true" />
-              Why Radar Sees Through Clouds and Darkness
+              How Satellite Radar Sees Through Storm Clouds
             </h3>
             <p className="mt-2 text-xs text-[var(--rr-muted)]">
-              Normal camera satellites get blocked by thick monsoon clouds and night skies. NISAR sends out 24 cm radar waves every 12 days that pass right through clouds to measure standing water, crop thickness, and centimeter-level ground movement.
+              Regular camera satellites cannot see the ground when monsoon storm
+              clouds or night darkness cover the sky. The NASA–ISRO NISAR
+              satellite sends out 24 cm radar waves every 12 days that pass
+              straight through clouds to measure standing water, wet farm soil,
+              and ground movement.
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <div className="border border-[var(--rr-border)] bg-[var(--rr-bg)] p-3">
                 <p className="font-bold text-xs text-[var(--rr-text)]">
-                  Water &amp; Crop Radar (GCOV)
+                  Floodwater &amp; Crops (Maharashtra &amp; Assam)
                 </p>
                 <p className="mt-1 text-xs text-[var(--rr-muted)]">
-                  Smooth floodwater reflects radar waves away like a mirror (shown as low dB), while dense crops and flooded stalks scatter signals back strongly.
+                  Calm floodwater acts like a flat mirror and bounces radar
+                  signals away (shown in blue as low dB), while leafy green
+                  crops bounce signals back strongly.
                 </p>
               </div>
               <div className="border border-[var(--rr-border)] bg-[var(--rr-bg)] p-3">
                 <p className="font-bold text-xs text-[var(--rr-text)]">
-                  Ground Movement Radar (GUNW)
+                  Earthquake Ground Shift (Noto Peninsula, Japan)
                 </p>
                 <p className="mt-1 text-xs text-[var(--rr-muted)]">
-                  Compares radar passes 12 days apart to spot land lifting upward or sinking downward in centimeters, filtered by a signal trust score (0.0–1.0).
+                  Compares two radar passes 12 days apart like a centimeter
+                  ruler from space to see where coastal land rose or sank after
+                  earthquakes.
                 </p>
               </div>
             </div>
           </section>
 
+          {/* NASA API Key Functions Section */}
           <section className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-4">
             <h3 className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--rr-text)]">
-              <Layers className="h-4 w-4 text-[var(--rr-accent)]" aria-hidden="true" />
-              Open Data Feeds Used
+              <KeyRound
+                className="h-4 w-4 text-[var(--rr-hv)]"
+                aria-hidden="true"
+              />
+              Live NASA API Key Functions
+            </h3>
+            <p className="mt-1.5 text-xs text-[var(--rr-muted)]">
+              Our server authenticates live requests with your{' '}
+              <code className="font-mono text-[var(--rr-text)]">NASA_API_KEY</code>{' '}
+              (upgrading NASA Open API rate limits to 1,000 requests/hour):
+            </p>
+            <ul className="mt-2.5 space-y-2 text-xs text-[var(--rr-muted)]">
+              <li className="border-b border-[var(--rr-border)] pb-1.5">
+                <strong className="font-mono text-[var(--rr-text)]">
+                  getNasaApiKey() &amp; buildNasaAuthenticatedUrl()
+                </strong>
+                : Automatically attaches your NASA API key to every NASA POWER
+                and NASA EONET request.
+              </li>
+              <li className="border-b border-[var(--rr-border)] pb-1.5">
+                <strong className="font-mono text-[var(--rr-text)]">
+                  fetchNasaPowerLiveMetrics(lat, lon, apiKey)
+                </strong>
+                : Pulls live satellite rainfall, root-zone soil wetness, and
+                temperature for Maharashtra, Northeast India, and Japan.
+              </li>
+              <li>
+                <strong className="font-mono text-[var(--rr-text)]">
+                  fetchNasaEonetRegionalAlerts(lat, lon, apiKey)
+                </strong>
+                : Checks NASA EONET for active flood, storm, landslide, and
+                earthquake alerts near our three study regions.
+              </li>
+            </ul>
+          </section>
+
+          {/* Open Data Feeds */}
+          <section className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-4">
+            <h3 className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--rr-text)]">
+              <Layers
+                className="h-4 w-4 text-[var(--rr-accent)]"
+                aria-hidden="true"
+              />
+              Open Satellite &amp; Weather Feeds Used
             </h3>
             <ul className="mt-3 space-y-2.5 text-xs text-[var(--rr-muted)]">
               <li className="flex items-start justify-between gap-3 border-b border-[var(--rr-border)] pb-2">
                 <div>
-                  <strong className="text-[var(--rr-text)]">Alaska Satellite Facility (ASF Vertex)</strong>
-                  <p>NISAR Cycle 035 HDF5 (.h5) radar files for Maharashtra, Northeast India, and Japan.</p>
+                  <strong className="text-[var(--rr-text)]">
+                    Alaska Satellite Facility (ASF Vertex) &amp; Local .H5 Server
+                  </strong>
+                  <p>
+                    NISAR Cycle 035 HDF5 (.h5) radar files (18.04 GB total) for
+                    Maharashtra, Northeast India, and Japan.
+                  </p>
                 </div>
                 <a
                   href="https://search.asf.alaska.edu/"
@@ -109,23 +220,13 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
               </li>
               <li className="flex items-start justify-between gap-3 border-b border-[var(--rr-border)] pb-2">
                 <div>
-                  <strong className="text-[var(--rr-text)]">2D Satellite Base Imagery</strong>
-                  <p>High-resolution 2D satellite map tiles paired side-by-side with radar zones.</p>
-                </div>
-                <a
-                  href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 font-semibold text-[var(--rr-accent)] hover:underline shrink-0"
-                >
-                  <span>Imagery</span>
-                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-              </li>
-              <li className="flex items-start justify-between gap-3 border-b border-[var(--rr-border)] pb-2">
-                <div>
-                  <strong className="text-[var(--rr-text)]">NASA POWER Weather Data</strong>
-                  <p>Daily rainfall (mm/day) and root-zone soil wetness for each location.</p>
+                  <strong className="text-[var(--rr-text)]">
+                    NASA POWER Weather Satellite Data
+                  </strong>
+                  <p>
+                    Daily rainfall (mm/day) and farm soil wetness for each
+                    location.
+                  </p>
                 </div>
                 <a
                   href="https://power.larc.nasa.gov/"
@@ -139,8 +240,13 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
               </li>
               <li className="flex items-start justify-between gap-3">
                 <div>
-                  <strong className="text-[var(--rr-text)]">NASA EONET Hazard Feed</strong>
-                  <p>Live natural disaster alerts shown when Live NASA mode is enabled.</p>
+                  <strong className="text-[var(--rr-text)]">
+                    NASA EONET, Open-Meteo Flood &amp; USGS Earthquakes
+                  </strong>
+                  <p>
+                    Live 7-day rain, river water flow (m³/s), hill steepness,
+                    and 30-day earthquake alerts.
+                  </p>
                 </div>
                 <a
                   href="https://eonet.gsfc.nasa.gov/"
@@ -157,14 +263,22 @@ export function AboutDataModal({ isOpen, onClose }: AboutDataModalProps) {
 
           <section className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-4">
             <h3 className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--rr-text)]">
-              <ShieldCheck className="h-4 w-4 text-[var(--rr-accent)]" aria-hidden="true" />
+              <ShieldCheck
+                className="h-4 w-4 text-[var(--rr-accent)]"
+                aria-hidden="true"
+              />
               Team &amp; Attribution
             </h3>
             <p className="mt-2 text-xs text-[var(--rr-muted)]">
-              Built with open NASA &amp; ISRO NISAR / ASF / Earthdata / GIBS / POWER data. NASA does not endorse this application.
+              Built with open NASA &amp; ISRO NISAR / ASF / Earthdata / GIBS /
+              POWER data. NASA does not endorse this application.
             </p>
             <p className="mt-2 text-xs text-[var(--rr-muted)]">
-              <strong className="text-[var(--rr-text)]">Team (Nagpur 2026):</strong> Aman Kawale · Vedant Jaiswal · Kalash Wasad · Humaira Khan · Asawari Dhawad
+              <strong className="text-[var(--rr-text)]">
+                Team Dancing With the SARs (Nagpur 2026):
+              </strong>{' '}
+              Aman Kawale · Vedant Jaiswal · Kalash Wasad · Humaira Khan ·
+              Asawari Dhawad
             </p>
           </section>
         </div>

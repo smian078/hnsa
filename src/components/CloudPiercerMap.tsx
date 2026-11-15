@@ -184,14 +184,14 @@ export function CloudPiercerMap({
 
   const layerOptions: Array<{ mode: LayerMode; label: string }> = isGunw
     ? [
-        { mode: 'GUNW_LOS', label: 'Shift (cm)' },
-        { mode: 'GUNW_COHERENCE', label: 'Trust (γ)' },
-        { mode: 'GCOV_HH', label: 'Base (HH dB)' },
+        { mode: 'GUNW_LOS', label: 'Ground Movement (cm)' },
+        { mode: 'GUNW_COHERENCE', label: 'Signal Clarity (%)' },
+        { mode: 'GCOV_HH', label: 'Surface Water View' },
       ]
     : [
-        { mode: 'GCOV_HH', label: 'Water (HH)' },
-        { mode: 'GCOV_HV', label: 'Crops (HV)' },
-        { mode: 'GCOV_RATIO', label: 'Water + Crop Mix' },
+        { mode: 'GCOV_HH', label: 'Floodwater View' },
+        { mode: 'GCOV_HV', label: 'Crops & Trees View' },
+        { mode: 'GCOV_RATIO', label: 'Water + Crops Combined' },
       ];
 
   const viewMode: MapDisplayMode =
@@ -277,13 +277,20 @@ export function CloudPiercerMap({
           </div>
 
           <span
-            className={`hidden xl:inline-flex font-mono text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1.5 border whitespace-nowrap ${
+            data-testid="map-data-feed-badge"
+            className={`hidden xl:inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1.5 border whitespace-nowrap ${
               demoMode
                 ? 'border-[var(--rr-border)] bg-[var(--rr-bg)] text-[var(--rr-muted)]'
-                : 'border-[var(--rr-accent)] bg-[var(--rr-accent)]/15 text-[var(--rr-accent)]'
+                : 'border-survey-moss/50 bg-survey-moss/10 text-survey-moss'
             }`}
           >
-            {demoMode ? 'Sample Data' : 'Live NASA'}
+            <span
+              aria-hidden="true"
+              className={`h-2 w-2 rounded-full shrink-0 ${
+                demoMode ? 'bg-survey-muted' : 'bg-survey-moss'
+              }`}
+            />
+            <span>{demoMode ? 'Sample Data' : 'LIVE NASA FEED'}</span>
           </span>
         </div>
       </div>
@@ -347,7 +354,7 @@ export function CloudPiercerMap({
                   <div className="text-xs font-sans">
                     <div className="font-semibold text-survey-ink">{zone.name}</div>
                     <div className="font-mono text-survey-muted">
-                      {style.formattedValue} {style.unit} · {style.classificationLabel}
+                      {style.classificationLabel} ({style.formattedValue} {style.unit})
                     </div>
                   </div>
                 </Tooltip>
@@ -416,14 +423,14 @@ export function CloudPiercerMap({
         {splitPercent > 8 && (
           <div className="pointer-events-none absolute bottom-3 left-3 sm:bottom-auto sm:top-3 sm:left-14 z-[460] flex items-center gap-1.5 rounded-md border border-survey-border-strong bg-survey-surface px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-ink">
             <Satellite className="h-3.5 w-3.5 text-data-water" aria-hidden="true" />
-            <span>2D Satellite View</span>
+            <span>Camera View (Blocked by Clouds)</span>
           </div>
         )}
 
         {splitPercent < 92 && (
           <div className="pointer-events-none absolute top-3 right-3 z-[460] flex items-center gap-1.5 rounded-md border border-survey-border-strong bg-survey-surface px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-survey-ink">
             <Radar className="h-3.5 w-3.5 text-data-hh" aria-hidden="true" />
-            <span>Radar View ({region.productType})</span>
+            <span>Radar View (Sees Through Clouds)</span>
           </div>
         )}
 
@@ -479,7 +486,7 @@ export function CloudPiercerMap({
               htmlFor="cloud-piercer-range"
               className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-muted)] whitespace-nowrap"
             >
-              Satellite / Radar
+              Camera vs Radar Wipe
             </label>
             <input
               id="cloud-piercer-range"
@@ -501,7 +508,7 @@ export function CloudPiercerMap({
             </span>
           </div>
 
-          {/* Signal Trust Filter (GUNW only) */}
+          {/* Signal Clarity Filter (GUNW only) */}
           {isGunw && (
             <div className="flex items-center gap-2.5">
               <SlidersHorizontal className="h-3.5 w-3.5 text-[var(--rr-accent)]" aria-hidden="true" />
@@ -509,7 +516,7 @@ export function CloudPiercerMap({
                 htmlFor="coherence-filter-range"
                 className="font-mono text-[10px] font-bold tracking-[0.14em] text-[var(--rr-muted)] whitespace-nowrap"
               >
-                TRUST γ &ge;
+                MIN CLARITY &ge;
               </label>
               <input
                 id="coherence-filter-range"
@@ -521,26 +528,26 @@ export function CloudPiercerMap({
                 onChange={(e) =>
                   onChangeCoherenceThreshold(Number(e.target.value))
                 }
-                aria-label="Signal trust filter threshold"
+                aria-label="Signal clarity filter threshold"
                 className="nisar-range w-24"
               />
               <span className="font-mono text-xs font-bold text-[var(--rr-text)] tabular-nums w-10">
-                {coherenceThreshold.toFixed(2)}
+                {Math.round(coherenceThreshold * 100)}%
               </span>
             </div>
           )}
 
-          {/* Map Color Key (Synchronized with Survey Sheet Data Colors) */}
+          {/* Map Color Key (Plain Everyday Language) */}
           <div className="flex flex-wrap items-center gap-3 text-[11px] text-survey-muted font-mono">
             {layerMode === 'GCOV_HH' && (
               <>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
-                  <span>Flood (&le; -18 dB)</span>
+                  <span>Blue = Standing Floodwater</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
-                  <span>Wet / Rough Ground (&gt; -18 dB)</span>
+                  <span>Orange = Wet Soil or Rough Land</span>
                 </span>
               </>
             )}
@@ -548,15 +555,15 @@ export function CloudPiercerMap({
               <>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hv" />
-                  <span>Thick Crops (&ge; -12.5 dB)</span>
+                  <span>Green = Thick Crops &amp; Trees</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
-                  <span>Light Cover</span>
+                  <span>Orange = Light Farm Cover</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
-                  <span>Open Water</span>
+                  <span>Blue = Open Water</span>
                 </span>
               </>
             )}
@@ -564,15 +571,15 @@ export function CloudPiercerMap({
               <>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
-                  <span>Water Under Plants</span>
+                  <span>Blue = Floodwater Under Crops</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hv" />
-                  <span>Healthy Canopy</span>
+                  <span>Green = Healthy Plants</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
-                  <span>Surface Ground</span>
+                  <span>Orange = Bare Soil / Towns</span>
                 </span>
               </>
             )}
@@ -580,19 +587,19 @@ export function CloudPiercerMap({
               <>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-status-error" />
-                  <span>Major Sink (&le; -10 cm)</span>
+                  <span>Red = Land Sank Heavily (&le; -10 cm)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hh" />
-                  <span>Mod. Sink (-2 to -10 cm)</span>
+                  <span>Orange = Land Sank Slightly</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-survey-bg" />
-                  <span>No Change</span>
+                  <span>Grey = Steady Ground</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
-                  <span>Rising (&ge; +2 cm)</span>
+                  <span>Blue = Land Rose (&ge; +2 cm)</span>
                 </span>
               </>
             )}
@@ -600,22 +607,22 @@ export function CloudPiercerMap({
               <>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-hv" />
-                  <span>High Trust (&ge; 0.70)</span>
+                  <span>Green = Clear Reading (&ge; 70%)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-data-water" />
-                  <span>Moderate (0.40–0.69)</span>
+                  <span>Blue = Moderate Clarity (40–69%)</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 border border-survey-border-strong bg-status-warning" />
-                  <span>Noisy (&lt; 0.40)</span>
+                  <span>Amber = Noisy / Dense Forest (&lt; 40%)</span>
                 </span>
               </>
             )}
           </div>
         </div>
 
-        {/* Selected Sub-Zone Readout */}
+        {/* Selected Sub-Zone Readout (Plain Everyday Language) */}
         {selectedZone && activePass && activeStyle ? (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border border-[var(--rr-border)] bg-[var(--rr-bg)] px-3.5 py-2.5">
             <div className="min-w-0">
@@ -635,66 +642,85 @@ export function CloudPiercerMap({
                         : 'border-[var(--rr-success-border)] text-[var(--rr-success-text)] bg-[var(--rr-success-bg)]'
                   }`}
                 >
-                  {selectedZone.hazardStatus}
+                  {selectedZone.hazardStatus === 'CRITICAL'
+                    ? 'HIGH RISK'
+                    : selectedZone.hazardStatus === 'ELEVATED'
+                      ? 'WATCH'
+                      : 'NORMAL'}
                 </span>
               </div>
               <p className="text-xs text-[var(--rr-muted)] mt-0.5">
-                {selectedZone.dominantCover} · {activeStyle.classificationLabel}
+                <span className="font-semibold text-[var(--rr-text)]">
+                  What Radar Sees:
+                </span>{' '}
+                {activeStyle.classificationLabel} · {selectedZone.dominantCover}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 font-mono text-xs tabular-nums shrink-0">
+            <div className="flex flex-wrap items-center gap-4 font-mono text-xs tabular-nums shrink-0">
               {isGunw ? (
                 <>
                   <div>
                     <span className="text-[var(--rr-muted)] block text-[10px] uppercase">
-                      Ground Shift
+                      Ground Movement
                     </span>
                     <span className="text-sm font-bold text-[var(--rr-accent)]">
-                      {formatSigned(activePass.losDisplacementCm ?? 0, 1)} cm
+                      {(activePass.losDisplacementCm ?? 0) <= -1
+                        ? `Sank ${Math.abs(activePass.losDisplacementCm ?? 0).toFixed(1)} cm`
+                        : (activePass.losDisplacementCm ?? 0) >= 1
+                          ? `Rose +${(activePass.losDisplacementCm ?? 0).toFixed(1)} cm`
+                          : `Steady (${formatSigned(activePass.losDisplacementCm ?? 0, 1)} cm)`}
                     </span>
                   </div>
                   <div>
                     <span className="text-[var(--rr-muted)] block text-[10px] uppercase">
-                      Phase
+                      Change Since Scan 1
                     </span>
                     <span className="text-sm font-bold text-[var(--rr-text)]">
-                      {formatSigned(activePass.unwrappedPhaseRad ?? 0, 2)} rad
+                      {formatSigned(activeDelta?.deltaLosCm ?? 0, 1)} cm
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--rr-muted)] block text-[10px]">
-                      TRUST γ
+                    <span className="text-[var(--rr-muted)] block text-[10px] uppercase">
+                      Signal Clarity
                     </span>
                     <span className="text-sm font-bold text-[var(--rr-text)]">
-                      γ {(activePass.coherence ?? 0).toFixed(2)}
+                      {Math.round((activePass.coherence ?? 0) * 100)}% Clear
                     </span>
                   </div>
                 </>
               ) : (
                 <>
                   <div>
-                    <span className="text-[var(--rr-muted)] block text-[10px]">
-                      HH γ⁰
+                    <span className="text-[var(--rr-muted)] block text-[10px] uppercase">
+                      Water on Ground
                     </span>
                     <span className="text-sm font-bold text-[var(--rr-accent)]">
-                      {activePass.hhGamma0Db.toFixed(1)} dB
+                      {activePass.hhGamma0Db <= -18
+                        ? `Flooded (${activePass.hhGamma0Db.toFixed(1)} dB)`
+                        : activePass.hhGamma0Db <= -13
+                          ? `Very Wet (${activePass.hhGamma0Db.toFixed(1)} dB)`
+                          : `Mostly Dry (${activePass.hhGamma0Db.toFixed(1)} dB)`}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--rr-muted)] block text-[10px]">
-                      Change
+                    <span className="text-[var(--rr-muted)] block text-[10px] uppercase">
+                      Change Since Scan 1
                     </span>
                     <span className="text-sm font-bold text-[var(--rr-text)]">
-                      {formatSigned(activeDelta?.deltaHhDb ?? 0, 1)} dB
+                      {(activeDelta?.deltaHhDb ?? 0) <= -3
+                        ? `More Water (${formatSigned(activeDelta?.deltaHhDb ?? 0, 1)} dB)`
+                        : (activeDelta?.deltaHhDb ?? 0) >= 2
+                          ? `Drier (${formatSigned(activeDelta?.deltaHhDb ?? 0, 1)} dB)`
+                          : `Steady (${formatSigned(activeDelta?.deltaHhDb ?? 0, 1)} dB)`}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--rr-muted)] block text-[10px]">
-                      HV γ⁰
+                    <span className="text-[var(--rr-muted)] block text-[10px] uppercase">
+                      Soil Wetness
                     </span>
                     <span className="text-sm font-bold text-[var(--rr-text)]">
-                      {activePass.hvGamma0Db.toFixed(1)} dB
+                      {Math.round(activePass.soilMoistureIndex * 100)}% Soaked
                     </span>
                   </div>
                 </>
@@ -704,7 +730,7 @@ export function CloudPiercerMap({
         ) : (
           <div className="flex items-center gap-2 border border-[var(--rr-border)] bg-[var(--rr-bg)] px-3.5 py-2.5 text-xs text-[var(--rr-muted)]">
             <EyeOff className="h-4 w-4 text-[var(--rr-accent)]" aria-hidden="true" />
-            <span>Tap any highlighted zone on the map to view its numbers.</span>
+            <span>Tap any highlighted zone on the map to see its water, soil, or ground movement readings.</span>
           </div>
         )}
       </div>

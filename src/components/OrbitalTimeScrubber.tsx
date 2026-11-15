@@ -101,7 +101,7 @@ export function OrbitalTimeScrubber({
               }`}
             >
               <div className="flex items-center justify-between gap-1 text-[10px] font-mono font-bold">
-                <span>{pass.passCode}</span>
+                <span>Scan {idx + 1}</span>
                 <span className={active ? 'text-survey-basalt-text/85' : 'text-[var(--rr-muted)]'}>
                   {pass.acquisitionDate}
                 </span>
@@ -114,40 +114,58 @@ export function OrbitalTimeScrubber({
         })}
       </div>
 
-      {/* Quick Numbers Strip */}
+      {/* Quick Numbers Strip (Plain Everyday Language) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono tabular-nums">
         {isGunw ? (
           <>
             <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
               <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
-                Ground Shift
+                Ground Movement
               </div>
-              <div className="text-base font-bold text-[var(--rr-accent)]">
-                {formatSigned(currentPass.losDisplacementCm ?? 0, 1)} cm
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-accent)]">
+                {(currentPass.losDisplacementCm ?? 0) <= -1
+                  ? `Sank ${Math.abs(currentPass.losDisplacementCm ?? 0).toFixed(1)} cm`
+                  : (currentPass.losDisplacementCm ?? 0) >= 1
+                    ? `Rose +${(currentPass.losDisplacementCm ?? 0).toFixed(1)} cm`
+                    : `Steady (${formatSigned(currentPass.losDisplacementCm ?? 0, 1)} cm)`}
+              </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                Land height change
               </div>
             </div>
             <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
               <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
-                Net Change
+                Change Since Scan 1
               </div>
-              <div className="text-base font-bold text-[var(--rr-text)]">
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-text)]">
                 {formatSigned(delta.deltaLosCm ?? 0, 1)} cm
               </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                Compared to {delta.baselineDate}
+              </div>
             </div>
             <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
               <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
-                Radar Phase
+                Daily Rain &amp; Soil
               </div>
-              <div className="text-base font-bold text-[var(--rr-text)]">
-                {formatSigned(currentPass.unwrappedPhaseRad ?? 0, 2)} rad
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-text)]">
+                {currentPass.rainfallMm.toFixed(0)} mm · {Math.round(currentPass.soilMoistureIndex * 100)}% Wet
+              </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                Rain &amp; wet hillside soil
               </div>
             </div>
             <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
-              <div className="text-[10px] tracking-[0.12em] text-[var(--rr-muted)]">
-                TRUST (γ)
+              <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
+                Signal Clarity
               </div>
-              <div className="text-base font-bold text-[var(--rr-text)]">
-                {(currentPass.coherence ?? 0).toFixed(2)}
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-text)]">
+                {Math.round((currentPass.coherence ?? 0) * 100)}% Clear
+              </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                {(currentPass.coherence ?? 0) >= 0.7
+                  ? 'High confidence reading'
+                  : 'Moderate clarity'}
               </div>
             </div>
           </>
@@ -155,34 +173,60 @@ export function OrbitalTimeScrubber({
           <>
             <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
               <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
-                Water Signal (HH)
+                Water on Ground
               </div>
-              <div className="text-base font-bold text-[var(--rr-accent)]">
-                {currentPass.hhGamma0Db.toFixed(1)} dB
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-accent)]">
+                {currentPass.hhGamma0Db <= -18
+                  ? 'Floodwater Present'
+                  : currentPass.hhGamma0Db <= -13
+                    ? 'Wet Ground / Mud'
+                    : 'Dry / Normal Ground'}
               </div>
-            </div>
-            <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
-              <div className="text-[10px] tracking-[0.12em] text-[var(--rr-muted)]">
-                Change (Δγ⁰)
-              </div>
-              <div className="text-base font-bold text-[var(--rr-text)]">
-                {formatSigned(delta.deltaHhDb, 1)} dB
-              </div>
-            </div>
-            <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
-              <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
-                Crop Signal (HV)
-              </div>
-              <div className="text-base font-bold text-[var(--rr-text)]">
-                {currentPass.hvGamma0Db.toFixed(1)} dB
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                Radar: {currentPass.hhGamma0Db.toFixed(1)} dB (lower = more water)
               </div>
             </div>
             <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
               <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
-                Wetness / Rain
+                Change Since Scan 1
               </div>
-              <div className="text-base font-bold text-[var(--rr-text)]">
-                {currentPass.dielectricConstantEst.toFixed(1)} · {currentPass.rainfallMm.toFixed(0)} mm
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-text)]">
+                {delta.deltaHhDb <= -6
+                  ? 'Much More Water'
+                  : delta.deltaHhDb <= -2
+                    ? 'Wetter Than Scan 1'
+                    : delta.deltaHhDb >= 2
+                      ? 'Water Draining Away'
+                      : 'Little Change'}
+              </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                {formatSigned(delta.deltaHhDb, 1)} dB vs {delta.baselineDate}
+              </div>
+            </div>
+            <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
+              <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
+                Crops &amp; Plants
+              </div>
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-text)]">
+                {currentPass.hvGamma0Db >= -12.5
+                  ? 'Thick Green Crops'
+                  : currentPass.hvGamma0Db >= -16
+                    ? 'Moderate Plants'
+                    : 'Submerged / Open Water'}
+              </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                Plant signal: {currentPass.hvGamma0Db.toFixed(1)} dB
+              </div>
+            </div>
+            <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2">
+              <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--rr-muted)]">
+                Soil Wetness &amp; Rain
+              </div>
+              <div className="text-sm sm:text-base font-bold text-[var(--rr-text)]">
+                {Math.round(currentPass.soilMoistureIndex * 100)}% Wet · {currentPass.rainfallMm.toFixed(0)} mm
+              </div>
+              <div className="text-[10px] font-sans text-[var(--rr-muted)] mt-0.5">
+                Soaked soil &amp; daily rainfall
               </div>
             </div>
           </>
@@ -211,7 +255,9 @@ export function OrbitalTimeScrubber({
                     {snap.acquisitionDate} ·{' '}
                     {snap.losDisplacementCm !== undefined
                       ? `${formatSigned(snap.losDisplacementCm, 1)} cm`
-                      : `${snap.hhDb.toFixed(1)} dB`}
+                      : snap.hhDb <= -18
+                        ? `Flooded (${snap.hhDb.toFixed(1)} dB)`
+                        : `Wet (${snap.hhDb.toFixed(1)} dB)`}
                   </span>
                 </button>
                 <button

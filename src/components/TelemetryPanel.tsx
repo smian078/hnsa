@@ -79,7 +79,7 @@ export function TelemetryPanel({
     return {
       date: pass.acquisitionDate.slice(5),
       fullDate: pass.acquisitionDate,
-      passCode: pass.passCode,
+      passCode: `Scan ${idx + 1}`,
       hhDb: pass.hhGamma0Db,
       hvDb: pass.hvGamma0Db,
       losCm: pass.losDisplacementCm ?? 0,
@@ -94,7 +94,7 @@ export function TelemetryPanel({
     return {
       zoneId: z.id,
       name: z.name,
-      dielectric: p.dielectricConstantEst,
+      wetnessPct: Math.round(p.soilMoistureIndex * 100),
       roughness: p.surfaceRoughnessCm,
       hhDb: p.hhGamma0Db,
       hvDb: p.hvGamma0Db,
@@ -175,8 +175,8 @@ export function TelemetryPanel({
             <CloudRain className="h-3.5 w-3.5 text-[var(--rr-accent)]" aria-hidden="true" />
             <span>
               {isGunw
-                ? 'Ground Shift (cm) vs Daily Rain (mm)'
-                : 'Radar Signal (dB) vs Daily Rain (mm)'}
+                ? 'Ground Movement (cm) vs Daily Rain (mm)'
+                : 'Water & Crop Signal vs Daily Rain (mm)'}
             </span>
           </h3>
         </div>
@@ -228,7 +228,7 @@ export function TelemetryPanel({
                   yAxisId="sar"
                   type="monotone"
                   dataKey="losCm"
-                  name="Ground Shift (cm)"
+                  name="Ground Movement (cm)"
                   stroke={hhColor}
                   strokeWidth={2.5}
                   dot={{ r: 4, fill: hhColor }}
@@ -239,7 +239,7 @@ export function TelemetryPanel({
                     yAxisId="sar"
                     type="monotone"
                     dataKey="hhDb"
-                    name="Water / Ground (HH dB)"
+                    name="Water on Ground (dB)"
                     stroke={hhColor}
                     strokeWidth={2.5}
                     dot={{ r: 4, fill: hhColor }}
@@ -248,7 +248,7 @@ export function TelemetryPanel({
                     yAxisId="sar"
                     type="monotone"
                     dataKey="hvDb"
-                    name="Crops (HV dB)"
+                    name="Crops & Plants (dB)"
                     stroke={hvColor}
                     strokeWidth={2}
                     dot={{ r: 3.5, fill: hvColor }}
@@ -261,20 +261,20 @@ export function TelemetryPanel({
 
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--rr-muted)] font-mono">
           <span>
-            Soil Wetness: {Math.round((activeZone.passes[passIndex]?.soilMoistureIndex ?? 0) * 100)}%
+            Soil Wetness: {Math.round((activeZone.passes[passIndex]?.soilMoistureIndex ?? 0) * 100)}% Soaked
           </span>
           <span>
-            Rain: {(activeZone.passes[passIndex]?.rainfallMm ?? 0).toFixed(1)} mm/d
+            Daily Rain: {(activeZone.passes[passIndex]?.rainfallMm ?? 0).toFixed(1)} mm
           </span>
         </div>
       </div>
 
-      {/* Wetness vs Surface Texture Scatter */}
+      {/* Soil Wetness vs Surface Roughness Scatter */}
       <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-3">
         <div className="flex items-center justify-between gap-2 mb-2">
           <h3 className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-text)]">
             <Compass className="h-3.5 w-3.5 text-[var(--rr-accent)]" aria-hidden="true" />
-            <span>Wetness vs Surface Texture</span>
+            <span>Soil Wetness (%) vs Ground Roughness</span>
           </h3>
           <span className="font-mono text-[10px] uppercase text-[var(--rr-muted)]">
             Tap dot
@@ -287,22 +287,22 @@ export function TelemetryPanel({
               <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
               <XAxis
                 type="number"
-                dataKey="dielectric"
-                name="Moisture ε"
-                domain={[0, 80]}
+                dataKey="wetnessPct"
+                name="Soil Wetness (%)"
+                domain={[0, 100]}
                 stroke={tickColor}
                 tick={{ fontSize: 11, fill: tickColor }}
               />
               <YAxis
                 type="number"
                 dataKey="roughness"
-                name="Texture (cm)"
+                name="Ground Texture (cm)"
                 domain={[0, 8]}
                 stroke={tickColor}
                 tick={{ fontSize: 11, fill: tickColor }}
               />
               <ZAxis range={[90, 180]} />
-              <ReferenceLine x={35} stroke={tickColor} strokeDasharray="3 3" />
+              <ReferenceLine x={50} stroke={tickColor} strokeDasharray="3 3" />
               <ReferenceLine y={3.0} stroke={tickColor} strokeDasharray="3 3" />
               <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={tooltipStyle} />
               <Scatter
@@ -334,17 +334,17 @@ export function TelemetryPanel({
         </div>
 
         <div className="mt-1 grid grid-cols-2 gap-1 text-[10px] font-mono text-[var(--rr-muted)]">
-          <span>Dry Soil</span>
-          <span className="text-right">Standing Floodwater</span>
-          <span>Dry Crops</span>
-          <span className="text-right">Flooded Crops</span>
+          <span>Dry Soil (Left)</span>
+          <span className="text-right">Soaked / Flooded (Right)</span>
+          <span>Smooth Water (Bottom)</span>
+          <span className="text-right">Tall Crops (Top)</span>
         </div>
       </div>
 
       {/* Soil Moisture Bar Strip */}
       <div className="border border-[var(--rr-border)] bg-[var(--rr-surface)] p-3">
         <div className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-muted)] mb-2">
-          Soil Moisture (%) Over Time
+          Soil Wetness (%) Across All 4 Scans
         </div>
         <div className="h-20 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -352,7 +352,7 @@ export function TelemetryPanel({
               <XAxis dataKey="passCode" stroke={tickColor} tick={{ fontSize: 10, fill: tickColor }} />
               <YAxis domain={[0, 100]} stroke={tickColor} tick={{ fontSize: 10, fill: tickColor }} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="soilMoisturePct" name="Soil Moisture %" fill={waterColor} />
+              <Bar dataKey="soilMoisturePct" name="Soil Wetness %" fill={waterColor} />
             </BarChart>
           </ResponsiveContainer>
         </div>

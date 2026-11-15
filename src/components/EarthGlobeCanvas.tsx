@@ -85,21 +85,21 @@ const HUD_BADGES: HudBadgeMeta[] = [
     code: '01',
     label: 'MAHARASHTRA',
     accentCssVar: 'var(--rr-space-water)',
-    fallbackMetric: '-21.4 dB HH',
+    fallbackMetric: 'Floods & 78% Wet Soil',
   },
   {
     regionId: 'northeast_india_gcov',
     code: '02',
     label: 'NE INDIA',
     accentCssVar: 'var(--rr-space-hv)',
-    fallbackMetric: '-23.0 dB HH',
+    fallbackMetric: 'Monsoon Floods · 89% Wet',
   },
   {
     regionId: 'japan_gunw',
     code: '03',
     label: 'JAPAN',
     accentCssVar: 'var(--rr-space-hh)',
-    fallbackMetric: '-18.6 cm LOS',
+    fallbackMetric: 'Land Sank 18.6 cm',
   },
 ];
 
@@ -112,14 +112,18 @@ function formatLiveBadgeMetric(
     SMIAN_P5_VERIFIED_RECORDS.find((r) => normalizeRegionMatch(r.regionId, regionId));
 
   if (!rec) {
-    return HUD_BADGES.find((b) => b.regionId === regionId)?.fallbackMetric ?? 'CYCLE 035';
+    return HUD_BADGES.find((b) => b.regionId === regionId)?.fallbackMetric ?? 'LIVE SCAN';
   }
   if (regionId === 'japan_gunw') {
     const cm = rec.losDisplacementCm ?? -18.6;
-    return `${cm > 0 ? '+' : ''}${cm.toFixed(1)} cm LOS`;
+    return cm < 0
+      ? `Land Sank ${Math.abs(cm).toFixed(1)} cm`
+      : `Land Rose +${cm.toFixed(1)} cm`;
   }
-  const hh = rec.hhFloodMinDb ?? rec.hhGamma0MeanDb ?? -18.0;
-  return `${hh.toFixed(1)} dB HH`;
+  const wetPct = Math.round((rec.soilMoistureIndex ?? 0.78) * 100);
+  return regionId === 'northeast_india_gcov'
+    ? `Monsoon Floods · ${wetPct}% Wet`
+    : `Floods & ${wetPct}% Wet Soil`;
 }
 
 export function EarthGlobeCanvas({
@@ -642,9 +646,23 @@ export function EarthGlobeCanvas({
       }
     };
 
+    const onCanvasWheel = (e: WheelEvent) => {
+      if (e.deltaY > 0) {
+        const camDist = camera.position.length();
+        // When camera is zoomed out near max (>= maxDistance - 0.22), scroll page down smoothly
+        if (camDist >= controls.maxDistance - 0.22) {
+          window.scrollBy({
+            top: Math.max(90, e.deltaY * 1.4),
+            behavior: 'smooth',
+          });
+        }
+      }
+    };
+
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
+    renderer.domElement.addEventListener('wheel', onCanvasWheel, { passive: true });
 
     const onResize = () => {
       if (isDisposed || !container) return;
@@ -856,6 +874,7 @@ export function EarthGlobeCanvas({
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
+      renderer.domElement.removeEventListener('wheel', onCanvasWheel);
 
       starGeo.dispose();
       starMat.dispose();

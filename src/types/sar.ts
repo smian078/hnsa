@@ -144,7 +144,11 @@ export interface PhysicalDriverSynthesis {
   humanAndNaturalDrivers: string;
   actionableAdvisory: string[];
   uncertaintyAndLimits: string;
-  source: 'GEMINI_4_HYDROGEN' | 'DETERMINISTIC_PHYSICS_FALLBACK';
+  source:
+    | 'NVIDIA_NEMOTRON_3_5'
+    | 'NVIDIA_NIM_LLAMA3_3'
+    | 'GEMINI_4_HYDROGEN'
+    | 'DETERMINISTIC_PHYSICS_FALLBACK';
   language: LanguageCode;
   generatedAt: string;
   cached?: boolean;
@@ -225,7 +229,11 @@ export interface AssistChatMessage {
   id: string;
   role: 'user' | 'assistant';
   text: string;
-  source?: 'GEMINI_4_HYDROGEN' | 'DETERMINISTIC_PHYSICS_FALLBACK';
+  source?:
+    | 'NVIDIA_NEMOTRON_3_5'
+    | 'NVIDIA_NIM_LLAMA3_3'
+    | 'GEMINI_4_HYDROGEN'
+    | 'DETERMINISTIC_PHYSICS_FALLBACK';
   timestamp: string;
 }
 
@@ -245,7 +253,95 @@ export interface PageAwareAssistResponse {
   answer: string;
   suggestedFollowUps: string[];
   contextLabel: string;
-  source: 'GEMINI_4_HYDROGEN' | 'DETERMINISTIC_PHYSICS_FALLBACK';
+  source:
+    | 'NVIDIA_NEMOTRON_3_5'
+    | 'NVIDIA_NIM_LLAMA3_3'
+    | 'GEMINI_4_HYDROGEN'
+    | 'DETERMINISTIC_PHYSICS_FALLBACK';
   generatedAt: string;
 }
+
+export type HazardRiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+
+export interface UsgsQuakeSummary {
+  id: string;
+  magnitude: number;
+  place: string;
+  timeIso: string;
+  depthKm: number;
+}
+
+export interface NasaApiKeyStatusResponse {
+  configured: boolean;
+  maskedKey: string;
+  rateLimitTier: string;
+  activeServices: string[];
+  functionsProvided: Array<{
+    name: string;
+    purpose: string;
+  }>;
+  checkedAt: string;
+}
+
+export interface LiveHazardForecastFeed {
+  lat: number;
+  lon: number;
+  rain7DayTotalMm: number;
+  rainDailyMaxMm: number;
+  dailyRainMm: number[];
+  topsoilMoistureM3M3: number;
+  peakRiverDischargeM3s: number;
+  meanRiverDischargeM3s: number;
+  elevationCenterM: number;
+  slopeDegrees: number;
+  recentQuakesCount: number;
+  maxQuakeMagnitude: number;
+  recentQuakes: UsgsQuakeSummary[];
+  nasaPowerRecentRainMm?: number;
+  nasaPowerWetnessPct?: number;
+  nasaPowerTempC?: number;
+  nasaEonetActiveCount?: number;
+  nasaKeyAuthenticated?: boolean;
+  source: 'LIVE_OPEN_METEO_USGS' | 'DETERMINISTIC_BASELINE_FALLBACK';
+  cached?: boolean;
+  fetchedAt: string;
+}
+
+export interface RegionalHazardTelemetryInput {
+  regionId: RegionId;
+  regionTitle: string;
+  h5FileName: string;
+  hhFloodMinDb: number;
+  hhGamma0MeanDb: number;
+  hvGamma0MeanDb: number;
+  soilMoistureIndex?: number;
+  losDisplacementCm?: number;
+  coherenceMean?: number;
+  liveForecast: LiveHazardForecastFeed;
+}
+
+export interface RegionalHazardPrediction {
+  regionId: RegionId;
+  floodScore: number;
+  landslideScore: number;
+  cropOrGroundScore: number;
+  cropOrGroundLabel: string;
+  overallLevel: HazardRiskLevel;
+  predictionHeadline: string;
+  plainEnglishForecast: string;
+  recommendedAction: string;
+  telemetryInput: RegionalHazardTelemetryInput;
+}
+
+export interface MultiHazardPredictionsResponse {
+  predictions: RegionalHazardPrediction[];
+  source:
+    | 'GEMINI_4_HYDROGEN'
+    | 'GEMINI_2_5_FLASH'
+    | 'NVIDIA_NEMOTRON_3_5'
+    | 'DETERMINISTIC_PHYSICS_FALLBACK';
+  generatedAt: string;
+  cached?: boolean;
+}
+
 

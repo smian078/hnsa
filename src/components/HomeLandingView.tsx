@@ -12,6 +12,7 @@ import {
 } from '../services/nisarApi.ts';
 import type { RegionId } from '../types/sar.ts';
 import { EarthGlobeCanvas, type DiveRequest } from './EarthGlobeCanvas.tsx';
+import { HomeHazardPredictionsSection } from './HomeHazardPredictionsSection.tsx';
 
 interface HomeLandingViewProps {
   activeRegionId: RegionId;
@@ -211,8 +212,8 @@ export function HomeLandingView({
         title: 'Maharashtra Spillway & Farms',
         subtitle:
           'Spots calm standing floodwater near Gosikhurd Dam and checks wet cotton soils in Wardha.',
-        metricBadge: `${(mh?.hhFloodMinDb ?? -21.4).toFixed(1)} dB HH · ${Math.round((mh?.soilMoistureIndex ?? 0.78) * 100)}% MOIST`,
-        trackLabel: `TRACK ${mh?.parsedGranule.rel_orbit ?? '084'} · FRAME ${mh?.parsedGranule.frame ?? '013'}`,
+        metricBadge: `Standing Floodwater · ${Math.round((mh?.soilMoistureIndex ?? 0.78) * 100)}% Wet Soil`,
+        trackLabel: `SATELLITE TRACK ${mh?.parsedGranule.rel_orbit ?? '084'} · CENTRAL INDIA`,
         fileSizeLabel: `${((mh?.fileSizeMB ?? 6388) / 1000).toFixed(2)} GB .H5`,
       },
       {
@@ -225,8 +226,8 @@ export function HomeLandingView({
         title: 'Brahmaputra & Kaziranga',
         subtitle:
           'Looks straight through heavy monsoon storm clouds to map flooded riverbanks and wildlife wetlands.',
-        metricBadge: `${(ne?.hhFloodMinDb ?? -23.0).toFixed(1)} dB HH · ${Math.round((ne?.soilMoistureIndex ?? 0.82) * 100)}% WET`,
-        trackLabel: `TRACK ${ne?.parsedGranule.rel_orbit ?? '098'} · FRAME ${ne?.parsedGranule.frame ?? '013'}`,
+        metricBadge: `Heavy River Flooding · ${Math.round((ne?.soilMoistureIndex ?? 0.89) * 100)}% Wet Soil`,
+        trackLabel: `SATELLITE TRACK ${ne?.parsedGranule.rel_orbit ?? '098'} · ASSAM VALLEY`,
         fileSizeLabel: `${((ne?.fileSizeMB ?? 6520) / 1000).toFixed(2)} GB .H5`,
       },
       {
@@ -239,8 +240,8 @@ export function HomeLandingView({
         title: 'Noto Peninsula & Toyama Bay',
         subtitle:
           'Measures how many centimeters the coastline rose or sank after earthquakes with 81% signal clarity.',
-        metricBadge: `${(jp?.losDisplacementCm ?? -18.6).toFixed(1)} cm LOS · γ ${(jp?.coherenceMean ?? 0.81).toFixed(2)}`,
-        trackLabel: `TRACK ${jp?.parsedGranule.rel_orbit ?? '009'} · FRAME ${jp?.parsedGranule.frame ?? '024'}`,
+        metricBadge: `Land Sank ${Math.abs(jp?.losDisplacementCm ?? -18.6).toFixed(1)} cm · ${Math.round((jp?.coherenceMean ?? 0.81) * 100)}% Clear Signal`,
+        trackLabel: `SATELLITE TRACK ${jp?.parsedGranule.rel_orbit ?? '009'} · JAPAN COAST`,
         fileSizeLabel: `${((jp?.fileSizeMB ?? 5132) / 1000).toFixed(2)} GB .H5`,
       },
       {
@@ -253,8 +254,8 @@ export function HomeLandingView({
         title: `${recordsToShow.length} Verified Files · ${totalGb} GB`,
         subtitle:
           'Real NASA radar files and live disk reads served straight from local storage with instant offline fallback.',
-        metricBadge: '100% VERIFIED · SHA-256',
-        trackLabel: 'CYCLE 035 · L-BAND 24 CM',
+        metricBadge: '100% Verified Local Files',
+        trackLabel: 'CYCLE 035 · ALL-WEATHER RADAR',
         fileSizeLabel: `${totalGb} GB TOTAL`,
       },
     ];
@@ -281,14 +282,23 @@ export function HomeLandingView({
           ? 'MAHARASHTRA · WATER & CROPS'
           : regionId === 'northeast_india_gcov'
             ? 'NE INDIA · MONSOON FLOODS'
-            : 'JAPAN · LAND SHIFT';
+            : 'JAPAN · EARTHQUAKE LAND SHIFT';
 
       ds.zones.forEach((zone, zIdx) => {
         const latestPass = zone.passes[zone.passes.length - 1];
+        const los = latestPass.losDisplacementCm ?? 0;
+        const cohPct = Math.round((latestPass.coherence ?? 0) * 100);
+        const soilPct = Math.round(latestPass.soilMoistureIndex * 100);
         const metricLabel =
           regionId === 'japan_gunw'
-            ? `${(latestPass.losDisplacementCm ?? 0) > 0 ? '+' : ''}${(latestPass.losDisplacementCm ?? 0).toFixed(1)} cm LOS · γ ${(latestPass.coherence ?? 0).toFixed(2)}`
-            : `${latestPass.hhGamma0Db.toFixed(1)} dB HH · ${Math.round(latestPass.soilMoistureIndex * 100)}% MOIST`;
+            ? los < 0
+              ? `Land Sank ${Math.abs(los).toFixed(1)} cm · ${cohPct}% Clear Signal`
+              : `Land Rose +${los.toFixed(1)} cm · ${cohPct}% Clear Signal`
+            : latestPass.hhGamma0Db <= -18
+              ? `Floodwater Present · ${soilPct}% Wet Soil`
+              : latestPass.hhGamma0Db <= -13
+                ? `Very Wet Ground · ${soilPct}% Wet Soil`
+                : `Healthy Crops · ${soilPct}% Wet Soil`;
         entries.push({
           regionId,
           zoneId: zone.id,
@@ -299,7 +309,7 @@ export function HomeLandingView({
           zoneName: zone.name,
           plainFocus: `${zone.dominantCover} · ${zone.districtOrPrefecture}`,
           metricLabel,
-          trackLabel: `TRK ${String(ds.granules[0]?.trackNumber ?? 35).padStart(3, '0')}`,
+          trackLabel: `Satellite Track ${String(ds.granules[0]?.trackNumber ?? 35).padStart(3, '0')} · Open 2D Map`,
         });
         counter += 1;
       });
@@ -661,8 +671,8 @@ export function HomeLandingView({
                 <div className="text-[var(--rr-text)] font-semibold">
                   Cycle 035 Seal
                 </div>
-                <div>2π = 12.0 cm Shift</div>
-                <div>Dual-Band Radar</div>
+                <div>Sees Through Clouds</div>
+                <div>12-Day Repeat Scans</div>
               </div>
             </div>
           </div>
@@ -893,7 +903,13 @@ export function HomeLandingView({
         </div>
       </section>
 
-      {/* SECTION 4: Monitored Study Zones List */}
+      {/* SECTION 3B: 7-Day AI Multi-Hazard Predictions */}
+      <HomeHazardPredictionsSection
+        records={recordsToShow}
+        onSelectRegionFromGlobe={triggerDiveIntoGlobe}
+      />
+
+      {/* SECTION 4: 12 Ground-Truth Study Locations (4 Per Region) */}
       <section
         id="roster"
         aria-label="Monitored study zones roster"
@@ -903,15 +919,15 @@ export function HomeLandingView({
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
               <div className="font-micro text-survey-muted">
-                03 / Monitored Study Areas
+                04 / Monitored Study Areas (4 in Maharashtra · 4 in NE India · 4 in Japan)
               </div>
               <h2 className="font-display text-3xl sm:text-4xl font-bold text-survey-ink">
-                Six Ground-Truth Locations
+                12 Ground-Truth Study Locations
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-survey-muted max-w-md">
-              Choose any place below to smoothly zoom the 3D Earth into its live
-              2D satellite and radar view.
+              Click any of the 12 real study locations below to smoothly zoom
+              into its live 2D satellite and radar map.
             </p>
           </div>
 
@@ -979,10 +995,10 @@ export function HomeLandingView({
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
               <div className="font-micro text-data-hv font-semibold">
-                04 / Satellite Passes &amp; .H5 Files
+                05 / Local Laptop Radar Files (.H5 Database)
               </div>
               <h2 className="font-display text-3xl sm:text-4xl font-bold text-survey-ink">
-                Verified Cycle 035 Scans
+                Verified Satellite Radar Files
               </h2>
             </div>
             <button
@@ -999,17 +1015,17 @@ export function HomeLandingView({
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-survey-border bg-survey-surface font-micro text-survey-muted">
-                  <th className="py-3.5 pl-5 pr-4 font-medium">Orbit / Frame</th>
+                  <th className="py-3.5 pl-5 pr-4 font-medium">Satellite Track</th>
                   <th className="py-3.5 px-4 font-medium">Study Region</th>
-                  <th className="py-3.5 px-4 font-medium">Scan Time (UTC)</th>
+                  <th className="py-3.5 px-4 font-medium">Scan Date</th>
                   <th className="py-3.5 px-4 font-medium hidden md:table-cell">
-                    Radar Mode
+                    What This File Measures
                   </th>
                   <th className="py-3.5 px-4 font-medium text-right">
                     File Size
                   </th>
                   <th className="py-3.5 pl-4 pr-5 font-medium text-right hidden sm:table-cell">
-                    File Digest
+                    Verification Status
                   </th>
                 </tr>
               </thead>
@@ -1021,6 +1037,11 @@ export function HomeLandingView({
                       : rec.regionId === 'northeast_india'
                         ? 'northeast_india_gcov'
                         : 'maharashtra_gcov';
+                  const rawStart = rec.parsedGranule.start;
+                  const cleanDate =
+                    rawStart.length >= 8
+                      ? `${rawStart.slice(0, 4)}-${rawStart.slice(4, 6)}-${rawStart.slice(6, 8)}`
+                      : rawStart;
 
                   return (
                     <tr
@@ -1029,7 +1050,7 @@ export function HomeLandingView({
                       className="cursor-pointer hover:bg-survey-surface transition-colors"
                     >
                       <td className="py-4 pl-5 pr-4 font-display text-sm sm:text-base font-bold text-survey-ink whitespace-nowrap">
-                        Track {rec.parsedGranule.rel_orbit} · F
+                        Track {rec.parsedGranule.rel_orbit} · Frame{' '}
                         {rec.parsedGranule.frame}
                       </td>
                       <td className="py-4 px-4">
@@ -1041,10 +1062,13 @@ export function HomeLandingView({
                         </div>
                       </td>
                       <td className="py-4 px-4 font-mono text-survey-muted tabular-nums whitespace-nowrap">
-                        {rec.parsedGranule.start}
+                        {cleanDate}
                       </td>
-                      <td className="py-4 px-4 font-mono text-survey-muted hidden md:table-cell whitespace-nowrap">
-                        40+5 MHz · {rec.parsedGranule.polar}
+                      <td className="py-4 px-4 text-survey-muted hidden md:table-cell whitespace-nowrap">
+                        {rec.parsedGranule.product === 'GUNW' ||
+                        rec.regionId === 'japan'
+                          ? 'Earthquake Ground Movement (cm)'
+                          : 'Floodwater & Farm Soil Wetness'}
                       </td>
                       <td className="py-4 px-4 font-mono font-bold text-survey-ink text-right tabular-nums whitespace-nowrap">
                         {rec.fileSizeMB.toLocaleString('en-US', {
@@ -1054,7 +1078,7 @@ export function HomeLandingView({
                         MB
                       </td>
                       <td className="py-4 pl-4 pr-5 font-mono text-data-hv text-right hidden sm:table-cell whitespace-nowrap">
-                        {rec.headerDigest}
+                        Verified ({rec.headerDigest.slice(0, 10)})
                       </td>
                     </tr>
                   );

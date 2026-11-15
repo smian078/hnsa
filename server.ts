@@ -14,6 +14,8 @@ async function startServer() {
 
   app.use(express.json({ limit: '1mb' }));
   app.use('/api', createApiRouter());
+  app.get('/local-h5', (_req, res) => res.redirect(307, '/api/local-h5'));
+  app.post('/local-h5', (_req, res) => res.redirect(307, '/api/local-h5'));
 
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');

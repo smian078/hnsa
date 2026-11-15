@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, ExternalLink } from 'lucide-react';
 
 interface FooterProps {
   onOpenAbout: () => void;
@@ -16,7 +16,7 @@ export function Footer({ onOpenAbout, onOpenExplorer }: FooterProps) {
               NASA Space Apps Challenge 2026 · Dancing with the SARs
             </div>
             <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-[-0.015em] text-survey-ink">
-              Clear cloud-piercing radar maps for floods, farms, and active faults.
+              Simple, cloud-piercing radar maps for floods, farms, and active faults.
             </h2>
             <p className="text-xs sm:text-sm leading-relaxed text-survey-muted">
               Built with open NASA &amp; ISRO NISAR / ASF / Earthdata / GIBS / POWER data. NASA does not endorse this application.
@@ -39,16 +39,33 @@ export function Footer({ onOpenAbout, onOpenExplorer }: FooterProps) {
               onClick={onOpenAbout}
               className="inline-flex items-center gap-2 rounded-lg border border-survey-border-strong bg-survey-bg px-5 py-2.5 text-xs font-semibold text-survey-ink hover:bg-survey-raised transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
             >
-              <span>Data Sources</span>
+              <span>About &amp; Data Sources</span>
               <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
+            <a
+              href="https://github.com/humairakhan1804-create/Dancing_With_SARs"
+              target="_blank"
+              rel="noreferrer"
+              data-testid="footer-github-repo-link"
+              className="inline-flex items-center gap-2 rounded-lg border border-survey-border-strong bg-survey-bg px-5 py-2.5 text-xs font-semibold text-survey-ink hover:bg-survey-raised transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
+            >
+              <span>GitHub Repo</span>
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+            </a>
           </div>
         </div>
 
         {/* Soft Footer Strip */}
         <div className="pt-5 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-survey-muted">
           <span>NISAR Cycle 035 · L-Band 24 cm · Dual Polarization</span>
-          <span>ASF Vertex · NASA POWER · NASA EONET · SMIAN_P5 .H5 Server</span>
+          <a
+            href="https://github.com/humairakhan1804-create/Dancing_With_SARs"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline font-mono text-[11px] text-survey-ink"
+          >
+            github.com/humairakhan1804-create/Dancing_With_SARs
+          </a>
         </div>
       </div>
 

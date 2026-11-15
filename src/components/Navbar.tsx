@@ -22,7 +22,7 @@ import type { PageViewMode, RegionId } from '../types/sar.ts';
 interface NavbarProps {
   pageView: PageViewMode;
   onNavigateHome: () => void;
-  onEnterExplorer: () => void;
+  onEnterExplorer: (tab?: '2D_MAP' | 'HISTORY_AI') => void;
   activeRegionId: RegionId;
   onSelectRegion: (id: RegionId) => void;
   demoMode: boolean;
@@ -30,6 +30,8 @@ interface NavbarProps {
   theme: ThemeMode;
   onToggleTheme: () => void;
   onOpenAbout: () => void;
+  activeViewTab?: '2D_MAP' | 'HISTORY_AI';
+  onSelectViewTab?: (tab: '2D_MAP' | 'HISTORY_AI') => void;
 }
 
 const REGION_LINKS: Array<{ id: RegionId; label: string }> = [
@@ -49,6 +51,8 @@ export function Navbar({
   theme,
   onToggleTheme,
   onOpenAbout,
+  activeViewTab = '2D_MAP',
+  onSelectViewTab,
 }: NavbarProps) {
   const [isDbPopoverOpen, setIsDbPopoverOpen] = useState(false);
   const [dbUrlInput, setDbUrlInput] = useState<string>(() => getLaptopDbUrl());
@@ -154,6 +158,14 @@ export function Navbar({
                 </button>
                 <button
                   type="button"
+                  data-testid="nav-predictions-link"
+                  onClick={() => scrollToHomeSection('hazard-predictions')}
+                  className="text-xs font-semibold text-[var(--rr-accent)] hover:underline transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                >
+                  Predictions
+                </button>
+                <button
+                  type="button"
                   onClick={() => scrollToHomeSection('roster')}
                   className="text-xs font-medium text-[var(--rr-muted)] hover:text-[var(--rr-accent)] transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
                 >
@@ -161,10 +173,17 @@ export function Navbar({
                 </button>
                 <button
                   type="button"
-                  onClick={onEnterExplorer}
+                  onClick={() => onEnterExplorer('2D_MAP')}
                   className="text-xs font-semibold text-survey-ink hover:text-data-hv transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
                 >
                   04 2D Radar Map
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onEnterExplorer('HISTORY_AI')}
+                  className="text-xs font-semibold text-[var(--rr-accent)] hover:underline transition-colors whitespace-nowrap shrink-0 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)]"
+                >
+                  05 History &amp; AI
                 </button>
               </>
             ) : (
@@ -176,6 +195,28 @@ export function Navbar({
                 >
                   3D Earth
                 </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectViewTab?.('2D_MAP')}
+                  className={`text-xs font-medium transition-colors whitespace-nowrap shrink-0 rounded-lg px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt ${
+                    activeViewTab === '2D_MAP'
+                      ? 'bg-survey-basalt text-survey-basalt-text font-semibold'
+                      : 'text-survey-muted hover:text-survey-ink'
+                  }`}
+                >
+                  2D Map
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectViewTab?.('HISTORY_AI')}
+                  className={`text-xs font-medium transition-colors whitespace-nowrap shrink-0 rounded-lg px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt ${
+                    activeViewTab === 'HISTORY_AI'
+                      ? 'bg-survey-basalt text-survey-basalt-text font-semibold'
+                      : 'text-[var(--rr-accent)] hover:text-survey-ink'
+                  }`}
+                >
+                  History &amp; AI
+                </button>
                 {REGION_LINKS.map((item) => {
                   const active = activeRegionId === item.id;
                   return (
@@ -185,7 +226,7 @@ export function Navbar({
                       onClick={() => onSelectRegion(item.id)}
                       className={`text-xs font-medium transition-colors whitespace-nowrap shrink-0 rounded-lg px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt ${
                         active
-                          ? 'bg-survey-basalt text-survey-basalt-text'
+                          ? 'border border-survey-border-strong text-survey-ink font-semibold'
                           : 'text-survey-muted hover:text-survey-ink'
                       }`}
                     >
@@ -289,15 +330,15 @@ export function Navbar({
                       htmlFor="laptop-db-url-input"
                       className="block text-[11px] font-medium text-[var(--rr-muted)]"
                     >
-                      Database Tunnel URL
+                      Database URL / Tunnel
                     </label>
                     <input
                       id="laptop-db-url-input"
                       data-testid="laptop-db-url-input"
-                      type="url"
+                      type="text"
                       value={dbUrlInput}
                       onChange={(e) => setDbUrlInput(e.target.value)}
-                      placeholder={DEFAULT_LAPTOP_DB_URL}
+                      placeholder="Leave blank for local server (/api/local-h5)"
                       className="w-full rounded-xl border border-[var(--rr-border)] bg-[var(--rr-surface)] px-3 py-2 font-mono text-xs text-[var(--rr-text)] focus:border-[var(--rr-accent)] focus:outline-none"
                     />
                   </div>
@@ -328,7 +369,7 @@ export function Navbar({
                   <div className="border-t border-survey-border pt-2 text-[11px] text-survey-muted">
                     Endpoint:{' '}
                     <code className="font-mono text-survey-ink break-all">
-                      {getLaptopDbUrl()}/api/local-h5
+                      {getLaptopDbUrl() ? `${getLaptopDbUrl()}/api/local-h5` : '/api/local-h5'}
                     </code>
                   </div>
                 </div>
@@ -355,13 +396,17 @@ export function Navbar({
               onClick={onToggleDemoMode}
               aria-pressed={!demoMode}
               title="Toggle between Sample Mode and Live NASA API Feeds"
-              className="rounded-lg border border-survey-border-strong bg-survey-bg px-3 sm:px-3.5 py-1 text-[11px] font-medium text-survey-ink hover:bg-survey-basalt hover:border-survey-basalt hover:text-survey-basalt-text transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt"
+              className={`rounded-lg border px-3 sm:px-3.5 py-1 text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-survey-basalt ${
+                !demoMode
+                  ? 'border-survey-moss/60 bg-survey-moss/10 text-survey-moss hover:bg-survey-moss/20'
+                  : 'border-survey-border-strong bg-survey-bg text-survey-ink hover:bg-survey-basalt hover:text-survey-basalt-text'
+              }`}
             >
               <span className="hidden sm:inline">
-                {demoMode ? 'Sample · Live NASA' : 'Live NASA On'}
+                {!demoMode ? '● Live NASA On' : 'Sample Data'}
               </span>
               <span className="sm:hidden">
-                {demoMode ? 'Sample' : 'Live'}
+                {!demoMode ? '● Live' : 'Sample'}
               </span>
             </button>
           </div>

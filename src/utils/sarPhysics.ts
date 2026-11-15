@@ -73,7 +73,7 @@ export function getPolygonVisualStyle(
         formattedValue: val.toFixed(1),
         unit: 'dB',
         dimmed: false,
-        classificationLabel: 'Specular Water / Flooded',
+        classificationLabel: 'Calm Standing Floodwater',
       };
     }
     if (val <= -13.0) {
@@ -84,7 +84,7 @@ export function getPolygonVisualStyle(
         formattedValue: val.toFixed(1),
         unit: 'dB',
         dimmed: false,
-        classificationLabel: 'High Dielectric Moisture',
+        classificationLabel: 'Very Wet Soil & Mud',
       };
     }
     return {
@@ -94,7 +94,7 @@ export function getPolygonVisualStyle(
       formattedValue: val.toFixed(1),
       unit: 'dB',
       dimmed: false,
-      classificationLabel: 'Rough / Double-Bounce Surface',
+      classificationLabel: 'Dry Ground, Buildings, or Wet Stems',
     };
   }
 
@@ -108,7 +108,7 @@ export function getPolygonVisualStyle(
         formattedValue: val.toFixed(1),
         unit: 'dB',
         dimmed: false,
-        classificationLabel: 'Dense Canopy / Volume Scatter',
+        classificationLabel: 'Thick Green Crops & Forest',
       };
     }
     if (val >= -16.0) {
@@ -119,7 +119,7 @@ export function getPolygonVisualStyle(
         formattedValue: val.toFixed(1),
         unit: 'dB',
         dimmed: false,
-        classificationLabel: 'Moderate Crop / Wetland',
+        classificationLabel: 'Moderate Farm Crops or Marsh',
       };
     }
     return {
@@ -129,7 +129,7 @@ export function getPolygonVisualStyle(
       formattedValue: val.toFixed(1),
       unit: 'dB',
       dimmed: false,
-      classificationLabel: 'Smooth / Open Water',
+      classificationLabel: 'Open Water or Bare Soil',
     };
   }
 
@@ -143,7 +143,7 @@ export function getPolygonVisualStyle(
         formattedValue: `+${val.toFixed(1)}`,
         unit: 'dB',
         dimmed: false,
-        classificationLabel: 'Flooded Emergent / Specular Gap',
+        classificationLabel: 'Floodwater Under Crops',
       };
     }
     if (val >= -3.0) {
@@ -154,7 +154,7 @@ export function getPolygonVisualStyle(
         formattedValue: val >= 0 ? `+${val.toFixed(1)}` : val.toFixed(1),
         unit: 'dB',
         dimmed: false,
-        classificationLabel: 'Vegetated Volume Dominated',
+        classificationLabel: 'Healthy Crops & Trees',
       };
     }
     return {
@@ -164,7 +164,7 @@ export function getPolygonVisualStyle(
       formattedValue: val.toFixed(1),
       unit: 'dB',
       dimmed: false,
-      classificationLabel: 'Surface-Dominated Backscatter',
+      classificationLabel: 'Bare Soil or Buildings',
     };
   }
 
@@ -175,20 +175,20 @@ export function getPolygonVisualStyle(
 
     let fillColor = neutralColor;
     let strokeColor = mutedStroke;
-    let classificationLabel = 'Stable Crustal Block';
+    let classificationLabel = 'Steady Ground (No Shift)';
 
     if (los <= -10.0) {
       fillColor = errColor;
       strokeColor = errColor;
-      classificationLabel = 'Major Subsidence';
+      classificationLabel = 'Ground Sank Heavily';
     } else if (los <= -2.0) {
       fillColor = hhColor;
       strokeColor = hhColor;
-      classificationLabel = 'Moderate Subsidence';
+      classificationLabel = 'Ground Sank Slightly';
     } else if (los >= 2.0) {
       fillColor = waterColor;
       strokeColor = waterColor;
-      classificationLabel = 'Co-Seismic Uplift';
+      classificationLabel = 'Ground Pushed Upward';
     }
 
     return {
@@ -199,7 +199,7 @@ export function getPolygonVisualStyle(
       unit: 'cm',
       dimmed,
       classificationLabel: dimmed
-        ? `${classificationLabel} (Low γ)`
+        ? `${classificationLabel} (Low Clarity)`
         : classificationLabel,
     };
   }
@@ -215,7 +215,7 @@ export function getPolygonVisualStyle(
       formattedValue: coh.toFixed(2),
       unit: 'γ',
       dimmed,
-      classificationLabel: 'High Interferometric Coherence',
+      classificationLabel: 'Very Clear Signal (Reliable)',
     };
   }
   if (coh >= 0.4) {
@@ -226,7 +226,7 @@ export function getPolygonVisualStyle(
       formattedValue: coh.toFixed(2),
       unit: 'γ',
       dimmed,
-      classificationLabel: 'Moderate Coherence',
+      classificationLabel: 'Moderate Signal Clarity',
     };
   }
   return {
@@ -236,7 +236,7 @@ export function getPolygonVisualStyle(
     formattedValue: coh.toFixed(2),
     unit: 'γ',
     dimmed,
-    classificationLabel: 'Decorrelated (Water / Canopy)',
+    classificationLabel: 'Noisy Signal (Dense Trees / Water)',
   };
 }
 
@@ -273,16 +273,16 @@ export function buildDeterministicSynthesis(
 
   if (lang === 'mr') {
     const headline = isGunw
-      ? `${payload.zoneName}: ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी भू-हालचाल (Coherence γ = ${payload.coherence?.toFixed(2) ?? '0.00'})`
-      : `${payload.zoneName}: HH ${payload.hhDb.toFixed(1)} dB व HV ${payload.hvDb.toFixed(1)} dB रडार बदल`;
+      ? `${payload.zoneName}: ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी जमीन हालचाल (${Math.round((payload.coherence ?? 0) * 100)}% स्पष्ट सिग्नल)`
+      : `${payload.zoneName}: पूरपाणी आणि मातीच्या ओलाव्याची सद्यस्थिती`;
 
     const physicsExplanation = isGunw
-      ? `L-बँड (24 सेमी तरंगलांबी) GUNW इंटरफेरोमेट्रीनुसार ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी LOS विस्थापन नोंदवले गेले आहे (सुसंगतता γ = ${payload.coherence?.toFixed(2) ?? '0.00'}). स्थिर खडकावर उच्च सुसंगतता अचूक फेज मोजमाप देते.`
-      : `HH बॅकस्कॅटर ${payload.hhDb.toFixed(1)} dB (बदल ${payload.deltaHhDb >= 0 ? '+' : ''}${payload.deltaHhDb.toFixed(1)} dB) आणि HV ${payload.hvDb.toFixed(1)} dB आहे. पाण्याच्या सपाट पृष्ठभागावर स्पेक्क्युलर परावर्तन वाढून HH सिग्नल कमी होतो, तर ओलसर पीक व झुडुपांमुळे HV व्हॉल्यूम स्कॅटरिंग वाढते.`;
+      ? `उपग्रह रडारनुसार या भागात जमीन ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी हलली आहे. सिग्नल स्पष्टता ${Math.round((payload.coherence ?? 0) * 100)}% असल्यामुळे हे मोजमाप विश्वसनीय आहे.`
+      : `सपाट पूरपाण्यावरून रडारचा किरण आरशासारखा दूर परावर्तित होतो, त्यामुळे पाण्याचा सिग्नल (${payload.hhDb.toFixed(1)} dB) कमी दिसतो. शेतातील पिके आणि झाडांवरून सिग्नल (${payload.hvDb.toFixed(1)} dB) परत येतो.`;
 
     const humanAndNaturalDrivers = isGunw
-      ? `भूगर्भीय फॉल्ट सरकणे आणि किनारपट्टीवरील मातीचे द्रवीकरण यामुळे पृष्ठभागावर बदल झाला आहे. पर्जन्यमान ${payload.rainfallMm.toFixed(1)} मिमी/दिवस आहे.`
-      : `NASA POWER नुसार ${payload.rainfallMm.toFixed(1)} मिमी/दिवस पाऊस आणि ${payload.soilMoistureIndex.toFixed(2)} मृदा ओलावा निर्देशांकामुळे पूर साचणे किंवा पिकांची वाढ प्रभावित झाली आहे.`;
+      ? `भूकंपामुळे जमिनीखालील खडक सरकणे आणि किनारपट्टीवरील ओलसर माती सैल होणे हे मुख्य कारण आहे. आजचा पाऊस ${payload.rainfallMm.toFixed(1)} मिमी आहे.`
+      : `NASA च्या माहितीनुसार ${payload.rainfallMm.toFixed(1)} मिमी पाऊस आणि ${Math.round(payload.soilMoistureIndex * 100)}% ओलसर मातीमुळे नदीकाठी पाणी साचले आहे.`;
 
     return {
       headline,
@@ -291,18 +291,18 @@ export function buildDeterministicSynthesis(
       humanAndNaturalDrivers,
       actionableAdvisory: isGunw
         ? [
-            `γ < 0.35 असलेल्या भागांत रस्ते व पुलांची क्षेत्रीय तपासणी करा.`,
-            `${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी विस्थापन क्षेत्रात जलवाहिनी व धरण सुरक्षा तपासा.`,
-            `पुढील 12-दिवसीय NISAR फेरीमध्ये फेज सातत्य तपासा.`,
+            `जमीन खचलेल्या भागात रस्ते आणि पुलांची तातडीने पाहणी करा.`,
+            `${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी जमीन हललेल्या ठिकाणी पाण्याच्या टाक्या व पाईपलाईन तपासा.`,
+            `पुढील १२ दिवसांनंतर येणाऱ्या उपग्रह पाहणीत बदल तपासा.`,
           ]
         : [
-            `HH <= -18.0 dB असलेल्या सखल भागात पूर नियंत्रण व निचरा मार्ग मोकळे ठेवा.`,
-            `मृदा ओलावा (${payload.soilMoistureIndex.toFixed(2)}) लक्षात घेऊन कापूस/धान पिकांचे सिंचन नियोजन करा.`,
-            `ढगाळ हवामानात ऑप्टिकलऐवजी L-बँड GCOV नकाशांचा वापर आपत्ती व्यवस्थापनासाठी करा.`,
+            `सखल भागात साचलेले पूरपाणी बाहेर काढण्यासाठी नाले मोकळे ठेवा.`,
+            `मातीतील ${Math.round(payload.soilMoistureIndex * 100)}% ओलावा पाहून पिकांना पाणी देण्याचे नियोजन करा.`,
+            `ढगाळ वातावरणातही हा रडार नकाशा थेट पूरस्थिती दाखवतो.`,
           ],
       uncertaintyAndLimits: isGunw
-        ? `दाट वनस्पती किंवा पाण्यामुळे γ < 0.35 असल्यास फेज अनरॅपिंगमध्ये त्रुटी येऊ शकते.`
-        : `तीव्र वाऱ्यामुळे पाण्यावर लाटा निर्माण झाल्यास ब्रॅग स्कॅटरिंग वाढून HH मूल्य किंचित वाढू शकते.`,
+        ? `दाट जंगलात किंवा पाण्यात सिग्नल स्पष्टता ३५% पेक्षा कमी असल्यास अचूकता थोडी कमी होऊ शकते.`
+        : `जोराच्या वाऱ्यामुळे पाण्यावर लाटा आल्यास पाण्याचा सिग्नल थोडा बदलू शकतो.`,
       source: 'DETERMINISTIC_PHYSICS_FALLBACK',
       language: 'mr',
       generatedAt: new Date().toISOString(),
@@ -311,16 +311,16 @@ export function buildDeterministicSynthesis(
 
   if (lang === 'hi') {
     const headline = isGunw
-      ? `${payload.zoneName}: ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी सतह विस्थापन (Coherence γ = ${payload.coherence?.toFixed(2) ?? '0.00'})`
-      : `${payload.zoneName}: HH ${payload.hhDb.toFixed(1)} dB एवं HV ${payload.hvDb.toFixed(1)} dB रडार विश्लेषण`;
+      ? `${payload.zoneName}: ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी ज़मीन का खिसकना (${Math.round((payload.coherence ?? 0) * 100)}% स्पष्ट सिग्नल)`
+      : `${payload.zoneName}: बाढ़ के पानी और खेतों की नमी की स्थिति`;
 
     const physicsExplanation = isGunw
-      ? `L-बैंड (24 सेमी तरंगदैर्ध्य) GUNW डेटा के अनुसार ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी LOS विस्थापन दर्ज हुआ है (सुसंगतता γ = ${payload.coherence?.toFixed(2) ?? '0.00'})। उच्च γ वाले क्षेत्रों में फेज मापन विश्वसनीय है।`
-      : `HH बैकस्कैटर ${payload.hhDb.toFixed(1)} dB (परिवर्तन ${payload.deltaHhDb >= 0 ? '+' : ''}${payload.deltaHhDb.toFixed(1)} dB) और HV ${payload.hvDb.toFixed(1)} dB है। शांत जल सतह पर स्पेक्युलर परावर्तन से HH घटता है जबकि फसल/वनस्पति कैनोपी से HV वॉल्यूम स्कैटरिंग बढ़ती है।`;
+      ? `सैटेलाइट रडार के अनुसार यहाँ ज़मीन ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी खिसकी है। रडार स्पष्टता ${Math.round((payload.coherence ?? 0) * 100)}% होने से यह माप भरोसेमंद है।`
+      : `शांत बाढ़ के पानी से रडार किरणें आईने की तरह दूर चली जाती हैं, जिससे पानी का सिग्नल (${payload.hhDb.toFixed(1)} dB) कम हो जाता है। वहीं फसलों और पेड़ों से सिग्नल (${payload.hvDb.toFixed(1)} dB) वापस लौटता है।`;
 
     const humanAndNaturalDrivers = isGunw
-      ? `टेक्टोनिक फॉल्ट विस्थापन एवं तटीय मृदा द्रवीकरण मुख्य कारण हैं; NASA POWER वर्षा ${payload.rainfallMm.toFixed(1)} मिमी/दिन दर्ज है।`
-      : `NASA POWER वर्षा (${payload.rainfallMm.toFixed(1)} मिमी/दिन) और रूट-ज़ोन नमी (${payload.soilMoistureIndex.toFixed(2)}) ने जलभराव और फसल वृद्धि को प्रभावित किया है।`;
+      ? `भूकंप से ज़मीन का खिसकना और तटीय मिट्टी का ढीला पड़ना मुख्य कारण हैं; साथ ही ${payload.rainfallMm.toFixed(1)} मिमी बारिश दर्ज की गई है।`
+      : `NASA के अनुसार ${payload.rainfallMm.toFixed(1)} मिमी बारिश और ${Math.round(payload.soilMoistureIndex * 100)}% मिट्टी की नमी ने जलभराव और फसलों को प्रभावित किया है।`;
 
     return {
       headline,
@@ -329,56 +329,64 @@ export function buildDeterministicSynthesis(
       humanAndNaturalDrivers,
       actionableAdvisory: isGunw
         ? [
-            `γ >= 0.70 वाले विस्थापन क्षेत्रों में अवसंरचना व तटबंधों का निरीक्षण करें।`,
-            `${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी विस्थापन के निकट निकासी व सुरक्षा क्षेत्र चिह्नित करें।`,
-            `अगले 12-दिवसीय NISAR पास के साथ निरंतर निगरानी जारी रखें।`,
+            `ज़मीन धँसने वाले इलाकों में सड़कों, पुलों और तटबंधों की जाँच करें।`,
+            `${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} सेमी खिसकाव वाले क्षेत्रों के पास सुरक्षा घेरा बनाएँ।`,
+            `अगले 12-दिन के सैटेलाइट स्कैन में बदलाव पर नज़र रखें।`,
           ]
         : [
-            `HH <= -18.0 dB वाले जलमग्न क्षेत्रों में राहत एवं जल निकासी दल तैनात करें।`,
-            `मृदा नमी (${payload.soilMoistureIndex.toFixed(2)}) के अनुसार कृषि सिंचाई व उर्वरक समय समायोजित करें।`,
-            `मानसूनी बादलों के बावजूद L-बैंड GCOV लेयर से बाढ़ सीमांकन अपडेट रखें।`,
+            `निचले इलाकों में जहाँ पानी भरा है, वहाँ जल निकासी और राहत दल भेजें।`,
+            `मिट्टी की नमी (${Math.round(payload.soilMoistureIndex * 100)}%) को देखते हुए खेतों में सिंचाई रोकें या घटाएँ।`,
+            `मानसून के घने बादलों में भी यह रडार नक्शा साफ़ बाढ़ की स्थिति दिखाता है।`,
           ],
       uncertaintyAndLimits: isGunw
-        ? `निम्न सुसंगतता (γ < 0.35) वाले वनस्पति या तटीय क्षेत्रों में अनरैप्ड फेज त्रुटि संभव है।`
-        : `तेज़ हवा से जल सतह खुरदरी होने पर HH मान -18 dB से थोड़ा ऊपर जा सकता है।`,
+        ? `घने पेड़ों या पानी वाले हिस्सों में जहाँ स्पष्टता 35% से कम है, वहाँ माप थोड़ा धुंधला हो सकता है।`
+        : `तेज़ हवा से पानी में लहरें उठने पर रडार सिग्नल में थोड़ा अंतर आ सकता है।`,
       source: 'DETERMINISTIC_PHYSICS_FALLBACK',
       language: 'hi',
       generatedAt: new Date().toISOString(),
     };
   }
 
-  // English deterministic grounded output
+  // Plain-English everyday explanation
+  const soilPct = Math.round(payload.soilMoistureIndex * 100);
+  const cohPct = Math.round((payload.coherence ?? 0) * 100);
+  const losVal = payload.losDisplacementCm ?? 0;
+
   const headline = isGunw
-    ? `${payload.zoneName}: ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} cm LOS Deformation (γ = ${payload.coherence?.toFixed(2) ?? '0.00'})`
-    : `${payload.zoneName}: HH ${payload.hhDb.toFixed(1)} dB (Δ ${payload.deltaHhDb >= 0 ? '+' : ''}${payload.deltaHhDb.toFixed(1)} dB) · HV ${payload.hvDb.toFixed(1)} dB`;
+    ? `${payload.zoneName}: Ground ${losVal < 0 ? `Sank ${Math.abs(losVal).toFixed(1)} cm` : `Rose +${losVal.toFixed(1)} cm`} (${cohPct}% Clear Signal)`
+    : mechanism === 'SPECULAR_WATER'
+      ? `${payload.zoneName}: Standing Floodwater Detected (${soilPct}% Wet Soil)`
+      : mechanism === 'DOUBLE_BOUNCE_FLOODED_VEG'
+        ? `${payload.zoneName}: Floodwater Standing Under Crops (${soilPct}% Wet Soil)`
+        : `${payload.zoneName}: Wet Soil & Growing Crops (${soilPct}% Wet Soil)`;
 
   const physicsExplanation = isGunw
-    ? `At NISAR's 24 cm L-band wavelength, one 2π interferometric fringe equals 12.0 cm of Line-of-Sight (LOS) motion. The observed ${payload.losDisplacementCm?.toFixed(1) ?? '0.0'} cm LOS shift with interferometric coherence γ = ${payload.coherence?.toFixed(2) ?? '0.00'} reflects coherent phase change across ground reflectors, while zones below γ = 0.35 suffer temporal decorrelation.`
+    ? `Comparing before-and-after satellite scans shows the ground here ${losVal < 0 ? `dropped by ${Math.abs(losVal).toFixed(1)} cm` : `lifted up by ${losVal.toFixed(1)} cm`}. The reading clarity is ${cohPct}%, meaning solid buildings and bare rock reflected a clean signal back to space.`
     : mechanism === 'SPECULAR_WATER'
-      ? `The drop in co-polarized HH backscatter to ${payload.hhDb.toFixed(1)} dB (Δ ${payload.deltaHhDb.toFixed(1)} dB) combined with low HV (${payload.hvDb.toFixed(1)} dB) indicates smooth-surface specular reflection off standing floodwater, redirecting L-band energy away from the sensor.`
+      ? `Calm standing water acts like a flat mirror and bounces the radar beam away from the satellite, causing the water reading to drop to ${payload.hhDb.toFixed(1)} dB (${payload.deltaHhDb.toFixed(1)} dB lower than dry days). This confirms open floodwater on the ground even under thick storm clouds.`
       : mechanism === 'DOUBLE_BOUNCE_FLOODED_VEG'
-        ? `Moderate-low HH (${payload.hhDb.toFixed(1)} dB) paired with elevated cross-polarized HV (${payload.hvDb.toFixed(1)} dB, Δ ${payload.deltaHvDb >= 0 ? '+' : ''}${payload.deltaHvDb.toFixed(1)} dB) signals flooded emergent vegetation and wet-canopy double-bounce plus volume scattering.`
-        : `Cross-polarized HV backscatter at ${payload.hvDb.toFixed(1)} dB (Δ ${payload.deltaHvDb >= 0 ? '+' : ''}${payload.deltaHvDb.toFixed(1)} dB) alongside high dielectric soil moisture (${payload.soilMoistureIndex.toFixed(2)}) demonstrates strong L-band volume scattering within maturing crop/forest canopy.`;
+        ? `Radar beams are bouncing off the water surface and hitting crop stems or tree trunks before returning to the satellite (water signal ${payload.hhDb.toFixed(1)} dB, crop signal ${payload.hvDb.toFixed(1)} dB). This means water is pooling underneath standing plants.`
+        : `The satellite beam is bouncing inside thick leaves and branches (crop signal ${payload.hvDb.toFixed(1)} dB) while the soil underneath is ${soilPct}% soaked with moisture.`;
 
   const humanAndNaturalDrivers = isGunw
-    ? `Co-seismic fault slip, coastal tectonic uplift/subsidence, and saturated sediment liquefaction govern the observed deformation gradient alongside ${payload.rainfallMm.toFixed(1)} mm/day precipitation.`
-    : `NASA POWER telemetry records ${payload.rainfallMm.toFixed(1)} mm/day precipitation and a root-zone soil wetness index of ${payload.soilMoistureIndex.toFixed(2)}, driving reservoir stage surges, riparian inundation, or rapid vegetative biomass accumulation.`;
+    ? `Earthquake shaking shifted the ground and loosened wet coastal soil, while ${payload.rainfallMm.toFixed(1)} mm of daily rain adds extra weight to nearby hillsides.`
+    : `Live weather data shows ${payload.rainfallMm.toFixed(1)} mm of daily rain and ${soilPct}% soaked topsoil, filling up riverbanks and low-lying farmland.`;
 
   const actionableAdvisory = isGunw
     ? [
-        `Prioritize field geotechnical inspection in coherent deformation zones (γ >= 0.70) where LOS shifts exceed ${Math.abs(payload.losDisplacementCm ?? 0).toFixed(1)} cm.`,
-        `Mask out γ < 0.35 vegetated or coastal liquefaction cells before computing engineering strain budgets.`,
-        `Cross-check culvert, port seawall, and road grade elevations against the next 12-day ascending NISAR pass.`,
+        `Inspect roads, bridges, and sea walls in areas where the ground moved more than ${Math.abs(losVal).toFixed(1)} cm.`,
+        `Use high-clarity areas (${cohPct}% clarity) first when planning repair crews; check forest slopes in person.`,
+        `Compare with the next 12-day satellite scan to see if the ground has stopped settling.`,
       ]
     : [
-        `Target flood response and embankment patrolling to corridors where HH drops below -18.0 dB (currently ${payload.hhDb.toFixed(1)} dB).`,
-        `Adjust agronomy irrigation and drainage advisories using the ${payload.soilMoistureIndex.toFixed(2)} GWETROOT moisture index and ${payload.rainfallMm.toFixed(1)} mm/day rain signal.`,
-        `Use L-band GCOV masks directly when optical MODIS/VIIRS scenes remain cloud-obscured during peak monsoon.`,
+        `Clear drainage channels and alert villages in blue zones where standing floodwater is detected (${payload.hhDb.toFixed(1)} dB).`,
+        `Advise farmers to pause irrigation and drain excess field water while soil wetness is at ${soilPct}%.`,
+        `Rely on this cloud-piercing radar map during heavy monsoon clouds when regular camera satellites are blocked.`,
       ];
 
   const uncertaintyAndLimits = isGunw
-    ? `Single-track LOS displacement captures 1D projection along the radar look vector; areas with γ < 0.35 may exhibit phase-unwrapping ambiguities.`
-    : `Wind-roughened water surfaces (> 5 m/s) can elevate HH backscatter via Bragg scattering, reducing water/land contrast in exposed reservoirs.`;
+    ? `Dense forests or moving water have lower signal clarity (below 35%), so ground movement there should be verified with field teams.`
+    : `Strong winds can create small waves on open water, making the water look slightly rougher on radar.`;
 
   return {
     headline,

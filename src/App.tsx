@@ -61,13 +61,14 @@ export default function App() {
   const [isDiveCrossfading, setIsDiveCrossfading] = useState<boolean>(false);
   const [activeRegionId, setActiveRegionId] =
     useState<RegionId>('maharashtra_gcov');
+  const [explorerTab, setExplorerTab] = useState<'2D_MAP' | 'HISTORY_AI'>('2D_MAP');
   const [activeAspect, setActiveAspect] = useState<DatasetAspectId | null>(
     'flood_water'
   );
   const [layerMode, setLayerMode] = useState<LayerMode>('GCOV_HH');
   const [passIndex, setPassIndex] = useState<number>(2);
   const [selectedZoneId, setSelectedZoneId] = useState<string>('mh_gosikhurd');
-  const [demoMode, setDemoMode] = useState<boolean>(true);
+  const [demoMode, setDemoMode] = useState<boolean>(false);
   const [splitPercent, setSplitPercent] = useState<number>(50);
   const [coherenceThreshold, setCoherenceThreshold] = useState<number>(0.35);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -220,7 +221,11 @@ export default function App() {
   }, []);
 
   const selectRegionAndEnterMap = useCallback(
-    (id: RegionId, zoneId?: string) => {
+    (
+      id: RegionId,
+      zoneId?: string,
+      initialTab: '2D_MAP' | 'HISTORY_AI' = '2D_MAP'
+    ) => {
       const nextRegion = REGION_DATASETS[id];
       const matchedZone =
         zoneId && nextRegion.zones.some((z) => z.id === zoneId)
@@ -228,8 +233,13 @@ export default function App() {
           : nextRegion.zones[0].id;
       setActiveRegionId(id);
       setSelectedZoneId(matchedZone);
+      setExplorerTab(initialTab);
       setLayerMode(nextRegion.productType === 'GUNW' ? 'GUNW_LOS' : 'GCOV_HH');
-      setActiveAspect(getDefaultAspectForRegion(id));
+      setActiveAspect(
+        initialTab === 'HISTORY_AI'
+          ? 'history_issues'
+          : getDefaultAspectForRegion(id)
+      );
       setSynthesis(null);
       setSynthesisError(null);
       setIsTransitioning(true);
@@ -363,9 +373,11 @@ export default function App() {
           setPageView('HOME_3D_GLOBE');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
-        onEnterExplorer={() => selectRegionAndEnterMap(activeRegionId)}
+        onEnterExplorer={(tab = '2D_MAP') =>
+          selectRegionAndEnterMap(activeRegionId, undefined, tab)
+        }
         activeRegionId={activeRegionId}
-        onSelectRegion={selectRegionAndEnterMap}
+        onSelectRegion={(id) => selectRegionAndEnterMap(id, undefined, '2D_MAP')}
         demoMode={demoMode}
         onToggleDemoMode={() => setDemoMode((prev) => !prev)}
         theme={theme}
@@ -377,6 +389,8 @@ export default function App() {
           })
         }
         onOpenAbout={() => setIsAboutOpen(true)}
+        activeViewTab={explorerTab}
+        onSelectViewTab={setExplorerTab}
       />
 
       <main className="relative z-10 flex-1">
@@ -393,7 +407,9 @@ export default function App() {
             <RegionExplorerView
               region={region}
               activeRegionId={activeRegionId}
-              onSelectRegion={selectRegionAndEnterMap}
+              activeViewTab={explorerTab}
+              onChangeViewTab={setExplorerTab}
+              onSelectRegion={(id) => selectRegionAndEnterMap(id, undefined, explorerTab)}
               onReturnToGlobe={() => {
                 setPageView('HOME_3D_GLOBE');
                 window.scrollTo({ top: 0, behavior: 'smooth' });

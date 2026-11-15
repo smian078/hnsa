@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   ChevronDown,
   ChevronUp,
   Compass,
   Database,
+  History,
   Layers,
+  Map,
   RefreshCw,
 } from 'lucide-react';
 import { REGION_DATASETS } from '../data/samples/asfVertexSamples.ts';
@@ -76,6 +78,8 @@ interface RegionExplorerViewProps {
   granulesError: string | null;
   onRetryGranules: () => void;
   eonetEvents: EonetEvent[];
+  activeViewTab?: '2D_MAP' | 'HISTORY_AI';
+  onChangeViewTab?: (tab: '2D_MAP' | 'HISTORY_AI') => void;
 }
 
 const REGION_SWITCH_ITEMS: Array<{ id: RegionId; label: string }> = [
@@ -200,7 +204,13 @@ export function RegionExplorerView({
   granulesError,
   onRetryGranules,
   eonetEvents,
+  activeViewTab,
+  onChangeViewTab,
 }: RegionExplorerViewProps) {
+  const [localTab, setLocalTab] = useState<'2D_MAP' | 'HISTORY_AI'>('2D_MAP');
+  const activeTab = activeViewTab ?? localTab;
+  const setTab = onChangeViewTab ?? setLocalTab;
+
   const aspects = getDatasetAspectsForRegion(region.id);
   const activeZone = selectedZone ?? region.zones[0];
   const activePass = activeZone.passes[passIndex] ?? activeZone.passes[0];
@@ -321,10 +331,88 @@ export function RegionExplorerView({
         </div>
       </section>
 
-      {/* Main 12-Col Grid: 2D Map Left (7 cols) + Toggleable Details Right (5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Stage (7 cols): 2D Map + Time Scrubber */}
-        <div className="lg:col-span-7 space-y-5">
+      {/* Primary Section Switcher: 2D Radar Map vs Dedicated Historical Disasters & Laptop .H5 Database */}
+      <div
+        role="tablist"
+        aria-label="Explorer Sections"
+        className="flex flex-wrap items-center gap-2.5 border-b border-[var(--rr-border)] pb-3"
+      >
+        <button
+          type="button"
+          role="tab"
+          id="tab-2d-map"
+          aria-selected={activeTab === '2D_MAP'}
+          data-testid="tab-2d-map-btn"
+          onClick={() => setTab('2D_MAP')}
+          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.12em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
+            activeTab === '2D_MAP'
+              ? 'border border-survey-basalt bg-survey-basalt text-survey-basalt-text shadow-sm'
+              : 'border border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-muted)] hover:border-[var(--rr-border-strong)] hover:text-[var(--rr-text)]'
+          }`}
+        >
+          <Map className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>01 · 2D Radar &amp; Satellite Map</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          id="tab-history-ai"
+          aria-selected={activeTab === 'HISTORY_AI'}
+          data-testid="tab-history-ai-btn"
+          onClick={() => setTab('HISTORY_AI')}
+          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.12em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rr-accent)] ${
+            activeTab === 'HISTORY_AI'
+              ? 'border border-survey-basalt bg-survey-basalt text-survey-basalt-text shadow-sm'
+              : 'border border-[var(--rr-border)] bg-[var(--rr-surface)] text-[var(--rr-muted)] hover:border-[var(--rr-accent)] hover:text-[var(--rr-accent)]'
+          }`}
+        >
+          <History className="h-3.5 w-3.5 text-[var(--rr-accent)]" aria-hidden="true" />
+          <span>02 · History, Past Issues &amp; Laptop Server AI</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-survey-moss/40 bg-survey-moss/10 px-2 py-0.5 text-[9px] font-bold text-survey-moss">
+            <Database className="h-2.5 w-2.5" />
+            <span>SMIAN_P5 .H5</span>
+          </span>
+        </button>
+      </div>
+
+      {activeTab === 'HISTORY_AI' ? (
+        <section
+          aria-labelledby="tab-history-ai"
+          className="space-y-4"
+        >
+          <div className="rounded-xl border border-[var(--rr-border)] bg-[var(--rr-surface)] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--rr-text)] flex items-center gap-2">
+                <History className="h-4 w-4 text-[var(--rr-accent)]" />
+                <span>Historical Disasters &amp; Laptop .H5 Database (NVIDIA AI Coverage)</span>
+              </h2>
+              <p className="text-xs text-[var(--rr-muted)] mt-0.5">
+                Pulls live .h5 server data and historical baselines from <code className="font-mono text-survey-ink font-semibold">/api/local-h5</code> on <code className="font-mono text-survey-ink font-bold">SMIAN_P5</code> with full coverage by NVIDIA NIM AI (LLaMA 3.3 70B).
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTab('2D_MAP')}
+              className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-lg border border-[var(--rr-border)] bg-[var(--rr-bg)] px-3 py-1.5 font-mono text-[11px] font-bold uppercase text-[var(--rr-text)] hover:border-survey-basalt transition-colors"
+            >
+              <Map className="h-3.5 w-3.5" />
+              <span>Back to 2D Map</span>
+            </button>
+          </div>
+
+          <HistoryIssuesPanel
+            region={region}
+            selectedZone={selectedZone}
+            passIndex={passIndex}
+            fullWidth={true}
+          />
+        </section>
+      ) : (
+        /* Main 12-Col Grid: 2D Map Left (7 cols) + Toggleable Details Right (5 cols) */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Stage (7 cols): 2D Map + Time Scrubber */}
+          <div className="lg:col-span-7 space-y-5">
           <CloudPiercerMap
             region={region}
             selectedZone={selectedZone}
@@ -434,7 +522,7 @@ export function RegionExplorerView({
                           <div className="rounded-xl border border-[var(--rr-border)] bg-[var(--rr-surface)] p-3.5 space-y-2">
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-accent)]">
-                                Selected Area · {activePass.passCode} ({activePass.acquisitionDate})
+                                Selected Area · Scan {passIndex + 1} ({activePass.acquisitionDate})
                               </span>
                               <Compass className="h-3.5 w-3.5 text-[var(--rr-accent)]" aria-hidden="true" />
                             </div>
@@ -443,19 +531,23 @@ export function RegionExplorerView({
                             </div>
                             <p className="text-xs text-[var(--rr-muted)] leading-relaxed">
                               {aspect.id === 'flood_water' &&
-                                `Standing Floodwater: Radar brightness reads ${activePass.hhGamma0Db.toFixed(1)} dB (${formatSigned(activeDelta.deltaHhDb, 1)} dB compared to dry ground). Values at -18.0 dB or lower show calm standing floodwater because smooth water bounces the radar beam away.`}
+                                `Standing Floodwater: Calm water acts like a flat mirror and bounces the radar beam away, dropping the reading to ${activePass.hhGamma0Db.toFixed(1)} dB (${formatSigned(activeDelta.deltaHhDb, 1)} dB compared to Scan 1). Readings at -18 dB or lower mean open floodwater is covering the ground.`}
                               {aspect.id === 'crop_canopy' &&
-                                `Crop & Forest Thickness: Plant-bounce strength is ${activePass.hvGamma0Db.toFixed(1)} dB with ${activePass.surfaceRoughnessCm.toFixed(1)} cm surface texture. Stronger readings (-12.5 dB or higher) mark thick standing crops or water pooling beneath plant stems.`}
+                                `Crop & Forest Thickness: Plant leaves and stems bounce the radar beam back (${activePass.hvGamma0Db.toFixed(1)} dB) while the soil underneath is ${Math.round(activePass.soilMoistureIndex * 100)}% soaked. Higher readings (-12.5 dB or above) mean thick green crops or floodwater standing beneath crop stems.`}
                               {aspect.id === 'crustal_los' &&
-                                `Ground Movement: The land in this zone moved ${formatSigned(activePass.losDisplacementCm ?? 0, 1)} cm compared to before the earthquake (${formatSigned(activeDelta.deltaLosCm ?? 0, 1)} cm net change). Positive numbers mean land rose; negative numbers mean land sank.`}
+                                `Ground Movement: The land in this zone ${
+                                  (activePass.losDisplacementCm ?? 0) < 0
+                                    ? `sank by ${Math.abs(activePass.losDisplacementCm ?? 0).toFixed(1)} cm`
+                                    : `rose by +${(activePass.losDisplacementCm ?? 0).toFixed(1)} cm`
+                                } compared to before the earthquake (${formatSigned(activeDelta.deltaLosCm ?? 0, 1)} cm change since Scan 1).`}
                               {aspect.id === 'coherence_mask' &&
-                                `Signal Trust Filter: Confidence score is γ = ${(activePass.coherence ?? 0).toFixed(2)} vs your filter threshold γ ≥ ${coherenceThreshold.toFixed(2)}. Adjust the "TRUST γ" slider under the map to hide noisy forest spots.`}
+                                `Signal Clarity Filter: This area has ${Math.round((activePass.coherence ?? 0) * 100)}% signal clarity compared to your minimum filter of ${Math.round(coherenceThreshold * 100)}%. Use the "MIN CLARITY" slider under the map to dim noisy forest or water spots.`}
                             </p>
                           </div>
 
                           <div className="space-y-1.5">
                             <div className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--rr-muted)]">
-                              All {region.zones.length} Zones (Tap to Focus)
+                              All {region.zones.length} Zones in {region.title} (Tap to Focus)
                             </div>
                             <div className="divide-y divide-[var(--rr-border)] rounded-xl overflow-hidden border border-[var(--rr-border)] bg-[var(--rr-surface)]">
                               {region.zones.map((z) => {
@@ -491,7 +583,9 @@ export function RegionExplorerView({
                                       </div>
                                     </div>
                                     <div className="font-mono text-xs font-bold shrink-0 tabular-nums">
-                                      {st.formattedValue} {st.unit}
+                                      {st.unit === 'γ'
+                                        ? `${Math.round(Number(st.formattedValue) * 100)}% Clear`
+                                        : `${st.formattedValue} ${st.unit}`}
                                     </div>
                                   </button>
                                 );
@@ -540,11 +634,22 @@ export function RegionExplorerView({
                       )}
 
                       {aspect.id === 'history_issues' && (
-                        <HistoryIssuesPanel
-                          region={region}
-                          selectedZone={selectedZone}
-                          passIndex={passIndex}
-                        />
+                        <div className="space-y-3">
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setTab('HISTORY_AI')}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--rr-accent)] bg-[var(--rr-accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--rr-accent)] hover:bg-[var(--rr-accent)] hover:text-white transition-colors"
+                            >
+                              <span>Open Full-Width Dedicated History View &rarr;</span>
+                            </button>
+                          </div>
+                          <HistoryIssuesPanel
+                            region={region}
+                            selectedZone={selectedZone}
+                            passIndex={passIndex}
+                          />
+                        </div>
                       )}
                     </div>
                   )}
@@ -554,6 +659,7 @@ export function RegionExplorerView({
           </div>
         </aside>
       </div>
+      )}
     </div>
   );
 }

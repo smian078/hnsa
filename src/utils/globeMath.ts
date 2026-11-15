@@ -448,6 +448,124 @@ export function buildPageAwareAssistantFallback(
     };
   }
 
+  const isSafetyQuestion =
+    qLower.includes('safe') ||
+    qLower.includes('advisory') ||
+    qLower.includes('danger') ||
+    qLower.includes('risk') ||
+    qLower.includes('watch') ||
+    qLower.includes('action') ||
+    qLower.includes('what should');
+
+  if (isSafetyQuestion) {
+    const safetyText =
+      region.productType === 'GUNW'
+        ? `In ${zoneLabel}, safety priority centers on crustal stability. Radar measures ${Math.abs(matchedSmian.losDisplacementCm ?? -18.6).toFixed(1)} cm of ground shift with ${Math.round((matchedSmian.coherenceMean ?? 0.81) * 100)}% measurement confidence. Geotechnical teams should prioritize inspecting roads, harbor seawalls, and water pipelines in coherent zones, while keeping away from saturated coastal bluffs vulnerable to aftershocks.`
+        : `In ${zoneLabel}, immediate advisory priority focuses on water levels. Radar detects standing water dropping to ${matchedSmian.hhFloodMinDb.toFixed(1)} dB (mirror reflection) alongside ${Math.round((matchedSmian.soilMoistureIndex ?? 0.78) * 100)}% soaked soil. Low-lying riverbank communities should heed dam spillway alerts, while farmers should clear field trenches to relieve waterlogging in cotton and paddy root zones.`;
+
+    return {
+      answer: safetyText,
+      suggestedFollowUps: [
+        'How does today’s .h5 scan compare to past disasters?',
+        'Why does flat floodwater act like a mirror?',
+        'Explain the .h5 satellite file in simple words',
+      ],
+      contextLabel,
+      source: 'DETERMINISTIC_PHYSICS_FALLBACK',
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const isFloodQuestion =
+    qLower.includes('flood') ||
+    qLower.includes('water') ||
+    qLower.includes('inundat') ||
+    qLower.includes('river') ||
+    qLower.includes('dam') ||
+    qLower.includes('spillway');
+
+  if (isFloodQuestion) {
+    return {
+      answer: `In ${zoneLabel}, standing floodwater acts like a flat specular mirror for NISAR's 24 cm L-band microwaves. Instead of scattering back to the satellite, the pulse bounces away, making open inundation appear very dark (HH dropped to ${matchedSmian.hhFloodMinDb.toFixed(1)} dB, compared to ${matchedSmian.hhGamma0MeanDb.toFixed(1)} dB ground average). Crucially, 24 cm radar waves pass through 100% of monsoon cloud cover, revealing flood extents even during severe overcast.`,
+      suggestedFollowUps: [
+        'What should people watch out for?',
+        'How does today’s .h5 scan compare to past floods?',
+        'Explain the .h5 satellite file in simple words',
+      ],
+      contextLabel,
+      source: 'DETERMINISTIC_PHYSICS_FALLBACK',
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const isCropQuestion =
+    qLower.includes('crop') ||
+    qLower.includes('cotton') ||
+    qLower.includes('paddy') ||
+    qLower.includes('soil') ||
+    qLower.includes('wetness') ||
+    qLower.includes('farm') ||
+    qLower.includes('canopy');
+
+  if (isCropQuestion) {
+    return {
+      answer: `In ${zoneLabel}, crop canopies create volume scattering where radar waves bounce repeatedly inside dense leaves and branches (measuring HV ${matchedSmian.hvGamma0MeanDb.toFixed(1)} dB). Coupled with NASA POWER topsoil wetness at ${Math.round((matchedSmian.soilMoistureIndex ?? 0.78) * 100)}%, this identifies healthy vegetative biomass alongside pockets where heavy vertisol clay is waterlogged and prone to fungal root stress.`,
+      suggestedFollowUps: [
+        'What should farmers do about waterlogging?',
+        'Why is cross-pol HV sensitive to crops?',
+        'Explain the .h5 satellite file in simple words',
+      ],
+      contextLabel,
+      source: 'DETERMINISTIC_PHYSICS_FALLBACK',
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const isEarthquakeQuestion =
+    qLower.includes('earthquake') ||
+    qLower.includes('quake') ||
+    qLower.includes('fault') ||
+    qLower.includes('shift') ||
+    qLower.includes('deform') ||
+    qLower.includes('uplift') ||
+    qLower.includes('subsid');
+
+  if (isEarthquakeQuestion) {
+    return {
+      answer: `In ${zoneLabel}, NISAR Level-2 GUNW interferometry compares radar wave phase cycles between repeat orbits. Each 2π unwrapped fringe corresponds to 12.0 cm of Line-of-Sight (LOS) crustal shift. Current telemetry detects up to ${Math.abs(matchedSmian.losDisplacementCm ?? -18.6).toFixed(1)} cm of ground displacement with ${Math.round((matchedSmian.coherenceMean ?? 0.81) * 100)}% measurement reliability (γ = ${(matchedSmian.coherenceMean ?? 0.81).toFixed(2)}), pinpointing differential settling across fault blocks.`,
+      suggestedFollowUps: [
+        'What does 81% confidence mean for recovery?',
+        'Where did the ground shift most?',
+        'Explain the .h5 satellite file in simple words',
+      ],
+      contextLabel,
+      source: 'DETERMINISTIC_PHYSICS_FALLBACK',
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const isRadarPhysicsQuestion =
+    qLower.includes('cloud') ||
+    qLower.includes('radar') ||
+    qLower.includes('l-band') ||
+    qLower.includes('microwave') ||
+    qLower.includes('penetrat') ||
+    qLower.includes('pierce');
+
+  if (isRadarPhysicsQuestion) {
+    return {
+      answer: `NISAR uses L-band microwave radar at a 24.0 cm wavelength. Unlike visible sunlight used by normal camera satellites (which gets scattered and blocked by cloud droplets, smoke, and haze), 24 cm microwaves are thousands of times larger than cloud water droplets. They pass straight through heavy monsoon clouds, fog, and night darkness, illuminating the actual ground and water below with 10-meter spatial resolution.`,
+      suggestedFollowUps: [
+        'Why does flat floodwater act like a mirror?',
+        'Explain the .h5 satellite file in simple words',
+        'Compare the 3 places',
+      ],
+      contextLabel,
+      source: 'DETERMINISTIC_PHYSICS_FALLBACK',
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
   let aspectInsight = '';
   if (aspect === 'flood_water') {
     aspectInsight =

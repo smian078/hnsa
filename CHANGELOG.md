@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0] - 2026-11-15 — 7-Day AI Multi-Hazard Predictions & NVIDIA Nemotron 3.5 Chat Fix
+### Added
+- **7-Day AI Multi-Hazard Predictions (`src/components/HomeHazardPredictionsSection.tsx`, `src/components/HomeLandingView.tsx`, `src/components/Navbar.tsx`, `server/routes.ts`, `src/services/nisarApi.ts`, `src/types/sar.ts`)**: Added `GET /api/hazards/forecast?lat={lat}&lon={lon}` (fusing Open-Meteo 7-day precipitation & topsoil moisture, Open-Meteo Global Flood river discharge, 5-point 90m elevation slope proxy, and 30-day USGS M3.5+ earthquakes within 300 km) and `POST /api/gemini/predict-hazards` (`gemini-4-hydrogen` low thinking + `gemini-2.5-flash` + `nvidia/nemotron-3.5-lightning-30b-a3b` + physics fallback) with a 3-column Survey Sheet prediction grid on the Home Page and a direct `"Predictions"` Navbar jump link.
+
+### Fixed
+- **NVIDIA Nemotron 3.5 AI Chat & Synthesis (`server/routes.ts`)**: Disabled reasoning token exhaustion on `nvidia/nemotron-3.5-lightning-30b-a3b` (`chat_template_kwargs: { enable_thinking: false }`, `detailed thinking off`, `max_tokens: 1536`) so `message.content` returns in ~400ms instead of exhausting tokens in `reasoning_content`, and separated keyed vs unkeyed cache keys so live AI responses are never shadowed by cached fallbacks.
+
+## [0.4.0] - 2026-11-15 — NVIDIA NIM AI, Dedicated History Section & 2D Contour Polygons
+### Added
+- **NVIDIA NIM AI Integration (`meta/llama-3.3-70b-instruct`)**: Replaced Google Gemini with NVIDIA NIM for AI chat completions across `/api/nvidia/assist` and `/api/nvidia/synthesize`. Added inline key management with `x-nvidia-api-key` header forwarding and instant grounded physics fallback when unkeyed.
+- **Dedicated Separate History Section (`RegionExplorerView.tsx`, `HistoryIssuesPanel.tsx`)**: Added top-level section switcher tab (`02 · History, Past Issues & Laptop Server AI`) and direct navbar navigation (`05 History & AI`) rendering full-width laptop server status (`/api/local-h5` on `SMIAN_P5`), raw binary disk slice proofs, past disaster comparisons, and dedicated NVIDIA AI disaster Q&A.
+- **Natural Contoured 2D Map Polygons (`asfVertexSamples.ts`)**: Upgraded all 12 monitored zones from rough boxes to multi-point geographic polygons tracing real reservoirs, floodplains, crop belts, forests, and fault rupture scarps.
+- **3D Earth Globe Zoom-Out Page Scroll (`EarthGlobeCanvas.tsx`)**: When zooming out to maximum distance on the 3D globe via mouse wheel, scrolling smoothly continues downward into page sections instead of getting trapped in OrbitControls.
+
 ## [0.1.0] - 2026-11-14 — P0 Complete Release
 ### Added
 - **3-Region SAR Study Areas**: Bundled ASF Vertex `GCOV` & `GUNW` multi-polygon GeoJSON and 4-pass orbital telemetry for Maharashtra (Wainganga/Gosikhurd & Wardha), Northeast India (Brahmaputra/Kaziranga), and Japan (Noto Peninsula/Toyama Bay).
